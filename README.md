@@ -6,16 +6,10 @@
 
 # Key Points:
 
-Web-based platform accessible via browsers.
-
-Electronics-focused, including laptops, phones, and related accessories.
-
-Inventory control for adding, updating, and deleting products.
-
-Stock alerts for low inventory items.
-
-Sales tracking for outgoing stock and orders.
-
-Reports for monitoring sales and inventory performance.
-
-Role-based access: Admins have full access, staff can handle sales and stock updates.
+.Web-based platform accessible via browsers.
+.Electronics-focused, including laptops, phones, and related accessories.
+.Inventory control for adding, updating, and deleting products.
+.Stock alerts for low inventory items.
+.Sales tracking for outgoing stock and orders.
+.Reports for monitoring sales and inventory performance.
+.Role-based access: Admins have full access, staff can handle sales and stock updates.
