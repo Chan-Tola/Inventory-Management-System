@@ -1,0 +1,20 @@
+{
+  "name": "ims-monorepo",
+  "version": "1.0.0",
+  "description": "Inventory Management System Monorepo",
+  "scripts": {
+    "dev:gateway": "cd ims-gateway && php artisan serve --port=8000",
+    "dev:inventory": "cd services/ims-inventory && php artisan serve --port=8001",
+    "dev:order": "cd services/ims-order && php artisan serve --port=8002",
+    "dev:users": "cd services/ims-users && php artisan serve --port=8004",
+    "dev:client": "cd client && npm start",
+    "dev:admin": "cd backend && npm start",
+    "dev:apis": "concurrently \"npm run dev:gateway\" \"npm run dev:inventory\" \"npm run dev:order\" \"npm run dev:users\"",
+    "dev:all": "concurrently \"npm run dev:gateway\" \"npm run dev:inventory\" \"npm run dev:order\" \"npm run dev:users\" \"npm run dev:client\" \"npm run dev:admin\""
+  },
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
+  
