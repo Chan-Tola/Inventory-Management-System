@@ -26,6 +26,63 @@ class GatewayController extends Controller
     }
 
     // note: Inventory Routes
+    // note: Categories CRUD
+    // note: index
+    public function getCategories(Request $request): JsonResponse
+    {
+        try {
+            $response = $this->inventoryService->getCategories($request->query());
+            return response()->json($response->json(), $response->status());
+        } catch (RequestException $e) {
+            return $this->handleServiceError($e);
+        }
+    }
+    // note: show
+    public function getCategory($id): JsonResponse
+    {
+        try {
+            $response = $this->inventoryService->getCategory($id);
+            return response()->json($response->json(), $response->status());
+        } catch (RequestException $e) {
+            return $this->handleServiceError($e);
+        }
+    }
+
+    // note: store 
+    public function createCategory(Request $request): JsonResponse
+    {
+        try {
+            $response = $this->inventoryService->createCategory($request->all());
+            return response()->json($response->json(), $response->status());
+        } catch (RequestException $e) {
+            return $this->handleServiceError($e);
+        }
+    }
+
+    //note: update
+    public function updateCategory(Request $request, $id): JsonResponse
+    {
+        try {
+            $response = $this->inventoryService->updateCategory($id, $request->all());
+            return response()->json($response->json(), $response->status());
+        } catch (RequestException $e) {
+            return $this->handleServiceError($e);
+        }
+    }
+
+    // note: delete
+    public function deleteCategory($id): JsonResponse
+    {
+        try {
+            $response = $this->inventoryService->deleteCategory($id);
+            return response()->json($response->json(), $response->status());
+        } catch (RequestException $e) {
+            return $this->handleServiceError($e);
+        }
+    }
+
+
+    // note: Products CRUD
     public function getProducts(Request $request): JsonResponse
     {
         try {
@@ -35,6 +92,45 @@ class GatewayController extends Controller
             return $this->handleServiceError($e);
         }
     }
+
+    public function getProduct($id): JsonResponse
+    {
+        try {
+            $response = $this->inventoryService->getProduct($id);
+            return response()->json($response->json(), $response->status());
+        } catch (RequestException $e) {
+            return $this->handleServiceError($e);
+        }
+    }
+    public function createProduct(Request $request): JsonResponse
+    {
+        try {
+            $response = $this->inventoryService->createProduct($request->all());
+            return response()->json($response->json(), $response->status());
+        } catch (RequestException $e) {
+            return $this->handleServiceError($e);
+        }
+    }
+    public function updateProduct(Request $request, $id): JsonResponse
+    {
+        try {
+            $response = $this->inventoryService->updateProduct($id, $request->all());
+            return response()->json($response->json(), $response->status());
+        } catch (RequestException $e) {
+            return $this->handleServiceError($e);
+        }
+    }
+    public function deleteProduct($id): JsonResponse
+    {
+        try {
+            $response = $this->inventoryService->deleteProduct($id);
+            return response()->json($response->json(), $response->status());
+        } catch (RequestException $e) {
+            return $this->handleServiceError($e);
+        }
+    }
+
+
     // note: Orders Routes
     public function getOrders(Request $request): JsonResponse
     {

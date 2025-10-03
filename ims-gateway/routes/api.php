@@ -16,7 +16,19 @@ Route::get('/', function () {
 
 //note: /api/inventory/prodcuts
 Route::prefix('inventory')->group(function () {
+    // note: Categories CRUD
+    Route::get('/categories', [GatewayController::class, 'getCategories']);
+    Route::get('/categories/{id}', [GatewayController::class, 'getCategory']);
+    Route::post('/categories', [GatewayController::class, 'createCategory']);
+    Route::put('/categories/{id}', [GatewayController::class, 'updateCategory']);
+    Route::delete('/categories/{id}', [GatewayController::class, 'deleteCategory']);
+
+    // note:  Products CRUD
     Route::get('/products', [GatewayController::class, 'getProducts']);
+    Route::get('/products/{id}', [GatewayController::class, 'getProduct']);
+    Route::post('/products', [GatewayController::class, 'createProduct']);
+    Route::put('/products/{id}', [GatewayController::class, 'updateProduct']);
+    Route::delete('/products/{id}', [GatewayController::class, 'deleteProduct']);
 });
 //note: /api/orders
 Route::prefix('orders')->group(function () {
