@@ -20,6 +20,8 @@ class Product extends Model
     const UPDATED_AT = 'updated_at';
     //note: FK catgoriest
     const CATEGORY_ID = 'category_id';
+    //note: FK staff
+    const STAFF_ID = 'staff_id';
 
     // note: fill tablename
     protected $table = self::TABLENAME;
@@ -31,6 +33,7 @@ class Product extends Model
         self::BRAND,
         self::PRICE,
         self::DESCRIPTION,
+        self::STAFF_ID
     ];
 
     public function category()
@@ -41,5 +44,15 @@ class Product extends Model
     public function stock()
     {
         return $this->hasOne(Stock::class);
+    }
+
+    public function images()
+    {
+        return $this->hasMany(ProductImage::class);
+    }
+
+    public function staff()
+    {
+        return $this->belongsTo(Staff::class);
     }
 }

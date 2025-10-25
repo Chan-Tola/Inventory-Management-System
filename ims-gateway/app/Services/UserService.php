@@ -18,4 +18,5 @@ class UserService extends BaseService
     {
         return $this->get('/api/users', $query);
     }
+    
 }

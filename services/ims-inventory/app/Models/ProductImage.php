@@ -13,6 +13,8 @@ class ProductImage extends Model
     public const ID = 'id';
     public const PRODUCT_ID = 'product_id';
     public const IMAGE_URL = 'image_url';
+    public const IMAGE_PUBLIC_ID = 'image_public_id';
+
     public const IS_PRIMARY = 'is_primary';
     public const CREATED_AT = 'created_at';
     public const UPDATED_AT = 'updated_at';
@@ -23,6 +25,7 @@ class ProductImage extends Model
         self::PRODUCT_ID,
         self::IMAGE_URL,
         self::IS_PRIMARY,
+        self::IMAGE_PUBLIC_ID,
     ];
 
     protected $casts = [

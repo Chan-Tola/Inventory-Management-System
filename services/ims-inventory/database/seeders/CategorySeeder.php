@@ -16,21 +16,21 @@ class CategorySeeder extends Seeder
 
 
         // note: Factory categories
-        Category::factory()->count(3)->create();
+        // Category::factory()->count(3)->create();
         // note: Seeder categories
-        // $categories = [
-        //     [
-        //         Category::NAME => 'Laptop',
-        //         Category::DESCRIPTION => 'Dell, Asus, and others..',
-        //     ],
-        //     [
-        //         Category::NAME => 'Phone',
-        //         Category::DESCRIPTION => 'Iphone, Samsung, and others..',
-        //     ],
-        // ];
+        $categories = [
+            [
+                Category::NAME => 'Laptop',
+                Category::DESCRIPTION => 'Dell, Asus, and others..',
+            ],
+            [
+                Category::NAME => 'Phone',
+                Category::DESCRIPTION => 'Iphone, Samsung, and others..',
+            ],
+        ];
 
-        // foreach($categories as $category){
-        //     Category::create($category);
-        // }
+        foreach($categories as $category){
+            Category::create($category);
+        }
     }
 }

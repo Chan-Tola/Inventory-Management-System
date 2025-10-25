@@ -22,9 +22,11 @@ class UpdateCategoryRequest extends FormRequest
      */
     public function rules(): array
     {
+        $categoryId = $this->route('category'); // Make sure this matches your route parameter
+
         return [
-            Category::NAME => 'required|string|max:255|unique:categories,name' . $this->route(Category::TABLENAME),
-            Category::DESCRIPTION => 'nullable|string|max:500',
+            Category::NAME => 'sometimes|required|string|max:255|unique:categories,name,' . $categoryId,
+            Category::DESCRIPTION => 'sometimes|nullable|string|max:500',
         ];
     }
 }

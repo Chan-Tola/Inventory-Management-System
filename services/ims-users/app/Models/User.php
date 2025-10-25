@@ -6,20 +6,37 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Spatie\Permission\Traits\HasRoles;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 
-class User extends Authenticatable
+class User extends Authenticatable implements JWTSubject
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasRoles; // Spatie
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+
+    public function getJWTCustomClaims()
+    {
+        return [];
+    }
+
+    const TABLENAME = 'users';
+    const ID = 'id';
+    const NAME =  'name';
+    const EMAIL = 'email';
+    const PASSWORD = 'password';
+    const IS_ACTIVE = 'is_active';
+    const REMEMBER_TOKEN = 'remember_token';
+    const EMAIL_VERIFIED_AT = 'email_verified_at';
+
     protected $fillable = [
-        'name',
-        'email',
-        'password',
+        self::NAME,
+        self::EMAIL,
+        self::PASSWORD,
+        self::IS_ACTIVE,
     ];
 
     /**
@@ -28,8 +45,8 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $hidden = [
-        'password',
-        'remember_token',
+        self::PASSWORD,
+        self::REMEMBER_TOKEN
     ];
 
     /**
@@ -40,8 +57,19 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            self::EMAIL_VERIFIED_AT => 'datetime',
+            self::PASSWORD => 'hashed',
         ];
+    }
+
+    // note: relation to staff
+    public function staff()
+    {
+        return $this->hasOne(Staff::class);
+    }
+    // note: relation to customer
+    public function customer()
+    {
+        return $this->hasOne(Customer::class);
     }
 }

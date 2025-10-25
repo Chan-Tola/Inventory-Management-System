@@ -33,17 +33,18 @@ return [
 
     'services' => [
         'inventory' => [
-            'base_url' => env('INVENTORY_SERVICE_URL', 'http://127.0.0.1:8001'),
+            'base_url' => env('INVENTORY_SERVICE_URL', 'http://localhost:8001'),
             'timeout' => env('SERVICE_TIMEOUT', 30),
         ],
         'orders' => [
             'base_url' => env('ORDERS_SERVICE_URL', 'http://localhost:8002'),
             'timeout' => env('SERVICE_TIMEOUT', 30),
         ],
-        'users'=>[
-            'base_url' => env('USERS_SERVICE_UR','http://localhost:8004'),
-            'timeout'=> env('SERVICE_TIMEOUT', 30),
+        'users' => [
+            'base_url' => env('USERS_SERVICE_URL', 'http://localhost:8004'),
+            'timeout' => env('SERVICE_TIMEOUT', 30),
         ]
+
 
     ]
 

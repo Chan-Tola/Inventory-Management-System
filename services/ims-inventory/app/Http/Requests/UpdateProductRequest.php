@@ -23,7 +23,7 @@ class UpdateProductRequest extends FormRequest
      */
     public function rules(): array
     {
-        $productId = $this->route(Product::TABLENAME);
+        $productId = $this->route('product');
         // assumes your route looks like /products/{product}
         //
         return [
@@ -35,6 +35,18 @@ class UpdateProductRequest extends FormRequest
             Product::BRAND => 'required|string|max:255',
             Product::PRICE => 'required|numeric|min:0',
             Product::DESCRIPTION => 'nullable|string',
+
         ];
+        // Check if images are files, base64, or raw file data
+        if ($this->hasFile('images')) {
+            // Direct file upload
+            $rules['images.*'] = 'image|mimes:jpeg,png,jpg,gif,webp|max:2048';
+        } elseif (isset($this->images[0]['data'])) {
+            // Base64 images
+            $rules['images.*.data'] = 'required|string';
+        } else {
+            // Raw file data from gateway - minimal validation
+            $rules['images.*'] = 'array';
+        }
     }
 }

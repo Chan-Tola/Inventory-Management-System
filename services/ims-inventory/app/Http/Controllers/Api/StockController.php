@@ -3,47 +3,99 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Http\Requests\StoreStockRequest;
+use App\Http\Requests\UpdateStockRequest;
+use App\Http\Resources\StockResource;
+use App\Models\Stock;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+
 
 class StockController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+
+    public function index(): JsonResponse
     {
-        //
+        try {
+            $stocks = Stock::all();
+            return response()->json([
+                'message' => 'Stocks retrieved successfully',
+                'data' => StockResource::collection($stocks)
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Failed to retrieved stocks',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function store(StoreStockRequest $request): JsonResponse
     {
-        //
+        try {
+            DB::beginTransaction();
+            // The request is already validated at this point
+            $stock = Stock::create($request->validated());
+            DB::commit();
+            return response()->json([
+                'message' => 'Stock created successfully.',
+                'data' => new StockResource($stock)
+            ]);
+        } catch (\Exception $e) {
+            // catch any unexpected errors
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Failed to create category',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function show($id): JsonResponse
     {
-        //
+        try {
+            $stock = Stock::find($id);
+            if (!$stock) {
+                return response()->json(['message' => 'Stock not found'], 404);
+            }
+            return response()->json([
+                'message' => 'Stock retrieved successfully',
+                'data' => $stock
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Failed to retrieved stock.',
+                'error' =>  $e->getMessage()
+            ], 500);
+        }
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function update(UpdateStockRequest $request, $id): JsonResponse
     {
-        //
+        try {
+            DB::beginTransaction();
+
+            $stock = Stock::find($id);
+            if (!$stock) {
+                return response()->json(['message' => 'Stock not found'], 404);
+            }
+
+            // the request is already validated at this point from (UpdateStockRequest method)
+            $stock->update($request->validated());
+            DB::commit();
+            return response()->json([
+                'message' => 'Update new stocks successfully',
+                'data' => new StockResource($stock)
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Failed to updated stocks.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
-    }
+    public function destroy() {}
 }
