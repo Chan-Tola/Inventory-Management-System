@@ -6,15 +6,18 @@ import {
   CategoryTable,
   CategoryForm,
 } from "../../components/features/category/index";
-import { Notification } from "../../components/common/index";
 import {
   createCategory,
   updateCategory,
   deleteCategory,
 } from "../../redux/slices/categorySlice";
+import { Notification } from "../../components/common/index";
+import { useState } from "react";
 
 const CategoryIndex = () => {
   const dispatch = useDispatch();
+  const [searchText, setSearchText] = useState("");
+
   const {
     categoryItems,
     loading,
@@ -32,11 +35,13 @@ const CategoryIndex = () => {
     handleCloseSnackbar,
   } = useCategory();
 
+  // function filteritme base on Search
+  const fileteredCategories = categoryItems.filter(
+    (item) =>
+      item.name.toLowerCase().includes(searchText.toLocaleLowerCase()) ||
+      item.id.toString().includes(searchText)
+  );
   const handleCreateCategory = async () => {
-    if (!formData.name.trim()) {
-      alert("Category name is required");
-      return;
-    }
     try {
       await dispatch(createCategory(formData)).unwrap();
       setOpenDialog(false);
@@ -47,10 +52,6 @@ const CategoryIndex = () => {
   };
 
   const handleUpdateCategory = async () => {
-    if (!formData.name.trim()) {
-      alert("Category name is required");
-      return;
-    } // Add safety check for currentCategory
     if (!currentCategory || !currentCategory.id) {
       console.error("No current category selected for update");
       console.log(currentCategory);
@@ -80,7 +81,9 @@ const CategoryIndex = () => {
         setOpenDialog(false);
         handleRefresh(); // Ensure refresh after delete
       } catch (error) {
-        console.error("Failed to delete category:", error);
+        console.error("Failed to update category:", error);
+        // 🔥 ADD USER-FRIENDLY ERROR MESSAGE
+        alert(`Update failed: ${error.message}`);
       }
     }
   };
@@ -89,14 +92,16 @@ const CategoryIndex = () => {
     ? handleUpdateCategory
     : handleCreateCategory;
 
+  // fucntion search
   return (
     <>
       <Box p={3}>
         {/* Header */}
         <CategoryHeader
           itemsCount={categoryItems.length}
+          searchText={searchText}
+          setSearchText={setSearchText}
           loading={loading}
-          onRefresh={handleRefresh}
           onAddCategory={() => setOpenDialog(true)}
         />
         {/* Notification */}
@@ -110,7 +115,7 @@ const CategoryIndex = () => {
 
         {/* Categories Table */}
         <CategoryTable
-          categoryItems={categoryItems}
+          categoryItems={fileteredCategories}
           loading={loading}
           onEdit={handleEditClick}
           onDelete={handleDeleteClick}

@@ -34,6 +34,11 @@ class AssignPermissionToRoleSeeder extends Seeder
         $admin->givePermissionTo(PermissionConstant::CREATE_STOCK);
         $admin->givePermissionTo(PermissionConstant::EDIT_STOCK);
         $admin->givePermissionTo(PermissionConstant::REMOVE_STOCK);
+        // supplier
+        $admin->givePermissionTo(PermissionConstant::VIEW_SUPPLIER);
+        $admin->givePermissionTo(PermissionConstant::CREATE_SUPPLIER);
+        $admin->givePermissionTo(PermissionConstant::EDIT_SUPPLIER);
+        $admin->givePermissionTo(PermissionConstant::REMOVE_SUPPLIER);
         // staff
         $admin->givePermissionTo(PermissionConstant::VIEW_STAFF);
         $admin->givePermissionTo(PermissionConstant::CREATE_STAFF);

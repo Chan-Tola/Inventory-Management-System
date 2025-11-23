@@ -6,6 +6,7 @@ import {
   clearSuccess,
   setCurrentCategory,
   clearCurrentCategory,
+  resetCategoryState,
 } from "../redux/slices/categorySlice";
 
 export const useCategory = () => {
@@ -20,20 +21,23 @@ export const useCategory = () => {
     name: "",
     description: "",
   });
+
   // Load categories on component mount
   useEffect(() => {
     dispatch(fetchCategories());
   }, [dispatch]);
 
-  // Clear messages after timeout
+  // Clear success after 3s
   useEffect(() => {
     if (success) {
       const timer = setTimeout(() => {
-        dispatch(clearSuccess);
+        dispatch(clearSuccess());
       }, 3000);
       return () => clearTimeout(timer);
     }
   }, [success, dispatch]);
+
+  // Clear error after 5s
   useEffect(() => {
     if (error) {
       const timer = setTimeout(() => {
@@ -43,17 +47,17 @@ export const useCategory = () => {
     }
   }, [error, dispatch]);
 
-  // Reset form when dialog closes
+  // Reset form and dialog state when closed
   useEffect(() => {
     if (!openDialog) {
       setFormData({ name: "", description: "" });
       setIsDeleting(false);
       setIsEditing(false);
       dispatch(clearCurrentCategory());
-      console.log("Dialog closed: All states reset, ready for new actions");
     }
   }, [openDialog, dispatch]);
 
+  // Update formData when editing/deleting a category
   useEffect(() => {
     if (currentCategory) {
       setFormData({
@@ -67,8 +71,16 @@ export const useCategory = () => {
         setIsEditing(false);
       }
     }
-  }, [currentCategory, isEditing, isDeleting, dispatch]);
+  }, [currentCategory, isEditing, isDeleting]);
 
+  // Reset entire category state when component unmounts
+  useEffect(() => {
+    return () => {
+      dispatch(resetCategoryState());
+    };
+  }, [dispatch]);
+
+  // fucntion buttons
   const handleEditClick = (category) => {
     dispatch(setCurrentCategory(category));
     setIsEditing(true);
@@ -88,7 +100,6 @@ export const useCategory = () => {
 
   const handleRefresh = () => {
     dispatch(fetchCategories());
-    console.log("Refresh triggered: Fetching latest categories");
   };
 
   const handleCloseSnackbar = () => {
@@ -101,17 +112,17 @@ export const useCategory = () => {
     loading,
     error,
     success,
+    currentCategory,
     openDialog,
     isEditing,
     isDeleting,
     formData,
+    setFormData,
     setOpenDialog,
     setIsEditing,
-    setFormData,
     handleEditClick,
-    handleDeleteClick, // Return delete handler
+    handleDeleteClick,
     handleRefresh,
     handleCloseSnackbar,
-    currentCategory,
   };
 };

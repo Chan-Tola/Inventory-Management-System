@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use GuzzleHttp\Psr7\Request;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Log;
 
@@ -55,13 +54,6 @@ class InventoryService extends BaseService
     // note: store 
     public function createProduct(array $data): Response
     {
-        // Log::info('=== INVENTORY SERVICE DEBUG ===');
-        // Log::info('Data received:', [
-        //     'has_images' => isset($data['images']),
-        //     'has_image_type' => isset($data['_image_type']),
-        //     'image_type_value' => $data['_image_type'] ?? 'not_set',
-        //     'all_keys' => array_keys($data)
-        // ]);
         return $this->post('/api/inventory/products', $data);
     }
     //note: update
@@ -75,8 +67,23 @@ class InventoryService extends BaseService
         return $this->delete("/api/inventory/products/{$id}");
     }
 
-    // note: Stock method
+    /**
+     * Create product with base64 images (for Flutter)
+     */
+    public function createProductWithBase64(array $data): Response
+    {
+        return $this->postBase64('/api/inventory/products', $data);
+    }
 
+    /**
+     * Update product with base64 images (for Flutter)
+     */
+    public function updateProductWithBase64(int $id, array $data): Response
+    {
+        return $this->putBase64("/api/inventory/products/{$id}", $data);
+    }
+
+    // note: Stock method
     // note: index
     public function getStocks(array $query = []): Response
     {
@@ -107,5 +114,38 @@ class InventoryService extends BaseService
     public function deleteStock(int $id): Response
     {
         return $this->delete("/api/inventory/stocks/{$id}");
+    }
+
+    // note: Supplier method
+    // note: index
+    public function getSuppliers(array $query = []): Response
+    {
+        try {
+            $response = $this->get('/api/inventory/suppliers', $query);
+
+            return $response;
+        } catch (\Exception $e) {
+            throw $e;
+        }
+    }
+    // note: show
+    public function getSupplier(int $id): Response
+    {
+        return $this->get("/api/inventory/suppliers/{$id}");
+    }
+    // note: store
+    public function createSupplier(array $data): Response
+    {
+        return $this->post('/api/inventory/suppliers', $data);
+    }
+    // note: update
+    public function updateSupplier(int $id, array $data): Response
+    {
+        return $this->put("/api/inventory/suppliers/{$id}", $data);
+    }
+    // note: delete
+    public function deleteSupplier(int $id): Response
+    {
+        return $this->delete("/api/inventory/suppliers/{$id}");
     }
 }

@@ -51,7 +51,7 @@ class CreateStaffUser extends Command
             Staff::HIRE_DATE => now(),
         ]);
         // Assign Role 
-        $role = Role::firstOrCreate(['name' => 'Staff', 'guard_name' => 'api']);
+        $role = Role::firstOrCreate(['name' => 'staff', 'guard_name' => 'api']);
         $user->assignRole($role);
         // Create User
         $this->info('✅ Staff user created successfully!');

@@ -4,6 +4,7 @@ export const categoryService = {
   getCategories: async () => {
     try {
       const res = await api.get("/inventory/categories");
+      console.log(res);
       return res.data.data;
     } catch (error) {
       throw error;

@@ -15,7 +15,7 @@ class Stock extends Model
     const PRODUCT_ID = 'product_id';
     const QUANTITY = 'quantity';
     const MIN_QUANTITY = 'min_quantity';
-    // const UNIT = 'unit';
+    const UNIT = 'unit';
     const CREATED_AT = 'created_at';
     const UPDATED_AT = 'updated_at';
     protected $table = self::TABLENAME;
@@ -23,7 +23,7 @@ class Stock extends Model
         self::PRODUCT_ID,
         self::QUANTITY,
         self::MIN_QUANTITY,
-        // self::UNIT,
+        self::UNIT,
     ];
 
     //note: default for when min_quantity is not provide

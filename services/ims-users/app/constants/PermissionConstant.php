@@ -4,7 +4,7 @@ namespace App\Constants;
 
 class PermissionConstant
 {
-    // Product Permissions
+    // Category Permissions
     public const VIEW_CATEGORY = 'view category';
     public const CREATE_CATEGORY = 'create category';
     public const EDIT_CATEGORY = 'edit category';
@@ -17,7 +17,7 @@ class PermissionConstant
     public const REMOVE_PRODUCT = 'remove product';
 
 
-    // Product Permissions
+    // Stock Permissions
     public const VIEW_STOCK = 'view stock';
     public const CREATE_STOCK = 'create stock';
     public const EDIT_STOCK = 'edit stock';
@@ -29,9 +29,21 @@ class PermissionConstant
     public const EDIT_STAFF = 'edit staff';
     public const REMOVE_STAFF = 'remove staff';
 
-    // Product Permissions
+    // Customer Permissions
     public const VIEW_CUSTOMER = 'view customer';
     public const CREATE_CUSTOMER = 'create customer';
     public const EDIT_CUSTOMER = 'edit customer';
     public const REMOVE_CUSTOMER = 'remove customer';
+
+    // Stock Permissions
+    public const VIEW_SUPPLIER = 'view supplier';
+    public const CREATE_SUPPLIER = 'create supplier';
+    public const EDIT_SUPPLIER = 'edit supplier';
+    public const REMOVE_SUPPLIER = 'remove supplier';
+
+    // // Transition Permissions
+    // public const VIEW_SUPPLIER = 'view stock';
+    // public const CREATE_SUPPLIER = 'create stock';
+    // public const EDIT_SUPPLIER = 'edit stock';
+    // public const REMOVE_SUPPLIER = 'remove stock';
 }

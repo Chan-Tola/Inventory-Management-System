@@ -14,17 +14,21 @@ class Staff extends Model
     protected $table = self::TABLENAME;
     const ID = 'id';
     const STAFF_CODE = 'staff_code';
+    const PROFILE_URL = 'profile_url';
     const GENDER = 'gender';
     const PHONE = 'phone';
     const ADDRESS = 'address';
     const SALARY = 'salary';
     const HIRE_DATE = 'hire_date';
+    const IMAGE_PUBLIC_ID  = 'image_public_id';
     // note: fk relation to users table
     const USER_ID = 'user_id';
 
     protected $fillable = [
         self::USER_ID,
         self::STAFF_CODE,
+        self::PROFILE_URL,
+        self::IMAGE_PUBLIC_ID,
         self::GENDER,
         self::PHONE,
         self::ADDRESS,

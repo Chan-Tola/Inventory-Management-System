@@ -22,7 +22,7 @@ class StockResource extends JsonResource
             Stock::MIN_QUANTITY => $this->min_quantity,
             Stock::CREATED_AT => $this->created_at?->toDateTimeString(),
             Stock::UPDATED_AT => $this->updated_at?->toDateTimeString(),
-            // Stock::UNIT => $this->unit,
+            Stock::UNIT => $this->unit,
         ];
     }
 }

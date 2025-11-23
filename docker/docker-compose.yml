@@ -1,0 +1,18 @@
+version: "3.9"
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: ims-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass # root password
+      MYSQL_DATABASE: inventory_db # initial database for your service
+      MYSQL_USER: ims_user # optional user
+      MYSQL_PASSWORD: ims_pass # optional user password
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+volumes:
+  mysql_data:

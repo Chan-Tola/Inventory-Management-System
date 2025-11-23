@@ -11,7 +11,6 @@ class Customer extends Model
     const ID = 'id';
     const CUSTOMER_CODE = 'customer_code';
     const GENDER = 'gender';
-    const PHONE = 'phone';
     const ADDRESS = 'address';
     // note: table 
     protected $table = self::TABLENAME;
@@ -24,7 +23,6 @@ class Customer extends Model
         self::USER_ID,
         self::CUSTOMER_CODE,
         self::GENDER,
-        self::PHONE,
         self::ADDRESS,
     ];
 

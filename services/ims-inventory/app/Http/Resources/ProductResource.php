@@ -24,38 +24,44 @@ class ProductResource extends JsonResource
             Product::BRAND => $this->brand,
             Product::PRICE => $this->price,
             Product::DESCRIPTION => $this->description,
-
-
+            Product::STAFF_ID => $this->staff_id,
             // include category
-            'category'    => $this->category ? [
+            'category' => $this->category ? [
                 'name' => $this->category->name
             ] : null,
-            // include staff (issuse maybe about getway not yes get staff)
-            // 'staff' => $this->staff ? [
-            //     'name' => optional($this->staff->user)->name,
-            // ] : null,
 
-            // note: images
-            'images' => $this->whenLoaded('images', function () {
-                return $this->images->map(function ($image) {
+            // FIX: Use whenLoaded OR fallback to relationship access
+            'images' => $this->relationLoaded('images')
+                ? $this->images->map(function ($image) {
                     return [
                         ProductImage::ID => $image->{ProductImage::ID},
                         'url' => $image->{ProductImage::IMAGE_URL},
-                        'public_id' =>  $image->{ProductImage::IMAGE_PUBLIC_ID},
+                        'public_id' => $image->{ProductImage::IMAGE_PUBLIC_ID},
                         ProductImage::IS_PRIMARY => (bool) $image->{ProductImage::IS_PRIMARY},
                     ];
-                });
-            }),
-
-            'primary_image' => $this->whenLoaded('images', function () {
-                $primaryImage = $this->images->where(ProductImage::IS_PRIMARY, true)->first();
-                if ($primaryImage) {
+                })
+                : $this->images()->get()->map(function ($image) {
                     return [
-                        'url' => $primaryImage->{ProductImage::IMAGE_URL},
-                        'public_id' =>  $primaryImage->{ProductImage::IMAGE_PUBLIC_ID},
+                        ProductImage::ID => $image->{ProductImage::ID},
+                        'url' => $image->{ProductImage::IMAGE_URL},
+                        'public_id' => $image->{ProductImage::IMAGE_PUBLIC_ID},
+                        ProductImage::IS_PRIMARY => (bool) $image->{ProductImage::IS_PRIMARY},
                     ];
-                }
-            }),
+                }),
+
+            'primary_image' => (function () {
+                $images = $this->relationLoaded('images')
+                    ? $this->images
+                    : $this->images()->get();
+
+                $primaryImage = $images->where(ProductImage::IS_PRIMARY, 1)->first();
+
+                return $primaryImage ? [
+                    'url' => $primaryImage->{ProductImage::IMAGE_URL},
+                    'public_id' => $primaryImage->{ProductImage::IMAGE_PUBLIC_ID},
+                ] : null;
+            })(),
+
             Product::CREATED_AT => $this->created_at?->toDateTimeString(),
             Product::UPDATED_AT => $this->updated_at?->toDateTimeString(),
         ];

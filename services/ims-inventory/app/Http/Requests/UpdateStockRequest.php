@@ -26,9 +26,9 @@ class UpdateStockRequest extends FormRequest
 
         return [
             Stock::PRODUCT_ID => 'required|exists:' . Product::TABLENAME . ',' . Product::ID,
-            Stock::QUANTITY => 'required|numeric|min:0',
-            Stock::MIN_QUANTITY => 'required|numeric|min:0',
-            // Stock::UNIT => 'required|string|max:20|in:pcs,boxes,kg,g,L,meters,pairs,sets,pallets,packages',
+            Stock::QUANTITY => 'sometimes|required|numeric|min:0',
+            Stock::MIN_QUANTITY => 'sometimes|required|numeric|min:0',
+            Stock::UNIT => 'sometimes|require|string|max:50',
         ];
     }
 }

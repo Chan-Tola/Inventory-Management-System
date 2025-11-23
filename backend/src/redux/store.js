@@ -1,12 +1,21 @@
 import { configureStore } from "@reduxjs/toolkit";
+import authReducer from "./slices/authSlice";
 import categoryReducer from "./slices/categorySlice";
 import productReducer from "./slices/productSlice";
+import stockReducer from "./slices/stockSlice";
+import staffReducer from "./slices/staffSlice";
+
 const store = configureStore({
   reducer: {
-    categories: categoryReducer,
-    products: productReducer, // ✅ should be here
-    // products: productReducer,
     // Add other reducers here for microservices
+    // note: auth
+    auth: authReducer,
+    // note: inventory management
+    categories: categoryReducer,
+    products: productReducer,
+    stocks: stockReducer,
+    // note: user management
+    staffs: staffReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

@@ -18,7 +18,7 @@ import { tokens } from "../../../theme";
 import ProductTableRow from "./ProductTableRow";
 import { useState } from "react";
 
-const ProductTable = ({ productItems, loading, onEdit, onDelete, onLink }) => {
+const ProductTable = ({ productItems, loading, onEdit, onDelete }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
@@ -27,7 +27,7 @@ const ProductTable = ({ productItems, loading, onEdit, onDelete, onLink }) => {
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
   // note: page change
-  const handleChangePage = (event, newPage) => {
+  const handleChangePage = (newPage) => {
     setPage(newPage);
   };
 
@@ -35,7 +35,7 @@ const ProductTable = ({ productItems, loading, onEdit, onDelete, onLink }) => {
     setRowsPerPage(parseInt(event.target.value, 5));
     setPage(0);
   };
-  // Calculate paginated data
+  //  note: Calculate paginated data
   const paginatedItems = productItems.slice(
     page * rowsPerPage,
     page * rowsPerPage + rowsPerPage
@@ -44,27 +44,25 @@ const ProductTable = ({ productItems, loading, onEdit, onDelete, onLink }) => {
   if (loading && productItems.length === 0) {
     return (
       <>
-        <Box className="flex justify-center items-center p-4">
+        <Box className="flex justify-center item-center p-4">
           <CircularProgress
             sx={{
               color: theme.palette.primary.main,
             }}
+          />
+          <Typography
+            variant="h6"
+            sx={{
+              ml: 2,
+              color: theme.palette.text.primary,
+            }}
           >
-            <Typography
-              variant="h6"
-              sx={{
-                ml: 2,
-                color: theme.palette.text.primary,
-              }}
-            >
-              Loading products...
-            </Typography>
-          </CircularProgress>
+            Loading products...
+          </Typography>
         </Box>
       </>
     );
   }
-
   return (
     <>
       <Card
@@ -115,7 +113,6 @@ const ProductTable = ({ productItems, loading, onEdit, onDelete, onLink }) => {
                     product={product}
                     onEdit={onEdit}
                     onDelete={onDelete}
-                    onLink={onLink}
                   />
                 ))}
               </TableBody>

@@ -6,6 +6,7 @@ import {
   TextField,
   Button,
   DialogContentText,
+  Box,
 } from "@mui/material";
 
 const CategoryForm = ({
@@ -16,35 +17,22 @@ const CategoryForm = ({
   formData,
   loading,
   onSubmit,
-  onDelete, // Add delete handler
+  onDelete,
   onFormDataChange,
 }) => {
-  // Create a safe version of formData with default values
-  const safeFormData = formData || { name: "", description: "" };
+  // --- Safe defaults ---
+  const safeFormData = { name: "", description: "", ...formData };
+  const { name, description } = safeFormData;
 
-  // Safe access to properties with fallbacks
-  const name = safeFormData.name || "";
-  const description = safeFormData.description || "";
+  // --- Validation ---
+  const isNameValid = !!name.trim();
+  const isFormValid = isNameValid; // description is optional
 
-  // Safe trim check
-  const isNameValid = name ? name.trim() !== "" : false;
+  // --- Handlers ---
+  const handleChange = (field) => (e) =>
+    onFormDataChange({ ...safeFormData, [field]: e.target.value });
 
-  const handleSubmit = () => {
-    onSubmit(formData);
-  };
-  const handleNameChange = (e) => {
-    onFormDataChange({
-      ...safeFormData,
-      name: e.target.value,
-    });
-  };
-
-  const handleDescriptionChange = (e) => {
-    onFormDataChange({
-      ...safeFormData,
-      description: e.target.value,
-    });
-  };
+  const handleSubmit = () => onSubmit(safeFormData);
 
   if (isDeleting) {
     return (
@@ -78,11 +66,11 @@ const CategoryForm = ({
               fullWidth
               variant="outlined"
               value={name}
-              onChange={handleNameChange}
+              onChange={handleChange("name")}
               sx={{ mb: 2 }}
               required
               error={!isNameValid}
-              helperText={!isNameValid ? "Category name is required" : ""}
+              helperText={!isNameValid && "Category name is required"}
             />
             <TextField
               margin="dense"
@@ -92,7 +80,7 @@ const CategoryForm = ({
               multiline
               rows={3}
               value={description}
-              onChange={handleDescriptionChange}
+              onChange={handleChange("description")}
               placeholder="Enter category description (optional)"
             />
           </DialogContent>
@@ -101,7 +89,7 @@ const CategoryForm = ({
             <Button
               onClick={handleSubmit}
               variant="contained"
-              disabled={loading || !isNameValid}
+              disabled={loading || !isFormValid}
             >
               {loading
                 ? "Saving..."

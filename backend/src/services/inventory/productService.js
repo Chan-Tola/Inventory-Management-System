@@ -28,10 +28,45 @@ export const productService = {
     }
   },
   // note: update product
-  updateProduct: async (id, ProductData) => {
+  updateProduct: async (id, productData) => {
     try {
-      const res = await api.put(`/inventory/products/${id}`, ProductData);
-      return res.data.data;
+      let res;
+
+      // Check if we have image files to upload
+      const hasImageFiles =
+        productData.images &&
+        productData.images.some((img) => img instanceof File);
+
+      if (hasImageFiles) {
+        // Use FormData for file upload
+        const formData = new FormData();
+
+        // Append all fields
+        formData.append("name", productData.name);
+        formData.append("sku", productData.sku);
+        formData.append("price", productData.price);
+        formData.append("brand", productData.brand);
+        formData.append("category_id", productData.category_id);
+        formData.append("description", productData.description || "");
+
+        // Append images - only the new files
+        productData.images.forEach((image, index) => {
+          if (image instanceof File) {
+            formData.append(`images[${index}]`, image);
+          }
+        });
+
+        // For Laravel, you might need this:
+        formData.append("_method", "PUT");
+
+        res = await api.post(`/inventory/products/${id}`, formData);
+      } else {
+        // Regular JSON update (no new images)
+        res = await api.put(`/inventory/products/${id}`, productData);
+      }
+
+      console.log(res.data);
+      return res.data;
     } catch (error) {
       throw error;
     }

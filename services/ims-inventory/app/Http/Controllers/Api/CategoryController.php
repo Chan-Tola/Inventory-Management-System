@@ -29,11 +29,11 @@ class CategoryController extends Controller
         }
     }
 
-    public function store(StoreCategoryRequest  $request): JsonResponse
+
+    public function store(StoreCategoryRequest $request): JsonResponse
     {
         DB::beginTransaction();
         try {
-            //The request is already validated at this point
             $category = Category::create($request->validated());
 
             DB::commit();
@@ -42,7 +42,6 @@ class CategoryController extends Controller
                 'data' => new CategoryResource($category)
             ]);
         } catch (\Exception $e) {
-            // catch any unexpected errors
             DB::rollBack();
             return response()->json([
                 'message' => 'Failed to create category',
@@ -50,7 +49,6 @@ class CategoryController extends Controller
             ], 500);
         }
     }
-
     public function show($id): JsonResponse
     {
         try {

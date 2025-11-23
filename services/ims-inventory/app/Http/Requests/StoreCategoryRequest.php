@@ -25,16 +25,7 @@ class StoreCategoryRequest extends FormRequest
         return [
             Category::NAME => 'required|string|max:255|unique:categories,name', //note: Use unique:categories,name whenever you want no two categories to have the same name.
             Category::DESCRIPTION => 'nullable|string|max:500',
+            Category::STAFF_ID  => 'required|exists:' . 'staffs' . ',' . 'id',
         ];
     }
-
-    // messages for validator errors.
-    // public function messages(): array
-    // {
-    //     return [
-    //         'name.required' => 'The category name is required.',
-    //         'name.unique' => 'This category name already exists.',
-    //         'name.max' => 'The category name may not be greater than 255 characters.',
-    //     ];
-    // }
 }

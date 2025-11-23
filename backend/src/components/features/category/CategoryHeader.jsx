@@ -1,7 +1,23 @@
-import { Box, Typography, Button, Chip, useTheme } from "@mui/material";
-import { Refresh, Add } from "@mui/icons-material";
-const CategoryHeader = ({ itemsCount, loading, onAddCategory, onRefresh }) => {
+import {
+  Box,
+  Typography,
+  Button,
+  Chip,
+  useTheme,
+  InputBase,
+  IconButton,
+} from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
+import { Add } from "@mui/icons-material";
+import { tokens } from "../../../theme";
+const CategoryHeader = ({
+  searchText,
+  setSearchText,
+  itemsCount,
+  onAddCategory,
+}) => {
   const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
   return (
     <>
       <Box
@@ -34,26 +50,22 @@ const CategoryHeader = ({ itemsCount, loading, onAddCategory, onRefresh }) => {
         </Box>
 
         <Box display="flex" gap={2}>
-          <Button
-            variant="outlined"
-            sx={{
-              color: theme.palette.text.primary,
-              borderColor: theme.palette.text.primary,
-              "&:hover": {
-                borderColor: theme.palette.text.primary,
-                backgroundColor: theme.palette.action.hover,
-              },
-              "&:disabled": {
-                color: theme.palette.text.disabled,
-                borderColor: theme.palette.text.disabled,
-              },
-            }}
-            startIcon={<Refresh />}
-            onClick={onRefresh}
-            disabled={loading}
+          {/* note: SEARCH SECTION  */}
+          <Box
+            display="flex"
+            backgroundColor={colors.primary[400]}
+            borderRadius="3px"
           >
-            Refresh
-          </Button>
+            <InputBase
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              sx={{ ml: 2, flex: 1 }}
+              placeholder="Search"
+            />
+            <IconButton type="button" sx={{ p: 1 }}>
+              <SearchIcon />
+            </IconButton>
+          </Box>
           <Button
             variant="outlined"
             sx={{

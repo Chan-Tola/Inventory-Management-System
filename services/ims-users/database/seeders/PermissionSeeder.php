@@ -39,5 +39,10 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['name' => PermissionConstant::CREATE_CUSTOMER, 'guard_name' => 'api']);
         Permission::firstOrCreate(['name' => PermissionConstant::EDIT_CUSTOMER, 'guard_name' => 'api']);
         Permission::firstOrCreate(['name' => PermissionConstant::REMOVE_CUSTOMER, 'guard_name' => 'api']);
+        // note: supplier permissions
+        Permission::firstOrCreate(['name' => PermissionConstant::VIEW_SUPPLIER, 'guard_name' => 'api']);
+        Permission::firstOrCreate(['name' => PermissionConstant::CREATE_SUPPLIER, 'guard_name' => 'api']);
+        Permission::firstOrCreate(['name' => PermissionConstant::EDIT_SUPPLIER, 'guard_name' => 'api']);
+        Permission::firstOrCreate(['name' => PermissionConstant::REMOVE_SUPPLIER, 'guard_name' => 'api']);
     }
 }

@@ -24,29 +24,42 @@ class UpdateProductRequest extends FormRequest
     public function rules(): array
     {
         $productId = $this->route('product');
-        // assumes your route looks like /products/{product}
-        //
-        return [
-            Product::NAME => 'required|string|max:255',
-            Product::SKU => 'required|string|max:100|unique:'
+
+        $rules = [
+            Product::NAME => 'sometimes|string|max:255',
+            Product::SKU => 'sometimes|string|max:100|unique:'
                 . Product::TABLENAME . ',' . Product::SKU
                 . ($productId ? ',' . $productId : ''),
-            Product::CATEGORY_ID => 'required|exists:' . Category::TABLENAME . ',' . Category::ID,
-            Product::BRAND => 'required|string|max:255',
-            Product::PRICE => 'required|numeric|min:0',
-            Product::DESCRIPTION => 'nullable|string',
-
+            Product::CATEGORY_ID => 'sometimes|exists:' . Category::TABLENAME . ',' . Category::ID,
+            Product::BRAND => 'sometimes|string|max:255',
+            Product::PRICE => 'sometimes|numeric|min:0',
+            Product::DESCRIPTION => 'sometimes|string|nullable',
+            Product::STAFF_ID => 'sometimes|exists:staffs,id',
         ];
+
+        // ✅ Image validation (this part was never running before) 
         // Check if images are files, base64, or raw file data
         if ($this->hasFile('images')) {
-            // Direct file upload
-            $rules['images.*'] = 'image|mimes:jpeg,png,jpg,gif,webp|max:2048';
-        } elseif (isset($this->images[0]['data'])) {
-            // Base64 images
-            $rules['images.*.data'] = 'required|string';
-        } else {
-            // Raw file data from gateway - minimal validation
-            $rules['images.*'] = 'array';
+            // Handle both single file and multiple files
+            if (is_array($this->file('images'))) {
+                // Multiple files
+                $rules['images.*'] = 'image|mimes:jpeg,png,jpg,gif,webp|max:2048';
+            } else {
+                // Single file
+                $rules['images'] = 'image|mimes:jpeg,png,jpg,gif,webp|max:2048';
+            }
+        } elseif ($this->has('images')) {
+            if (is_array($this->images) && isset($this->images[0]['data'])) {
+                // Base64 images
+                $rules['images.*.data'] = 'required|string';
+            } else {
+                // Raw file data from gateway - minimal validation
+                $rules['images'] = 'array';
+            }
         }
+
+
+
+        return $rules;
     }
 }

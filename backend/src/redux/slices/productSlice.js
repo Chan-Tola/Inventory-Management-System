@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { productService } from "../../services/inventory/productService";
 
+// index
 export const fetchProducts = createAsyncThunk(
   "products/fetchProducts",
   async (_, { rejectWithValue }) => {
@@ -12,6 +13,7 @@ export const fetchProducts = createAsyncThunk(
     }
   }
 );
+// store
 export const createProduct = createAsyncThunk(
   "products/createProduct",
   async (productData, { rejectWithValue }) => {
@@ -23,18 +25,21 @@ export const createProduct = createAsyncThunk(
     }
   }
 );
+
+// edit
 export const updateProduct = createAsyncThunk(
   "products/updateCategory",
   async ({ id, productData }, { rejectWithValue }) => {
     try {
-      const data = await productService.updateProduct(id, productData);
-      console.log(data);
-      return data;
+      const response = await productService.updateProduct(id, productData);
+      return response;
     } catch (error) {
-      throw rejectWithValue(error.message);
+      throw rejectWithValue(error.message || "Update failed");
     }
   }
 );
+
+// delete
 export const deleteProduct = createAsyncThunk(
   "products/deleteCategory",
   async (id, { rejectWithValue }) => {
@@ -87,7 +92,7 @@ const productSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Fetch Categories
+      // Fetch product
       .addCase(fetchProducts.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -102,7 +107,7 @@ const productSlice = createSlice({
         state.error = action.payload;
         state.success = false;
       })
-      // Create Category
+      // Create porduct
       .addCase(createProduct.pending, (state) => {
         state.loading = true;
         state.error = null;

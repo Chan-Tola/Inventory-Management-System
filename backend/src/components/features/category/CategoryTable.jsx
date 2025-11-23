@@ -43,6 +43,7 @@ const CategoryTable = ({ categoryItems, loading, onEdit, onDelete }) => {
     page * rowsPerPage + rowsPerPage
   );
 
+  
   if (loading && categoryItems.length === 0) {
     return (
       <>

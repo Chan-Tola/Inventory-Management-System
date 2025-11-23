@@ -6,6 +6,7 @@ import {
   clearSuccess,
   setCurrentProduct,
   clearCurrentProduct,
+  resetProductState,
 } from "../redux/slices/productSlice";
 
 export const useProduct = () => {
@@ -21,24 +22,28 @@ export const useProduct = () => {
     name: "",
     sku: "",
     price: "",
+    brand: "",
     category_id: "",
     description: "",
     images: [],
   });
-  // Load categories on component mount
+
+  // Load products on component mount
   useEffect(() => {
     dispatch(fetchProducts());
   }, [dispatch]);
 
-  // Clear messages after timeout
+  // Clear success after 3s
   useEffect(() => {
     if (success) {
       const timer = setTimeout(() => {
-        dispatch(clearSuccess);
+        dispatch(clearSuccess());
       }, 3000);
       return () => clearTimeout(timer);
     }
   }, [success, dispatch]);
+
+  // Clear error after 5s
   useEffect(() => {
     if (error) {
       const timer = setTimeout(() => {
@@ -48,13 +53,14 @@ export const useProduct = () => {
     }
   }, [error, dispatch]);
 
-  // Reset form when dialog closes
+  // Reset form and dialog state when closed
   useEffect(() => {
     if (!openDialog) {
       setFormData({
         name: "",
         sku: "",
         price: "",
+        brand: "",
         category_id: "",
         description: "",
         images: [],
@@ -62,15 +68,20 @@ export const useProduct = () => {
       setIsDeleting(false);
       setIsEditing(false);
       dispatch(clearCurrentProduct());
-      console.log("Dialog closed: All states reset, ready for new actions");
     }
   }, [openDialog, dispatch]);
 
+  // Update formData when editing/deleting a product
   useEffect(() => {
     if (currentProduct) {
       setFormData({
         name: currentProduct.name,
+        sku: currentProduct.sku,
+        price: currentProduct.price,
+        brand: currentProduct.brand,
+        category_id: currentProduct.category_id,
         description: currentProduct.description || "",
+        images: currentProduct.images,
       });
       // Ensure state are consistent
       if (isEditing) {
@@ -79,8 +90,16 @@ export const useProduct = () => {
         setIsEditing(false);
       }
     }
-  }, [currentProduct, isEditing, isDeleting, dispatch]);
+  }, [currentProduct, isEditing, isDeleting]);
 
+  // Reset entire category state when component unmounts
+  useEffect(() => {
+    return () => {
+      dispatch(resetProductState());
+    };
+  }, [dispatch]);
+
+  // fucntion buttons
   const handleEditClick = (product) => {
     dispatch(setCurrentProduct(product));
     setIsEditing(true);
@@ -113,17 +132,17 @@ export const useProduct = () => {
     loading,
     error,
     success,
+    currentProduct,
     openDialog,
     isEditing,
     isDeleting,
     formData,
+    setFormData,
     setOpenDialog,
     setIsEditing,
-    setFormData,
     handleEditClick,
-    handleDeleteClick, // Return delete handler
+    handleDeleteClick,
     handleRefresh,
     handleCloseSnackbar,
-    currentProduct,
   };
 };

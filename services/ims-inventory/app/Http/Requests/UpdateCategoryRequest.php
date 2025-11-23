@@ -27,6 +27,7 @@ class UpdateCategoryRequest extends FormRequest
         return [
             Category::NAME => 'sometimes|required|string|max:255|unique:categories,name,' . $categoryId,
             Category::DESCRIPTION => 'sometimes|nullable|string|max:500',
+            Category::STAFF_ID  => 'required|exists:' . 'staffs' . ',' . 'id',
         ];
     }
 }

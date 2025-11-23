@@ -126,15 +126,9 @@ const categorySlice = createSlice({
       })
       .addCase(updateCategory.fulfilled, (state, action) => {
         state.loading = false;
-
-        // Debug: see what's in the payload
-        console.log("Update fulfilled payload:", action.payload);
-
         const index = state.categoryItems.findIndex(
           (item) => item.id === action.payload.id
         );
-
-        console.log("Found index:", index);
 
         if (index !== -1) {
           state.categoryItems[index] = action.payload;

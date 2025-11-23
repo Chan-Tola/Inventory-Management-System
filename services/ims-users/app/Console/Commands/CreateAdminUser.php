@@ -53,7 +53,7 @@ class CreateAdminUser extends Command
             Staff::HIRE_DATE => now(),
         ]);
         // Assign Role 
-        $role = Role::firstOrCreate(['name' => 'Admin', 'guard_name' => 'api']);
+        $role = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'api']);
         $user->assignRole($role);
         // Create User
         $this->info('✅ Admin user created successfully!');

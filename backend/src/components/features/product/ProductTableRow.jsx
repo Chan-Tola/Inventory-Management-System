@@ -7,14 +7,7 @@ import {
 } from "@mui/material";
 import { Edit, Delete } from "@mui/icons-material";
 
-const ProductTableRow = ({
-  product,
-  onEdit,
-  onDelete,
-  loading,
-  index,
-  onLink,
-}) => {
+const ProductTableRow = ({ index, product, onEdit, onDelete, loading }) => {
   return (
     <>
       <TableRow key={product.id} hover>
@@ -26,8 +19,8 @@ const ProductTableRow = ({
         <TableCell>
           <Box
             component="img"
-            src={`${product.primary_image}`}
-            alt="no image"
+            src={product.primary_image?.url || "/no-image.png"} // safe access with fallback
+            alt={product.name || "no image"}
             sx={{
               width: 100,
               height: 100,

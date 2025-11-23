@@ -1,7 +1,25 @@
-import { Box, Typography, Button, Chip, useTheme } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Button,
+  Chip,
+  useTheme,
+  InputBase,
+  IconButton,
+} from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
 import { Refresh, Add } from "@mui/icons-material";
-const ProductHeader = ({ itemsCount, loading, onAddProduct, onRefresh }) => {
+import { tokens } from "../../../theme";
+const ProductHeader = ({
+  itemsCount,
+  loading,
+  onAddProduct,
+  onRefresh,
+  setSearchText,
+  searchText,
+}) => {
   const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
   return (
     <>
       <Box
@@ -33,6 +51,23 @@ const ProductHeader = ({ itemsCount, loading, onAddProduct, onRefresh }) => {
           />
         </Box>
         <Box display={"flex"} gap={2}>
+          {/* note: SEARCH SECTION  */}
+          <Box
+            d
+            display="flex"
+            backgroundColor={colors.primary[400]}
+            borderRadius="3px"
+          >
+            <InputBase
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              sx={{ ml: 2, flex: 1 }}
+              placeholder="Search"
+            />
+            <IconButton type="button" sx={{ p: 1 }}>
+              <SearchIcon />
+            </IconButton>
+          </Box>
           <Button
             variant="outlined"
             sx={{
