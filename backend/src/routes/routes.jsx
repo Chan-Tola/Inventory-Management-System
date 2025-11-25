@@ -3,8 +3,8 @@ import {
   CategoryPage,
   ProductPage,
   StockPage,
+  SupplierPage,
   Setting,
-  LoginPage,
   StaffPage,
   CustomerPage,
 } from "../pages/index";
@@ -50,9 +50,29 @@ export const routes = [
     },
   },
   {
+    path: "/suppliers",
+    element: <SupplierPage />,
+    permission: "view supplier",
+    menu: {
+      title: "Suppliers",
+      icon: "warehouse",
+      showInMenu: true,
+    },
+  },
+  {
     path: "/staffs",
     element: <StaffPage />,
     permission: "view staff",
+    menu: {
+      title: "Staff",
+      icon: "people",
+      showInMenu: true,
+    },
+  },
+  {
+    path: "/customers",
+    element: <CustomerPage />,
+    permission: "view customer",
     menu: {
       title: "Staff",
       icon: "people",

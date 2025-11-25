@@ -120,7 +120,6 @@ const Topbar = () => {
       p={2}
       sx={{ borderBottom: `2px solid ${colors.primary[100]}` }}
     >
-      {/* note: SEARCH SECTION  */}
       <Typography variant="h5" component="h2" fontWeight="bold">
         Today,{date}
       </Typography>
@@ -138,9 +137,9 @@ const Topbar = () => {
         </IconButton>
 
         {/* Notifications Button */}
-        <IconButton>
+        {/* <IconButton>
           <NotificationsOutlinedIcon />
-        </IconButton>
+        </IconButton> */}
 
         {/* Profile Section */}
         <Box>

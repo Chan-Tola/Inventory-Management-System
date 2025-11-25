@@ -35,7 +35,7 @@ class UserService extends BaseService
         return $this->put("/api/users/staffs/{$id}", $data);
     }
     // note: delete
-    public function deleteUser(int $id): Response
+    public function deleteStaffUser(int $id): Response
     {
         return $this->delete("/api/users/staffs/{$id}");
     }
@@ -45,6 +45,37 @@ class UserService extends BaseService
     {
         return $this->get("/api/users/{$userId}/staff");
     }
+
+    /**
+     * Create product with base64 images (for Flutter)
+     */
+
+    // note: index
+    public function getCustomerUsers(array $query = []): Response
+    {
+        return $this->get('/api/users/customers', $query);
+    }
+    // note: show by id
+    public function getCustomerUser(int $id): Response
+    {
+        return $this->get("/api/users/customers/{$id}");
+    }
+    // note: store
+    public function createCustomerUser(array $data): Response
+    {
+        return $this->post('/api/users/customers', $data);
+    }
+    // note: update
+    public function updateCustomerUser(int $id, array $data): Response
+    {
+        return $this->put("/api/users/customers/{$id}", $data);
+    }
+    // note: delete
+    public function deleteCustomerUser(int $id): Response
+    {
+        return $this->delete("/api/users/customers/{$id}");
+    }
+    
     /**
      * Create product with base64 images (for Flutter)
      */

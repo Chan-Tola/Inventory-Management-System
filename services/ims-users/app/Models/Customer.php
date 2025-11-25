@@ -2,10 +2,14 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Notifications\Notifiable;
+use Spatie\Permission\Traits\HasRoles;
 
 class Customer extends Model
 {
+    use HasFactory, Notifiable, HasRoles; // Spatie
     // note: table name
     const TABLENAME = 'customers';
     const ID = 'id';
@@ -19,7 +23,7 @@ class Customer extends Model
     const USER_ID = 'user_id';
 
     // note: filleable fields
-    protected $filable = [
+    protected $fillable = [
         self::USER_ID,
         self::CUSTOMER_CODE,
         self::GENDER,

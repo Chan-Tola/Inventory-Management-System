@@ -6,7 +6,6 @@ import {
   TextField,
   Button,
   DialogContentText,
-  Box,
 } from "@mui/material";
 
 const CategoryForm = ({
@@ -67,7 +66,7 @@ const CategoryForm = ({
               variant="outlined"
               value={name}
               onChange={handleChange("name")}
-              sx={{ mb: 2 }}
+              sx={{ my: 2 }}
               required
               error={!isNameValid}
               helperText={!isNameValid && "Category name is required"}

@@ -51,6 +51,10 @@ class Product extends Model
         return $this->hasMany(ProductImage::class);
     }
 
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class, Transaction::SUPPLIER_ID);
+    }
     public function staff()
     {
         return $this->belongsTo(Staff::class);

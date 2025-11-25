@@ -483,11 +483,66 @@ class GatewayController extends Controller
         }
     }
 
-    // note: Orders Routes
-    public function getOrders(Request $request): JsonResponse
+    public function getTransactions(Request $request): JsonResponse
     {
         try {
-            $response = $this->orderService->getOrders($request->query());
+            $queryParams = $request->all();
+            $response = $this->inventoryService->getTransactions($queryParams);
+            return response()->json($response->json(), $response->status());
+        } catch (RequestException $e) {
+            return $this->handleServiceError($e);
+        }
+    }
+
+    // note: get single transaction
+    public function getTransaction($id): JsonResponse
+    {
+        try {
+            $response = $this->inventoryService->getTransaction($id);
+            return response()->json($response->json(), $response->status());
+        } catch (RequestException $e) {
+            return $this->handleServiceError($e);
+        }
+    }
+
+    // note: create transaction (with staff_id from token)
+    public function createTransaction(Request $request): JsonResponse
+    {
+        try {
+            // ✅ FIRST: Get ALL form data including text fields
+            $data = $request->all();
+
+            // ✅ THEN: Get staff_id from token (same as your category method)
+            $token = $request->bearerToken();
+            if ($token) {
+                $payload = json_decode(base64_decode(explode('.', $token)[1]), true);
+                $userId = $payload['sub'] ?? null;
+
+                if ($userId) {
+                    $staffResponse = $this->userService->getStaffByUser($userId);
+
+                    if ($staffResponse->successful()) {
+                        $staffData = $staffResponse->json();
+                        $data['staff_id'] = $staffData['data']['staff_id'] ?? null;
+
+                        Log::info('Successfully converted user_id to staff_id for transaction', [
+                            'user_id' => $userId,
+                            'staff_id' => $data['staff_id']
+                        ]);
+                    } else {
+                        Log::error('Failed to get staff_id from user service for transaction', [
+                            'user_id' => $userId,
+                            'status' => $staffResponse->status(),
+                            'error' => $staffResponse->body()
+                        ]);
+                    }
+                }
+            }
+
+            // ✅ DEBUG: Check transaction data
+            Log::info('Transaction data before sending to inventory', $data);
+
+            $response = $this->inventoryService->createTransaction($data);
             return response()->json($response->json(), $response->status());
         } catch (RequestException $e) {
             return $this->handleServiceError($e);
@@ -545,47 +600,263 @@ class GatewayController extends Controller
         }
     }
     // note: update
-    // public function updateStaffUser($id): JsonResponse
-    // {
-    //     try {
-    //         $response = $this->userService->updateStaffUser($id);
-    //         return response()->json($response->json(), $response->status());
-    //     } catch (RequestException $e) {
-    //         return $this->handleServiceError($e);
-    //     }
-    // }
+    public function updateStaffUser(Request $request, $id): JsonResponse
+    {
+        try {
+            $data = $request->all();
+            // ✅ CORRECTED: Handle Flutter (base64) FIRST
+            if (isset($data['profile_url']) && $this->userService->isSingleBase64Image($data['profile_url'])) {
+                $data['_image_type'] = 'base64';
+                // Use the new base64 method
+                $response = $this->userService->updateStaffUserWithBase64($id, $data);
+            }
+            // ✅ Then handle React.js (files)
+            elseif ($request->hasFile('profile_url')) {
+                $images = $request->file('profile_url');
+                $data['profile_url'] = is_array($images) ? $images : [$images];
+                // Use regular method for file uploads
+                $response = $this->userService->updateStaffUser($id, $data);
+            }
+            // ✅ No images case
+            else {
+                Log::info('No images detected, update staff with basic data');
+                $response = $this->userService->updateStaffUser($id, $data);
+            }
+            return response()->json($response->json(), $response->status());
+        } catch (RequestException $e) {
+            return $this->handleServiceError($e);
+        }
+    }
     // // note: delete
-    // public function deleteStaffUser($id): JsonResponse
-    // {
-    //     try {
-    //         $response = $this->userService->deleteUser($id);
-    //         return response()->json($response->json(), $response->status());
-    //     } catch (RequestException $e) {
-    //         return $this->handleServiceError($e);
-    //     }
-    // }
+    public function deleteStaffUser($id): JsonResponse
+    {
+        try {
+            $response = $this->userService->deleteStaffUser($id);
+            return response()->json($response->json(), $response->status());
+        } catch (RequestException $e) {
+            return $this->handleServiceError($e);
+        }
+    }
     // note: Users Routes +  Customers 
     // note: index
-    // public function getStaffCustomers(Request $request): JsonResponse
-    // {
-    //     try {
-    //         $response = $this->userService->getUsers($request->query());
-    //         return response()->json($response->json(), $response->status());
-    //     } catch (RequestException $e) {
-    //         return $this->handleServiceError($e);
-    //     }
-    // }
-    // // note: show
-    // public function getCustomerUser($id): JsonResponse
-    // {
-    //     try {
-    //         $response = $this->userService->getUsers($id);
-    //         return response()->json($response->json(), $response->status());
-    //     } catch (RequestException $e) {
-    //         return $this->handleServiceError($e);
-    //     }
-    // }
+    public function getCustomerUsers(Request $request): JsonResponse
+    {
+        try {
+            $response = $this->userService->getCustomerUsers($request->query());
+            return response()->json($response->json(), $response->status());
+        } catch (RequestException $e) {
+            return $this->handleServiceError($e);
+        }
+    }
+    // note: show
+    public function getCustomerUser($id): JsonResponse
+    {
+        try {
+            $response = $this->userService->getCustomerUser($id);
+            return response()->json($response->json(), $response->status());
+        } catch (RequestException $e) {
+            return $this->handleServiceError($e);
+        }
+    }
+    // note: store
+    public function createCustomerUser(Request $request): JsonResponse
+    {
+        try {
+            $data = $request->all();
 
+            $response = $this->userService->createCustomerUser($data);
+            return response()->json($response->json(), $response->status());
+        } catch (RequestException $e) {
+            return $this->handleServiceError($e);
+        }
+    }
+    // note: update
+    public function updateCustomerUser(Request $request, $id): JsonResponse
+    {
+        try {
+            $data = $request->all();
+            Log::info($data);
+            $response = $this->userService->updateCustomerUser($id, $data);
+            return response()->json($response->json(), $response->status());
+        } catch (RequestException $e) {
+            return $this->handleServiceError($e);
+        }
+    }
+    // note: delete
+    public function deleteCustomerUser($id): JsonResponse
+    {
+        try {
+            $response = $this->userService->deleteCustomerUser($id);
+            return response()->json($response->json(), $response->status());
+        } catch (RequestException $e) {
+            return $this->handleServiceError($e);
+        }
+    }
+
+    // note: Orders Routes
+    // ✅ GET /orders - List all orders with optional filters
+    public function getOrders(Request $request): JsonResponse
+    {
+        try {
+            $response = $this->orderService->getOrders($request->all());
+
+            return response()->json(
+                $response->json(),
+                $response->status()
+            );
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch orders: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    // ✅ GET /orders/{id} - Get single order
+    public function getOrder($id): JsonResponse
+    {
+        try {
+            $response = $this->orderService->getOrder($id);
+
+            return response()->json(
+                $response->json(),
+                $response->status()
+            );
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch order: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+    // ✅ POST /orders - Create new order
+    public function createOrder(Request $request): JsonResponse
+    {
+        try {
+            $requestData = $request->all();
+
+            Log::info('Received order data:', $requestData);
+
+            // Extract staff_id from user object
+            if (isset($requestData['user']['staff']['id'])) {
+                $requestData['staff_id'] = $requestData['user']['staff']['id'];
+                Log::info('Extracted staff_id:', ['staff_id' => $requestData['staff_id']]);
+            } else {
+                Log::error('Staff ID not found in user data');
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Staff ID is required'
+                ], 422);
+            }
+
+            // Prepare clean data for order service
+            $orderData = [
+                'customer_id' => $requestData['customer_id'],
+                'staff_id' => $requestData['staff_id'],
+                'items' => $requestData['items']
+            ];
+
+            Log::info('Sending to order service:', $orderData);
+
+            $response = $this->orderService->createOrder($orderData);
+
+            return response()->json(
+                $response->json(),
+                $response->status()
+            );
+        } catch (\Exception $e) {
+            Log::error('Order creation failed in gateway:', ['error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to create order: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+
+    // ✅ PUT /orders/{id}/status - Update order status
+    public function updateOrderStatus(Request $request, $id): JsonResponse
+    {
+        try {
+            $request->validate([
+                'status' => 'required|in:pending,completed,cancelled'
+            ]);
+
+            $response = $this->orderService->updateOrderStatus($id, $request->status);
+
+            return response()->json(
+                $response->json(),
+                $response->status()
+            );
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update order status: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    // ✅ DELETE /orders/{id} - Delete order
+    public function deleteOrder($id): JsonResponse
+    {
+        try {
+            $response = $this->orderService->deleteOrder($id);
+
+            return response()->json(
+                $response->json(),
+                $response->status()
+            );
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete order: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    // ✅ GET /orders/reports/sales - Sales report
+    public function getSalesReport(Request $request): JsonResponse
+    {
+        try {
+            $response = $this->orderService->getSalesReport($request->all());
+
+            return response()->json(
+                $response->json(),
+                $response->status()
+            );
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to generate sales report: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    // ✅ GET /health - Health check
+    public function healthCheck(): JsonResponse
+    {
+        try {
+            $response = $this->orderService->healthCheck();
+
+            return response()->json(
+                $response->json(),
+                $response->status()
+            );
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'ERROR',
+                'service' => 'IMS Order Service',
+                'message' => 'Service unavailable: ' . $e->getMessage(),
+                'timestamp' => now()
+            ], 503);
+        }
+    }
 
     // note: HanldeServiceError
     private function handleServiceError(RequestException $e): JsonResponse

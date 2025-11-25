@@ -142,16 +142,22 @@ const Sidebar = () => {
       requiredPermission: "view category",
     },
     {
-      title: "Product",
+      title: "Products",
       to: "/products",
       icon: <ListAltOutlinedIcon />,
       requiredPermission: "view product",
     },
     {
-      title: "Stock Transfer",
+      title: "Stock products",
       to: "/stocks",
       icon: <InventoryOutlinedIcon />,
       requiredPermission: "view stock",
+    },
+    {
+      title: "Transaction",
+      to: "/transition",
+      icon: <InventoryOutlinedIcon />,
+      requiredPermission: "view transaction",
     },
   ];
 

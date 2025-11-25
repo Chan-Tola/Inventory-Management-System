@@ -49,19 +49,49 @@ Route::middleware(['jwt.auth'])->group(function () {
         Route::post('/suppliers', [GatewayController::class, 'createSupplier'])->middleware('permission:create supplier');
         Route::put('/suppliers/{id}', [GatewayController::class, 'updateSupplier'])->middleware('permission:edit supplier');
         Route::delete('/suppliers/{id}', [GatewayController::class, 'deleteSupplier'])->middleware('permission:remove supplier');
+        // note: Transaction CRUD
+        Route::get('/transactions', [GatewayController::class, 'getTransactions'])->middleware('permission:view transaction');
+        Route::get('/transactions/{id}', [GatewayController::class, 'getTransaction'])->middleware('permission:view transaction');
+        Route::post('/transactions', [GatewayController::class, 'createTransaction'])->middleware('permission:create transaction');
     });
     //note: /api/users
     Route::prefix('users')->group(function () {
+
+        // note:  Staff  CRUD
         Route::get('/staffs', [GatewayController::class, 'getStaffUsers'])->middleware('permission:view staff');
         Route::get('/staffs/{id}', [GatewayController::class, 'getStaffUser'])->middleware('permission:view staff');
         Route::post('/staffs', [GatewayController::class, 'createStaffUser'])->middleware('permission:create staff');
         Route::put('/staffs/{id}', [GatewayController::class, 'updateStaffUser'])->middleware('permission:edit staff');
         Route::delete('/staffs/{id}', [GatewayController::class, 'deleteStaffUser'])->middleware('permission:remove staff');
+
+        // note:  Customer  CRUD
+        Route::get('/customers', [GatewayController::class, 'getCustomerUsers'])->middleware('permission:view customer');
+        Route::get('/customers/{id}', [GatewayController::class, 'getCustomerUser'])->middleware('permission:view customer');
+        Route::post('/customers', [GatewayController::class, 'createCustomerUser'])->middleware('permission:create customer');
+        Route::put('/customers/{id}', [GatewayController::class, 'updateCustomerUser'])->middleware('permission:edit customer');
+        Route::delete('/customers/{id}', [GatewayController::class, 'deleteCustomerUser'])->middleware('permission:remove customer');
     });
 
-    //note: /api/orders
+    // ✅ Order Routes with appropriate permissions
     Route::prefix('orders')->group(function () {
-        Route::get('/', [GatewayController::class, 'getOrders']); //note: → /orders
+        // Admin & Staff & Customer can view orders
+        Route::get('/', [GatewayController::class, 'getOrders'])->middleware('permission:view order');
 
+        // Admin & Staff & Customer can create orders
+        Route::post('/', [GatewayController::class, 'createOrder'])->middleware('permission:create order');
+
+        // Admin & Staff & Customer can view single order
+        Route::get('/{id}', [GatewayController::class, 'getOrder'])->middleware('permission:view order');
+
+        // Only Admin & Staff can update order status
+        Route::put('/{id}/status', [GatewayController::class, 'updateOrderStatus'])->middleware('permission:edit order');
+
+        // Only Admin can delete orders
+        Route::delete('/{id}', [GatewayController::class, 'deleteOrder'])->middleware('permission:remove order');
+
+        // Admin & Staff can view sales reports
+        Route::get('/reports/sales', [GatewayController::class, 'getSalesReport'])->middleware('permission:view order');
     });
+    // Health check route
+    Route::get('/health/orders', [GatewayController::class, 'healthCheck']);
 });

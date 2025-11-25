@@ -148,4 +148,26 @@ class InventoryService extends BaseService
     {
         return $this->delete("/api/inventory/suppliers/{$id}");
     }
+
+    // note: index - get all transactions
+    public function getTransactions(array $query = []): Response
+    {
+        try {
+            $response = $this->get('/api/inventory/transactions', $query);
+            return $response;
+        } catch (\Exception $e) {
+            throw $e;
+        }
+    }
+    // note: show - get single transaction
+    public function getTransaction(int $id): Response
+    {
+        return $this->get("/api/inventory/transactions/{$id}");
+    }
+
+    // note: store - create transaction
+    public function createTransaction(array $data): Response
+    {
+        return $this->post('/api/inventory/transactions', $data);
+    }
 }

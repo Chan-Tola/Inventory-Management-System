@@ -27,4 +27,8 @@ class Supplier extends Model
     //     return $this->belongsTo(Product::class);
     // }
 
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class, Transaction::SUPPLIER_ID);
+    }
 }

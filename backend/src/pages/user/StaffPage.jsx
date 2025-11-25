@@ -7,12 +7,17 @@ import {
   StaffTable,
   StaffForm,
 } from "../../components/features/staffs/index";
+import {
+  createStaff,
+  updateStaff,
+  deleteStaff,
+} from "../../redux/slices/staffSlice";
 import { Notification } from "../../components/common/index";
-import { createStaff } from "../../redux/slices/staffSlice";
 
 const StaffPage = () => {
   const dispatch = useDispatch();
   const [searchText, setSearchText] = useState("");
+
   const {
     staffItems,
     loading,
@@ -31,7 +36,6 @@ const StaffPage = () => {
     handleCloseSnackbar,
   } = useStaff();
 
-  console.log("Staff Items:", staffItems);
   // function filteritme base on Search
   const fileteredStaffs = staffItems.filter(
     (item) =>
@@ -40,6 +44,7 @@ const StaffPage = () => {
         .toLowerCase()
         .includes(searchText.toLocaleLowerCase())
   );
+
   // note:function create staff
   const handleCreateStaff = async () => {
     try {
@@ -61,7 +66,7 @@ const StaffPage = () => {
     }
     try {
       await dispatch(
-        updateProduct({
+        updateStaff({
           id: currentStaff.id,
           StaffData: formData,
         })
@@ -72,22 +77,23 @@ const StaffPage = () => {
       console.error("Failed to update staff:", error);
     }
   };
-  // const handleUpdateStaff = async () => {
-  //   if (!currentStaff || !currentStaff.id) {
-  //     console.error("No current staff selected for update");
-  //     alert("No staff selected for editing");
-  //     return;
-  //   }
-  //   try {
-  //     await dispatch();
-  //   } catch (error) {
-  //     console.log("Failed to update Staff :", error);
-  //   }
-  // };
   // note:function delete staff
-
+  const handleDeleteStaff = async () => {
+    if (currentStaff) {
+      try {
+        await dispatch(deleteStaff(currentStaff.id)).unwrap();
+        setOpenDialog(false);
+        handleRefresh();
+      } catch (error) {
+        console.error("Failed to delte category:", error);
+        // 🔥 ADD USER-FRIENDLY ERROR MESSAGE
+        alert(`Update failed: ${error.message}`);
+      }
+    }
+  };
   // note: function handleFormSubmit
   const handleFormSubmit = isEditing ? handleUpdateStaff : handleCreateStaff;
+
   return (
     <>
       <Box p={3}>
@@ -112,6 +118,7 @@ const StaffPage = () => {
           staffItems={fileteredStaffs}
           loading={loading}
           onEdit={handleEditClick}
+          onDelete={handleDeleteClick}
           onRefresh={handleRefresh}
         />
         {/* Add/Edit Staff Form */}
@@ -125,7 +132,7 @@ const StaffPage = () => {
           onSubmit={handleFormSubmit}
           onFormDataChange={setFormData}
           currentStaff={currentStaff}
-          // onDelete={handleDeleteStaff}
+          onDelete={handleDeleteStaff}
         />
       </Box>
     </>

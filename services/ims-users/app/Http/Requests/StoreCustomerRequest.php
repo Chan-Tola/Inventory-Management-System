@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Customer;
+use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreCustomerRequest extends FormRequest
@@ -11,7 +13,7 @@ class StoreCustomerRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +24,19 @@ class StoreCustomerRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            // User data validation
+            User::NAME      => 'required|string|max:255',
+            User::EMAIL     => 'required|email|unique:' . User::TABLENAME . ',' . User::EMAIL,
+            User::PASSWORD  => 'required|string|min:8',
+            User::IS_ACTIVE => 'sometimes|boolean',
+
+            // Customer data validation
+            Customer::GENDER  => 'sometimes|required|in:male,female,other', // Change to sometimes
+            Customer::ADDRESS => 'required|string|max:500',
+
+            // Role validation
+            'roles'   => 'sometimes|array',
+            'roles.*' => 'string|in:customer'
         ];
     }
 }

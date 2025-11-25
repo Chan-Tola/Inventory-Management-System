@@ -16,7 +16,6 @@ class PermissionConstant
     public const EDIT_PRODUCT = 'edit product';
     public const REMOVE_PRODUCT = 'remove product';
 
-
     // Stock Permissions
     public const VIEW_STOCK = 'view stock';
     public const CREATE_STOCK = 'create stock';
@@ -42,8 +41,18 @@ class PermissionConstant
     public const REMOVE_SUPPLIER = 'remove supplier';
 
     // // Transition Permissions
-    // public const VIEW_SUPPLIER = 'view stock';
-    // public const CREATE_SUPPLIER = 'create stock';
-    // public const EDIT_SUPPLIER = 'edit stock';
-    // public const REMOVE_SUPPLIER = 'remove stock';
+    public const VIEW_TRANSACTION = 'view transaction';
+    public const CREATE_TRANSACTION = 'create transaction';
+
+    // ✅ ORDER Permissions
+    public const VIEW_ORDER = 'view order';
+    public const CREATE_ORDER = 'create order';
+    public const EDIT_ORDER = 'edit order';
+    public const REMOVE_ORDER = 'remove order';
+
+    // ✅ ORDER ITEM Permissions
+    public const VIEW_ORDER_ITEM = 'view order item';
+    public const CREATE_ORDER_ITEM = 'create order item';
+    public const EDIT_ORDER_ITEM = 'edit order item';
+    public const REMOVE_ORDER_ITEM = 'remove order item';
 }

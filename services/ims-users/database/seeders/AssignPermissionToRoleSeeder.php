@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Constants\PermissionConstant;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
 
@@ -14,9 +13,9 @@ class AssignPermissionToRoleSeeder extends Seeder
      */
     public function run(): void
     {
-        $admin = Role::where('name', 'Admin')->first();
-        $staff = Role::where('name', 'Staff')->first();
-        $customer = Role::where('name', 'Customer')->first();
+        $admin = Role::where('name', 'admin')->first();
+        $staff = Role::where('name', 'staff')->first();
+        $customer = Role::where('name', 'customer')->first();
 
         // note:: assign all permissions to admin
         // category
@@ -39,6 +38,7 @@ class AssignPermissionToRoleSeeder extends Seeder
         $admin->givePermissionTo(PermissionConstant::CREATE_SUPPLIER);
         $admin->givePermissionTo(PermissionConstant::EDIT_SUPPLIER);
         $admin->givePermissionTo(PermissionConstant::REMOVE_SUPPLIER);
+
         // staff
         $admin->givePermissionTo(PermissionConstant::VIEW_STAFF);
         $admin->givePermissionTo(PermissionConstant::CREATE_STAFF);
@@ -46,13 +46,52 @@ class AssignPermissionToRoleSeeder extends Seeder
         $admin->givePermissionTo(PermissionConstant::REMOVE_STAFF);
         // customer
         $admin->givePermissionTo(PermissionConstant::VIEW_CUSTOMER);
+        $admin->givePermissionTo(PermissionConstant::CREATE_CUSTOMER);
         $admin->givePermissionTo(PermissionConstant::EDIT_CUSTOMER);
         $admin->givePermissionTo(PermissionConstant::REMOVE_CUSTOMER);
+        // transition
+        $admin->givePermissionTo(PermissionConstant::VIEW_TRANSACTION);
+        $admin->givePermissionTo(PermissionConstant::CREATE_TRANSACTION);
+
+        // ✅ ORDER Permissions - Admin gets ALL
+        $admin->givePermissionTo(PermissionConstant::VIEW_ORDER);
+        $admin->givePermissionTo(PermissionConstant::CREATE_ORDER);
+        $admin->givePermissionTo(PermissionConstant::EDIT_ORDER);
+        $admin->givePermissionTo(PermissionConstant::REMOVE_ORDER);
+
+        // ✅ ORDER ITEM Permissions - Admin gets ALL
+        $admin->givePermissionTo(PermissionConstant::VIEW_ORDER_ITEM);
+        $admin->givePermissionTo(PermissionConstant::CREATE_ORDER_ITEM);
+        $admin->givePermissionTo(PermissionConstant::EDIT_ORDER_ITEM);
+        $admin->givePermissionTo(PermissionConstant::REMOVE_ORDER_ITEM);
+
         // note:: assign limited permissions to staff
         $staff->givePermissionTo(PermissionConstant::VIEW_PRODUCT);
+        $staff->givePermissionTo(PermissionConstant::VIEW_SUPPLIER);
         $staff->givePermissionTo(PermissionConstant::VIEW_STOCK);
         $staff->givePermissionTo(PermissionConstant::CREATE_STOCK);
+
+        // ✅ ORDER Permissions - Staff can view and create orders
+        $staff->givePermissionTo(PermissionConstant::VIEW_ORDER);
+        $staff->givePermissionTo(PermissionConstant::CREATE_ORDER);
+        $staff->givePermissionTo(PermissionConstant::EDIT_ORDER); // Can update order status
+
+        // ✅ ORDER ITEM Permissions - Staff can manage order items
+        $staff->givePermissionTo(PermissionConstant::VIEW_ORDER_ITEM);
+        $staff->givePermissionTo(PermissionConstant::CREATE_ORDER_ITEM);
+        $staff->givePermissionTo(PermissionConstant::EDIT_ORDER_ITEM);
+
         // note:: assign limited permissions to customer
         $customer->givePermissionTo(PermissionConstant::CREATE_CUSTOMER);
+        $customer->givePermissionTo(PermissionConstant::EDIT_CUSTOMER);
+        $customer->givePermissionTo(PermissionConstant::VIEW_PRODUCT);
+        $customer->givePermissionTo(PermissionConstant::VIEW_STOCK);
+
+        // ✅ ORDER Permissions - Customers can view their own orders and create orders
+        $customer->givePermissionTo(PermissionConstant::VIEW_ORDER);
+        $customer->givePermissionTo(PermissionConstant::CREATE_ORDER);
+
+        // ✅ ORDER ITEM Permissions - Customers can view order items
+        $customer->givePermissionTo(PermissionConstant::VIEW_ORDER_ITEM);
     }
 }

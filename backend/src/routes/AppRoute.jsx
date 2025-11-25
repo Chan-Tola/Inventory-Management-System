@@ -1,20 +1,10 @@
 import { Route, Routes } from "react-router";
 // note: layouts
 import { MasterLayout } from "../components/layouts/index";
-// note: pages
-import {
-  Dashboard,
-  CategoryPage,
-  ProductPage,
-  StockPage,
-  Setting,
-  LoginPage,
-  StaffPage,
-  CustomerPage,
-} from "../pages/index";
 import PublicRoute from "./PublicRoute";
 import PrivateRoute from "./PrivateRoute";
 import { routes } from "./routes";
+import { LoginPage } from "../pages";
 import UnauthorizedPage from "../pages/UnauthorizedPage";
 
 const AppRoute = () => {
@@ -54,28 +44,6 @@ const AppRoute = () => {
             />
           ))}
         </Route>
-        {/* Protected App Routes */}
-        {/* <Route
-          path="/"
-          element={
-            <PrivateRoute>
-              <MasterLayout />
-            </PrivateRoute>
-          }
-        > */}
-        {/* <Route index element={<Dashboard />} />
-       {/* ims-inventory route */}
-        {/* <Route path="categories" element={<CategoryPage />} /> */}
-        {/* <Route path="products" element={<ProductPage />} /> */}
-        {/* <Route path="stocks" element={<StockPage />} /> */}
-        {/* <Route path="suppliers" element={<StockPage />} /> */}
-        {/* <Route path="transitions" element={<StockPage />} /> */}
-        {/* ims-user route */}
-        {/* <Route path="staffs" element={<StaffPage />} /> */}
-        {/* <Route path="customers" element={<StockPage />} /> */}
-        {/* ims-order route */}
-        {/* <Route path="setting" element={<Setting />} /> */}
-        {/* </Route> */}
       </Routes>
     </>
   );

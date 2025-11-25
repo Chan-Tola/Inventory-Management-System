@@ -82,26 +82,6 @@ const ProductHeader = ({
                 borderColor: theme.palette.text.disabled,
               },
             }}
-            startIcon={<Refresh />}
-            onClick={onRefresh}
-            disabled={loading}
-          >
-            Refresh
-          </Button>
-          <Button
-            variant="outlined"
-            sx={{
-              color: theme.palette.text.primary,
-              borderColor: theme.palette.text.primary,
-              "&:hover": {
-                borderColor: theme.palette.text.primary,
-                backgroundColor: theme.palette.action.hover,
-              },
-              "&:disabled": {
-                color: theme.palette.text.disabled,
-                borderColor: theme.palette.text.disabled,
-              },
-            }}
             startIcon={<Add />}
             onClick={onAddProduct}
           >

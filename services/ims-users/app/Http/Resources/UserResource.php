@@ -35,7 +35,6 @@ class UserResource extends JsonResource
 
             'customer' => $this->customer ? [
                 Customer::ID => $this->customer->id,
-                Customer::USER_ID => $this->customer->user_id,
                 Customer::CUSTOMER_CODE => $this->customer->customer_code,
                 Customer::GENDER => $this->customer->gender,
                 Customer::ADDRESS => $this->customer->address,

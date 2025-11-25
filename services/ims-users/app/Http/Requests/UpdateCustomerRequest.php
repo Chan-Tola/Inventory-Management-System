@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Customer;
+use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateCustomerRequest extends FormRequest
@@ -11,7 +13,7 @@ class UpdateCustomerRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +24,11 @@ class UpdateCustomerRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            // User data validation
+            User::NAME      => 'required|string|max:255',
+            // Customer data validation
+            Customer::GENDER  => 'sometimes|required|in:male,female,other', // Change to sometimes
+            Customer::ADDRESS => 'required|string|max:500',
         ];
     }
 }

@@ -88,13 +88,10 @@ const StocckTable = ({ productItems, stockItems, loading, onEdit }) => {
                   <TableCell>
                     <strong>Unit</strong>
                   </TableCell>
-                  <TableCell align="right">
-                    <strong>Actions</strong>
-                  </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {paginatedItems.map((stock, index) => (
+                {paginatedItems.map((stock) => (
                   <StockTableRow
                     key={stockItems.id}
                     productItems={productItems}

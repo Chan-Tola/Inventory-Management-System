@@ -41,6 +41,8 @@ const CategoryIndex = () => {
       item.name.toLowerCase().includes(searchText.toLocaleLowerCase()) ||
       item.id.toString().includes(searchText)
   );
+
+  // note:function create category
   const handleCreateCategory = async () => {
     try {
       await dispatch(createCategory(formData)).unwrap();
@@ -50,7 +52,8 @@ const CategoryIndex = () => {
       console.log("Failed to create Category :", error);
     }
   };
-
+  
+  // note:function update category
   const handleUpdateCategory = async () => {
     if (!currentCategory || !currentCategory.id) {
       console.error("No current category selected for update");

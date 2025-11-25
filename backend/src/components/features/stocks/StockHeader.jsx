@@ -62,7 +62,7 @@ const StockHeader = ({ searchText, setSearchText, itemsCount, onAddStock }) => {
               <SearchIcon />
             </IconButton>
           </Box>
-          <Button
+          {/* <Button
             variant="outlined"
             sx={{
               color: theme.palette.text.primary,
@@ -80,7 +80,7 @@ const StockHeader = ({ searchText, setSearchText, itemsCount, onAddStock }) => {
             onClick={onAddStock}
           >
             Add Stocks
-          </Button>
+          </Button> */}
         </Box>
       </Box>
     </>

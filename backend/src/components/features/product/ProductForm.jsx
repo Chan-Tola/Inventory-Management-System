@@ -43,7 +43,7 @@ const ProductForm = ({
     images: [],
     ...formData,
   };
-  const [deletedImageIds, setDeletedImageIds] = useState([]);
+  
   //  Then we destructure:
   const { name, sku, category_id, brand, price, description, images } =
     safeFormData;
@@ -142,10 +142,10 @@ const ProductForm = ({
                 value={sku}
                 onChange={handleInputChange("sku")}
                 required
-                sx={{ mb: 2 }}
+                sx={{ my: 2 }}
               />
               {/* Category Selection */}
-              <FormControl sx={{ mb: 2 }} fullWidth required>
+              <FormControl sx={{ my: 2 }} fullWidth required>
                 <InputLabel>Category</InputLabel>
                 <Select
                   value={category_id}
@@ -169,7 +169,7 @@ const ProductForm = ({
                 fullWidth
                 value={brand}
                 onChange={handleInputChange("brand")}
-                sx={{ mb: 2 }}
+                sx={{ my: 2 }}
               />
 
               {/* Price */}
@@ -183,7 +183,7 @@ const ProductForm = ({
                 InputProps={{
                   startAdornment: <Typography sx={{ mr: 1 }}>$</Typography>,
                 }}
-                sx={{ mb: 2 }}
+                sx={{ my: 2 }}
               />
 
               {/* Description */}
@@ -195,10 +195,10 @@ const ProductForm = ({
                 value={description}
                 onChange={handleInputChange("description")}
                 placeholder="Enter product description"
-                sx={{ mb: 2 }}
+                sx={{ my: 2 }}
               />
               {/* Image Upload */}
-              <Box sx={{ mb: 2 }}>
+              <Box sx={{ my: 2 }}>
                 <Typography variant="subtitle1" gutterBottom>
                   Product Images
                 </Typography>

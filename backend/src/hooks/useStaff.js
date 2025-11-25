@@ -70,10 +70,10 @@ export const useStaff = () => {
         profile_url: "",
         roles: "default",
       });
+      setIsDeleting(false);
+      setIsEditing(false);
+      dispatch(clearCurrentStaff());
     }
-    setIsDeleting(false);
-    setIsEditing(false);
-    dispatch(clearCurrentStaff());
   }, [openDialog, dispatch]);
 
   // Update formData when editing/deleting a staff
@@ -109,8 +109,11 @@ export const useStaff = () => {
     setIsEditing(true);
     setIsDeleting(false);
     setOpenDialog(true);
-    console.log("Handle Edit Click: Dialog opened for editing", { isEditing });
+    console.log("Handle Edit Click: Dialog opened for editing", {
+      isEditing,
+    });
   };
+
   const handleDeleteClick = (staffInfo) => {
     dispatch(setCurrentStaff(staffInfo));
     setIsDeleting(true);

@@ -17,7 +17,7 @@ import {
   InputAdornment,
   IconButton,
 } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const StaffForm = ({
   open,
@@ -31,7 +31,6 @@ const StaffForm = ({
   onFormDataChange,
 }) => {
   const [showPassword, setShowPassword] = useState(false);
-
   const toggleShowPassword = () => {
     setShowPassword((prev) => !prev);
   };
@@ -64,6 +63,15 @@ const StaffForm = ({
     roles,
   } = safeFormData;
 
+  useEffect(() => {
+    console.log("StaffForm Debug:", {
+      isEditing,
+      open,
+      hasFormData: !!formData,
+      formDataKeys: Object.keys(formData),
+    });
+  }, [isEditing, open, formData]);
+
   //handle input change
   const handleInputChange = (field) => (e) => {
     onFormDataChange({
@@ -87,7 +95,6 @@ const StaffForm = ({
   // handle submit
   const handleSubmit = () => {
     console.log("🧾 Staff data before submit:", safeFormData);
-
     // Prepare data for submission - ensure proper data types
     const submitData = {
       name: name,
@@ -119,6 +126,7 @@ const StaffForm = ({
         onFormDataChange({
           ...safeFormData,
           profile_url: e.target.result,
+          // profile_url: [e.target.result],
         });
       };
       reader.readAsDataURL(file);
@@ -130,6 +138,7 @@ const StaffForm = ({
     onFormDataChange({
       ...safeFormData,
       profile_url: "",
+      // profile_url: [],
     });
   };
 
@@ -276,15 +285,18 @@ const StaffForm = ({
                 )}
               </Box>
               {/* staff email */}
-              <TextField
-                label="Email"
-                type="email"
-                fullWidth
-                value={email}
-                onChange={handleInputChange("email")}
-                required
-                sx={{ mb: 2 }}
-              />
+              {!isEditing && (
+                <TextField
+                  label="Email"
+                  type="email"
+                  fullWidth
+                  value={email}
+                  onChange={handleInputChange("email")}
+                  required
+                  sx={{ mb: 2 }}
+                />
+              )}
+
               {/* staff password */}
               {!isEditing && (
                 <TextField
@@ -294,7 +306,7 @@ const StaffForm = ({
                   value={password}
                   onChange={handleInputChange("password")}
                   sx={{ my: 2 }}
-                  required={!isEditing}
+                  required
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">
@@ -315,34 +327,37 @@ const StaffForm = ({
                 sx={{ my: 2 }}
                 required
               />
-              <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
-                {/* Gender Selection */}
-                <FormControl sx={{ flex: 1 }} required>
-                  <InputLabel>Gender</InputLabel>
-                  <Select
-                    value={gender}
-                    label="Gender"
-                    onChange={handleInputChange("gender")}
-                  >
-                    <MenuItem value="male">Male</MenuItem>
-                    <MenuItem value="female">Female</MenuItem>
-                  </Select>
-                </FormControl>
-                
-                <FormControl sx={{ flex: 1 }}>
-                  <InputLabel>Role</InputLabel>
-                  <Select
-                    value={
-                      Array.isArray(roles) && roles.length > 0 ? roles[0] : ""
-                    }
-                    label="Role"
-                    onChange={handleRolesChange}
-                  >
-                    <MenuItem value="staff">Staff</MenuItem>
-                    <MenuItem value="admin">Admin</MenuItem>
-                  </Select>
-                </FormControl>
-              </Box>
+
+              {!isEditing && (
+                <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
+                  {/* Gender Selection */}
+                  <FormControl sx={{ flex: 1 }} required>
+                    <InputLabel>Gender</InputLabel>
+                    <Select
+                      value={gender}
+                      label="Gender"
+                      onChange={handleInputChange("gender")}
+                    >
+                      <MenuItem value="male">Male</MenuItem>
+                      <MenuItem value="female">Female</MenuItem>
+                    </Select>
+                  </FormControl>
+
+                  <FormControl sx={{ flex: 1 }}>
+                    <InputLabel>Role</InputLabel>
+                    <Select
+                      value={
+                        Array.isArray(roles) && roles.length > 0 ? roles[0] : ""
+                      }
+                      label="Role"
+                      onChange={handleRolesChange}
+                    >
+                      <MenuItem value="staff">Staff</MenuItem>
+                      <MenuItem value="admin">Admin</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Box>
+              )}
               {/* Phone number and Salary in one row */}
               <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
                 {/* Phone number */}
@@ -369,18 +384,21 @@ const StaffForm = ({
               </Box>
 
               {/* Hire Date */}
-              <TextField
-                label="Hire Date"
-                type="date"
-                fullWidth
-                value={hire_date}
-                onChange={handleInputChange("hire_date")}
-                InputLabelProps={{
-                  shrink: true,
-                }}
-                sx={{ mb: 2 }}
-                required
-              />
+              {!isEditing && (
+                <TextField
+                  label="Hire Date"
+                  type="date"
+                  fullWidth
+                  value={hire_date}
+                  onChange={handleInputChange("hire_date")}
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                  sx={{ mb: 2 }}
+                  required
+                />
+              )}
+
               {/* Address */}
               <TextField
                 label="Address"

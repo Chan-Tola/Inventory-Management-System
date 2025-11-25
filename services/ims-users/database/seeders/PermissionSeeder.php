@@ -44,5 +44,18 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['name' => PermissionConstant::CREATE_SUPPLIER, 'guard_name' => 'api']);
         Permission::firstOrCreate(['name' => PermissionConstant::EDIT_SUPPLIER, 'guard_name' => 'api']);
         Permission::firstOrCreate(['name' => PermissionConstant::REMOVE_SUPPLIER, 'guard_name' => 'api']);
+        // note: transaction permissions
+        Permission::firstOrCreate(['name' => PermissionConstant::VIEW_TRANSACTION, 'guard_name' => 'api']);
+        Permission::firstOrCreate(['name' => PermissionConstant::CREATE_TRANSACTION, 'guard_name' => 'api']);
+        // note: order permissions
+        Permission::firstOrCreate(['name' => PermissionConstant::VIEW_ORDER, 'guard_name' => 'api']);
+        Permission::firstOrCreate(['name' => PermissionConstant::CREATE_ORDER, 'guard_name' => 'api']);
+        Permission::firstOrCreate(['name' => PermissionConstant::EDIT_ORDER, 'guard_name' => 'api']);
+        Permission::firstOrCreate(['name' => PermissionConstant::REMOVE_ORDER, 'guard_name' => 'api']);
+        // note: order_items permissions
+        Permission::firstOrCreate(['name' => PermissionConstant::VIEW_ORDER_ITEM, 'guard_name' => 'api']);
+        Permission::firstOrCreate(['name' => PermissionConstant::CREATE_ORDER_ITEM, 'guard_name' => 'api']);
+        Permission::firstOrCreate(['name' => PermissionConstant::EDIT_ORDER_ITEM, 'guard_name' => 'api']);
+        Permission::firstOrCreate(['name' => PermissionConstant::REMOVE_ORDER_ITEM, 'guard_name' => 'api']);
     }
 }

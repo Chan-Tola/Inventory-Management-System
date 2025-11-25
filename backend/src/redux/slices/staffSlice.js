@@ -50,6 +50,17 @@ export const updateStaff = createAsyncThunk(
   }
 );
 // delete
+export const deleteStaff = createAsyncThunk(
+  "staffs/deleteStaff",
+  async (id, { rejectWithValue }) => {
+    try {
+      const data = await stafffService.deleteStaff(id);
+      return data;
+    } catch (error) {
+      throw rejectWithValue(error.message || "Update failed");
+    }
+  }
+);
 
 // Initial state
 const initialState = {
@@ -149,8 +160,24 @@ const staffSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
         state.success = false;
+      })
+      //  delete staff
+      .addCase(deleteStaff.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(deleteStaff.fulfilled, (state, action) => {
+        state.loading = false;
+        state.productItems = state.staffItems.filter(
+          (item) => item.id !== action.payload
+        );
+        state.success = true;
+      })
+      .addCase(deleteStaff.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+        state.success = false;
       });
-    //  delete staff
   },
 });
 

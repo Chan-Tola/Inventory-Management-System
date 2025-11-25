@@ -81,7 +81,7 @@ const ProductPage = () => {
         setOpenDialog(false);
         handleRefresh();
       } catch (error) {
-        console.error("Failed to update category:", error);
+        console.error("Failed to delte category:", error);
         // 🔥 ADD USER-FRIENDLY ERROR MESSAGE
         alert(`Update failed: ${error.message}`);
       }

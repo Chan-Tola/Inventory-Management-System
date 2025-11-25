@@ -6,7 +6,6 @@ import { useStock } from "../../hooks/useStock";
 import {
   StockHeader,
   StockTable,
-  StockForm,
 } from "../../components/features/stocks/index";
 import { createStock, updateStock } from "../../redux/slices/stockSlice";
 import { Notification } from "../../components/common/index";
@@ -100,18 +99,6 @@ const StockPage = () => {
           onEdit={handleEditClick}
           onDelete={handleDeleteClick}
           onRefresh={handleRefresh} // Add this prop
-        />
-        {/* Add/Edit Category Form */}
-        <StockForm
-          open={openDialog}
-          onClose={() => setOpenDialog(false)}
-          isEditing={isEditing}
-          isDeleting={isDeleting}
-          formData={formData}
-          loading={loading}
-          onSubmit={handleFormSubmit}
-          onFormDataChange={setFormData}
-          currentStock={currentStock}
         />
       </Box>
     </>
