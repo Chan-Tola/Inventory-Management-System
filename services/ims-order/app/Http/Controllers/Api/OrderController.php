@@ -25,11 +25,11 @@ class OrderController extends Controller
     {
         DB::beginTransaction();
         try {
-            Log::info('🟢 Order creation started', [
-                'customer_id' => $request->customer_id,
-                'staff_id' => $request->staff_id,
-                'items_count' => count($request->items)
-            ]);
+            // Log::info('🟢 Order creation started', [
+            //     'customer_id' => $request->customer_id,
+            //     'staff_id' => $request->staff_id,
+            //     'items_count' => count($request->items)
+            // ]);
 
             // Calculate total amount
             $totalAmount = collect($request->items)->sum(function ($item) {
@@ -58,10 +58,10 @@ class OrderController extends Controller
             DB::commit();
 
             // ✅ Create inventory transactions RIGHT HERE after everything is committed
-            Log::info('🔄 Creating inventory transactions after order commit', [
-                'order_id' => $order->id,
-                'items_count' => $order->items->count()
-            ]);
+            // Log::info('🔄 Creating inventory transactions after order commit', [
+            //     'order_id' => $order->id,
+            //     'items_count' => $order->items->count()
+            // ]);
 
             $transactionResults = [];
             foreach ($order->items as $item) {
@@ -69,10 +69,10 @@ class OrderController extends Controller
                 $transactionResults[] = $result;
             }
 
-            Log::info('✅ Order creation completed with inventory transactions', [
-                'order_id' => $order->id,
-                'transactions_created' => count($transactionResults)
-            ]);
+            // Log::info('✅ Order creation completed with inventory transactions', [
+            //     'order_id' => $order->id,
+            //     'transactions_created' => count($transactionResults)
+            // ]);
 
             return response()->json([
                 'success' => true,
@@ -81,7 +81,7 @@ class OrderController extends Controller
             ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('💥 Order creation failed', ['error' => $e->getMessage()]);
+            // Log::error('💥 Order creation failed', ['error' => $e->getMessage()]);
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to create order: ' . $e->getMessage()
@@ -121,7 +121,7 @@ class OrderController extends Controller
                 'data' => OrderResource::collection($orders)
             ]);
         } catch (\Exception $e) {
-            Log::error('Failed to retrieve orders', ['error' => $e->getMessage()]);
+            // Log::error('Failed to retrieve orders', ['error' => $e->getMessage()]);
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to retrieve orders'
@@ -149,7 +149,7 @@ class OrderController extends Controller
                 'data' => new OrderResource($order)
             ]);
         } catch (\Exception $e) {
-            Log::error('Failed to retrieve order', ['order_id' => $id, 'error' => $e->getMessage()]);
+            // Log::error('Failed to retrieve order', ['order_id' => $id, 'error' => $e->getMessage()]);
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to retrieve order'
@@ -182,7 +182,7 @@ class OrderController extends Controller
                 'data' => new OrderResource($order->load(['items.product', 'customer', 'staff']))
             ]);
         } catch (\Exception $e) {
-            Log::error('Failed to update order status', ['order_id' => $id, 'error' => $e->getMessage()]);
+            // Log::error('Failed to update order status', ['order_id' => $id, 'error' => $e->getMessage()]);
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to update order status'

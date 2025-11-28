@@ -1,8 +1,7 @@
 import { useDispatch } from "react-redux";
 import { Box } from "@mui/material";
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useProduct } from "../../hooks/useProduct";
-import { useCategory } from "../../hooks/useCategory";
 import {
   ProductHeader,
   ProductForm,
@@ -12,12 +11,23 @@ import {
   createProduct,
   updateProduct,
   deleteProduct,
+  fetchProducts,
 } from "../../redux/slices/productSlice";
 import { Notification } from "../../components/common/index";
+import { useSimpleCategory } from "../../hooks/useSimpleCategory";
 const ProductPage = () => {
   const dispatch = useDispatch();
   const [searchText, setSearchText] = useState("");
-  const { categoryItems } = useCategory();
+  const { categoryItems } = useSimpleCategory();
+  // ✅ Ref to prevent double fetch even in StrictMode
+  const hasFetched = useRef(false);
+  // Load products on component mount
+  const handleRefresh = useCallback(() => {
+    if (!hasFetched.current) {
+      hasFetched.current = true;
+      dispatch(fetchProducts());
+    }
+  }, [dispatch]);
   const {
     productItems,
     loading,
@@ -31,9 +41,13 @@ const ProductPage = () => {
     setOpenDialog,
     handleEditClick,
     handleDeleteClick,
-    handleRefresh,
     handleCloseSnackbar,
   } = useProduct();
+
+  // ✅ Only call once
+  useEffect(() => {
+    handleRefresh();
+  }, [handleRefresh]);
 
   // function filteritme base on Search
   const fileteredProducts = productItems.filter(
@@ -102,7 +116,6 @@ const ProductPage = () => {
           searchText={searchText}
           setSearchText={setSearchText}
           loading={loading}
-          onRefresh={handleRefresh}
           onAddProduct={() => setOpenDialog(true)}
         />
         {/* Notification */}
@@ -120,7 +133,6 @@ const ProductPage = () => {
           loading={loading}
           onEdit={handleEditClick}
           onDelete={handleDeleteClick}
-          onRefresh={handleRefresh}
         />
 
         {/* Add/Edit Product Form */}

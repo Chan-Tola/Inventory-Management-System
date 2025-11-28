@@ -6,6 +6,8 @@ import stockReducer from "./slices/stockSlice";
 import staffReducer from "./slices/staffSlice";
 import supplierReducer from "./slices/supplierSlice";
 import customerReducer from "./slices/customerSlice";
+import transactionReducer from "./slices/transactionSlice";
+import orderReducer from "./slices/orderSlice";
 const store = configureStore({
   reducer: {
     // Add other reducers here for microservices
@@ -16,9 +18,11 @@ const store = configureStore({
     products: productReducer,
     stocks: stockReducer,
     suppliers: supplierReducer,
+    transactions: transactionReducer,
     // note: user management
     staffs: staffReducer,
     customers: customerReducer,
+    orders: orderReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

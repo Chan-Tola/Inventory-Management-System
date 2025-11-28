@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchProducts,
@@ -27,11 +27,6 @@ export const useProduct = () => {
     description: "",
     images: [],
   });
-
-  // Load products on component mount
-  useEffect(() => {
-    dispatch(fetchProducts());
-  }, [dispatch]);
 
   // Clear success after 3s
   useEffect(() => {
@@ -117,11 +112,6 @@ export const useProduct = () => {
     });
   };
 
-  const handleRefresh = () => {
-    dispatch(fetchProducts());
-    console.log("Refresh triggered: Fetching latest categories");
-  };
-
   const handleCloseSnackbar = () => {
     dispatch(clearError());
     dispatch(clearSuccess());
@@ -142,7 +132,6 @@ export const useProduct = () => {
     setIsEditing,
     handleEditClick,
     handleDeleteClick,
-    handleRefresh,
     handleCloseSnackbar,
   };
 };

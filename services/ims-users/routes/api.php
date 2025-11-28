@@ -12,7 +12,6 @@ Route::prefix('auth')->group(function () {
 });
 
 Route::prefix('users')->middleware('auth:api')->group(function () {
-
     // Staff-specific routes
     Route::get('/staffs', [UserManagementController::class, 'getStaffUsers']); // Only staff
     Route::get('/staffs/{id}', [UserManagementController::class, 'getStaffUser']);

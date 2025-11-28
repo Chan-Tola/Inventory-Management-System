@@ -88,9 +88,6 @@ Route::middleware(['jwt.auth'])->group(function () {
 
         // Only Admin can delete orders
         Route::delete('/{id}', [GatewayController::class, 'deleteOrder'])->middleware('permission:remove order');
-
-        // Admin & Staff can view sales reports
-        Route::get('/reports/sales', [GatewayController::class, 'getSalesReport'])->middleware('permission:view order');
     });
     // Health check route
     Route::get('/health/orders', [GatewayController::class, 'healthCheck']);

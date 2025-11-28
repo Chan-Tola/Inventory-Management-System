@@ -23,6 +23,12 @@ class StockResource extends JsonResource
             Stock::CREATED_AT => $this->created_at?->toDateTimeString(),
             Stock::UPDATED_AT => $this->updated_at?->toDateTimeString(),
             Stock::UNIT => $this->unit,
+
+            'product' => $this->whenLoaded('product', function () {
+                return [
+                    'name' => $this->product->name,
+                ];
+            }),
         ];
     }
 }

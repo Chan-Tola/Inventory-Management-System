@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchStaffs,
@@ -32,8 +32,12 @@ export const useStaff = () => {
   });
 
   // Load staffs on component mount
+  const hasFetched = useRef(false);
   useEffect(() => {
-    dispatch(fetchStaffs());
+    if (!hasFetched.current) {
+      hasFetched.current = true;
+      dispatch(fetchStaffs());
+    }
   }, [dispatch]);
   // Clear success after 3s
   useEffect(() => {

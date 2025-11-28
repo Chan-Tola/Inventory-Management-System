@@ -22,7 +22,13 @@ class ProductController extends Controller
     public function index(): JsonResponse
     {
         try {
-            $products = Product::with(['category', 'images'])->get();
+            $products = Product::select('id', 'name', 'sku', 'brand', 'price', 'category_id', 'description', 'staff_id')
+                ->with([
+                    'category:id,name',      // also select only needed category fields
+                    'images'
+                ])
+                ->get();
+            // $products = Product::with(['category', 'images'])->get();
             return response()->json([
                 'message' => 'Product retrieved successfully',
                 'data' => ProductResource::collection($products)
@@ -40,9 +46,6 @@ class ProductController extends Controller
      */
     public function store(StoreProductRequest $request): JsonResponse
     {
-        Log::info('Request data received in inventory:', $request->all());
-        Log::info('Request files:', $request->files->all());
-        Log::info('Has files:', ['hasFiles' => $request->hasFile('images')]);
         try {
             DB::beginTransaction();
 
@@ -54,19 +57,19 @@ class ProductController extends Controller
 
             // Handle image uploads
             if ($request->hasFile('images')) {
-                Log::info('Processing FILE uploads');
+                // Log::info('Processing FILE uploads');
                 // Get images and normalize to array
                 $images = $request->file('images');
                 if (!is_array($images)) {
                     $images = [$images];  // Convert single file to array
                 }
-                Log::info('Files to process:', ['count' => count($images)]);
+                // Log::info('Files to process:', ['count' => count($images)]);
                 foreach ($images as $index => $imageFile) {
                     try {
-                        Log::info("Uploading file {$index}", [
-                            'name' => $imageFile->getClientOriginalName(),
-                            'size' => $imageFile->getSize()
-                        ]);
+                        // Log::info("Uploading file {$index}", [
+                        //     'name' => $imageFile->getClientOriginalName(),
+                        //     'size' => $imageFile->getSize()
+                        // ]);
                         $result = cloudinary()->uploadApi()->upload($imageFile->getRealPath(), [
                             'folder' => 'products'
                         ]);
@@ -74,18 +77,18 @@ class ProductController extends Controller
                         $uploadedImages[] = $productImage;
                         $isFirstImage = false;
 
-                        Log::info('File uploaded successfully', ['image_id' => $productImage->id]);
+                        // Log::info('File uploaded successfully', ['image_id' => $productImage->id]);
                     } catch (\Exception $e) {
-                        Log::error("Failed to upload file {$index}: " . $e->getMessage());
+                        // Log::error("Failed to upload file {$index}: " . $e->getMessage());
                     }
                 }
             } elseif ($request->has('images') && is_array($request->images)) {
-                Log::info('Processing ARRAY data uploads');
+                // Log::info('Processing ARRAY data uploads');
                 foreach ($request->images as $index => $imageData) {
                     try {
                         // Check if it's base64 data
                         if (isset($imageData['data'])) {
-                            Log::info("Uploading base64 image {$index}");
+                            // Log::info("Uploading base64 image {$index}");
 
                             $result = cloudinary()->uploadApi()->upload($imageData['data'], [
                                 'folder' => 'flutter-products'
@@ -95,7 +98,7 @@ class ProductController extends Controller
                             $uploadedImages[] = $productImage;
                             $isFirstImage = false;
 
-                            Log::info('Base64 image uploaded successfully', ['image_id' => $productImage->id]);
+                            // Log::info('Base64 image uploaded successfully', ['image_id' => $productImage->id]);
                         }
                         // Add other image data types here if needed
 
@@ -110,10 +113,10 @@ class ProductController extends Controller
             DB::commit();
             $product->load('images');
 
-            Log::info('Image processing completed', [
-                'total_uploaded' => count($uploadedImages),
-                'product_images_count' => $product->images->count()
-            ]);
+            // Log::info('Image processing completed', [
+            //     'total_uploaded' => count($uploadedImages),
+            //     'product_images_count' => $product->images->count()
+            // ]);
 
             return response()->json([
                 'message' => 'Product created successfully',
@@ -121,7 +124,7 @@ class ProductController extends Controller
             ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Product creation failed: ' . $e->getMessage());
+            // Log::error('Product creation failed: ' . $e->getMessage());
 
             return response()->json([
                 'message' => 'Failed to create product',
@@ -165,12 +168,12 @@ class ProductController extends Controller
     // function handleupdate product image
     private function updateProductImage(Product $product, $cloudinaryResult, $isPrimary = false)
     {
-        Log::info('Creating product image record', [
-            'product_id' => $product->id,
-            'cloudinary_url' => $cloudinaryResult['secure_url'],
-            'public_id' => $cloudinaryResult['public_id'],
-            'is_primary' => $isPrimary
-        ]);
+        // Log::info('Creating product image record', [
+        //     'product_id' => $product->id,
+        //     'cloudinary_url' => $cloudinaryResult['secure_url'],
+        //     'public_id' => $cloudinaryResult['public_id'],
+        //     'is_primary' => $isPrimary
+        // ]);
 
         $image = $product->images()->create([
             'image_url' => $cloudinaryResult['secure_url'],
@@ -184,9 +187,9 @@ class ProductController extends Controller
      */
     public function update(UpdateProductRequest $request, $id): JsonResponse
     {
-        Log::info('Update Request data received:', $request->all());
-        Log::info('Update Request files:', $request->files->all());
-        Log::info('Update Has files:', ['hasFiles' => $request->hasFile('images')]);
+        // Log::info('Update Request data received:', $request->all());
+        // Log::info('Update Request files:', $request->files->all());
+        // Log::info('Update Has files:', ['hasFiles' => $request->hasFile('images')]);
 
         try {
             DB::beginTransaction();
@@ -231,20 +234,20 @@ class ProductController extends Controller
 
             // Handle image upload
             if ($request->hasFile('images')) {
-                Log::info('Processing FILE uploads in update');
+                // Log::info('Processing FILE uploads in update');
                 // Get images and normalize to array
                 $images = $request->file('images');
                 if (!is_array($images)) {
                     $images = [$images];  // Convert single file to array
                 }
-                Log::info('Files to process in update:', ['count' => count($images)]);
+                // Log::info('Files to process in update:', ['count' => count($images)]);
 
                 foreach ($images as $index => $imageFile) {
                     try {
-                        Log::info("Uploading file {$index} in update", [
-                            'name' => $imageFile->getClientOriginalName(),
-                            'size' => $imageFile->getSize()
-                        ]);
+                        // Log::info("Uploading file {$index} in update", [
+                        //     'name' => $imageFile->getClientOriginalName(),
+                        //     'size' => $imageFile->getSize()
+                        // ]);
                         $result = cloudinary()->uploadApi()->upload($imageFile->getRealPath(), [
                             'folder' => 'products'
                         ]);
@@ -252,18 +255,18 @@ class ProductController extends Controller
                         $uploadedImages[] = $productImage;
                         $isFirstImage = false;
 
-                        Log::info('File uploaded successfully in update', ['image_id' => $productImage->id]);
+                        // Log::info('File uploaded successfully in update', ['image_id' => $productImage->id]);
                     } catch (\Exception $e) {
-                        Log::error("Failed to upload file {$index} in update: " . $e->getMessage());
+                        // Log::error("Failed to upload file {$index} in update: " . $e->getMessage());
                     }
                 }
             } elseif ($request->has('images') && is_array($request->images)) {
-                Log::info('Processing ARRAY data uploads in update');
+                // Log::info('Processing ARRAY data uploads in update');
                 foreach ($request->images as $index => $imageData) {
                     try {
                         // Check if it's base64 data
                         if (isset($imageData['data'])) {
-                            Log::info("Uploading base64 image {$index} in update");
+                            // Log::info("Uploading base64 image {$index} in update");
 
                             $result = cloudinary()->uploadApi()->upload($imageData['data'], [
                                 'folder' => 'flutter-products'
@@ -273,7 +276,7 @@ class ProductController extends Controller
                             $uploadedImages[] = $productImage;
                             $isFirstImage = false;
 
-                            Log::info('Base64 image uploaded successfully in update', ['image_id' => $productImage->id]);
+                            // Log::info('Base64 image uploaded successfully in update', ['image_id' => $productImage->id]);
                         }
                     } catch (\Exception $e) {
                         Log::error("Failed to process image data {$index} in update: " . $e->getMessage());
@@ -288,10 +291,10 @@ class ProductController extends Controller
             // Reload the product with images
             $product->load('images');
 
-            Log::info('Product update completed', [
-                'total_new_images' => count($uploadedImages),
-                'product_images_count' => $product->images->count()
-            ]);
+            // Log::info('Product update completed', [
+            //     'total_new_images' => count($uploadedImages),
+            //     'product_images_count' => $product->images->count()
+            // ]);
             return response()->json([
                 'message' => 'Product updated successfully.',
                 'date' => new ProductResource($product)
@@ -318,37 +321,37 @@ class ProductController extends Controller
                 return response()->json(['message' => 'Product not found'], 404);
             }
 
-            Log::info('Deleting product', ['product_id' => $id, 'product_name' => $product->name]);
+            // Log::info('Deleting product', ['product_id' => $id, 'product_name' => $product->name]);
 
             // 1️⃣ Delete product images from Cloudinary
             foreach ($product->images as $image) {
                 try {
                     // FIX: Use the correct field name from your store method
                     if ($image->image_public_id) { // Changed from image_product_public_id
-                        Log::info('Deleting image from Cloudinary', [
-                            'public_id' => $image->image_public_id
-                        ]);
+                        // Log::info('Deleting image from Cloudinary', [
+                        //     'public_id' => $image->image_public_id
+                        // ]);
 
                         cloudinary()->uploadApi()->destroy($image->image_public_id);
-                        Log::info('Cloudinary image deleted successfully');
+                        // Log::info('Cloudinary image deleted successfully');
                     } else {
                         Log::warning('Image missing public_id', ['image_id' => $image->id]);
                     }
 
                     $image->delete(); // Delete image record from DB
-                    Log::info('Image record deleted from database', ['image_id' => $image->id]);
+                    // Log::info('Image record deleted from database', ['image_id' => $image->id]);
                 } catch (\Exception $e) {
-                    Log::error('Failed to delete image: ' . $e->getMessage(), [
-                        'image_id' => $image->id,
-                        'public_id' => $image->image_public_id
-                    ]);
+                    // Log::error('Failed to delete image: ' . $e->getMessage(), [
+                    //     'image_id' => $image->id,
+                    //     'public_id' => $image->image_public_id
+                    // ]);
                     // Continue with other images even if one fails
                 }
             }
 
             // 2️⃣ Delete the product itself
             $product->delete();
-            Log::info('Product deleted successfully', ['product_id' => $id]);
+            // Log::info('Product deleted successfully', ['product_id' => $id]);
 
             DB::commit();
 
@@ -357,7 +360,7 @@ class ProductController extends Controller
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Product deletion failed: ' . $e->getMessage(), ['product_id' => $id]);
+            // Log::error('Product deletion failed: ' . $e->getMessage(), ['product_id' => $id]);
 
             return response()->json([
                 'message' => 'Failed to delete product.',

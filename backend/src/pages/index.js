@@ -6,9 +6,12 @@ export { default as CategoryPage } from "./Inventory/CategoryPage";
 export { default as ProductPage } from "./Inventory/ProductPage";
 export { default as StockPage } from "./Inventory/StockPage";
 export { default as SupplierPage } from "./Inventory/SupplierPage";
+export { default as TranscationPage } from "./Inventory/TranscationPage";
 // note: User Management Pages
 export { default as StaffPage } from "./user/StaffPage";
 export { default as CustomerPage } from "./user/CustomerPage";
+// note: Order Management Pages
+export { default as OrderPage } from "./order/OrderPage";
 // note: Settings Page
 export { default as Setting } from "./Setting";
 // note: 404 page

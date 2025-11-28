@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchSuppliers,
@@ -24,8 +24,12 @@ export const useSupplier = () => {
   });
 
   // Load suppliers on component mount
+  const hasFetched = useRef(false);
   useEffect(() => {
-    dispatch(fetchSuppliers());
+    if (!hasFetched.current) {
+      hasFetched.current = true;
+      dispatch(fetchSuppliers());
+    }
   }, [dispatch]);
 
   // Clear success after 3s

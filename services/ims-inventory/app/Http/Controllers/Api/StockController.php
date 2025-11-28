@@ -18,7 +18,7 @@ class StockController extends Controller
     public function index(): JsonResponse
     {
         try {
-            $stocks = Stock::all();
+            $stocks = Stock::with('product')->get();
             return response()->json([
                 'message' => 'Stocks retrieved successfully',
                 'data' => StockResource::collection($stocks)

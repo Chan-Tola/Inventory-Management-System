@@ -8,27 +8,79 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Http\JsonResponse;
 use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
-
-    public function login(LoginRequest $request): JsonResponse
+    public function login(Request $request): JsonResponse
     {
-
         try {
-            // Get validated credentials from the request
-            $credentials = $request->validated(); // Use validated() instead of validate()
+            $credentials = $request->validate([
+                'email' => 'required|email',
+                'password' => 'required|string',
+            ]);
 
-            // Attempt to authenticate
-            if (! $token = auth('api')->attempt($credentials)) {
-
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Invalid Email or Password!!',
-                    'data' => null
-                ], 401);
+            if (!Auth::attempt($credentials)) {
+                return response()->json(['success' => false, 'message' => 'Invalid credentials'], 401);
             }
+
+            $user = Auth::user();
+            // ✅ FRESH QUERY: Get user with Spatie relationships
+            $userWithPermissions = \App\Models\User::with(['roles.permissions'])
+                ->where('id', $user->id)
+                ->first();
+            // ✅ Get permissions and roles from Spatie
+            $permissions = $userWithPermissions->getAllPermissions()->pluck('name')->toArray();
+            $roles = $userWithPermissions->getRoleNames()->toArray();
+            // ✅ MANUALLY ADD PERMISSIONS FOR TESTING
+            // $permissions = [
+            //     "view category",
+            //     "create category",
+            //     "edit category",
+            //     "remove category",
+            //     "view product",
+            //     "create product",
+            //     "edit product",
+            //     "remove product",
+            //     "view stock",
+            //     "create stock",
+            //     "edit stock",
+            //     "remove stock",
+            //     "view staff",
+            //     "create staff",
+            //     "edit staff",
+            //     "remove staff",
+            //     "view customer",
+            //     "create customer",
+            //     "edit customer",
+            //     "remove customer",
+            //     "view supplier",
+            //     "create supplier",
+            //     "edit supplier",
+            //     "remove supplier",
+            //     "view transaction",
+            //     "create transaction",
+            //     "view order",
+            //     "create order",
+            //     "edit order",
+            //     "remove order",
+            //     "view order item",
+            //     "create order item",
+            //     "edit order item",
+            //     "remove order item"
+            // ];
+
+            // $roles = ["admin"];
+
+            $token = JWTAuth::claims([
+                'email' => $user->email,
+                'name' => $user->name,
+                'permissions' => $permissions,  // ✅ Now has actual permissions
+                'roles' => $roles,              // ✅ Now has actual roles
+                'staff_id' => $user->staff?->id,
+            ])->attempt($credentials);
+
             return response()->json([
                 'success' => true,
                 'message' => 'Login successful',
@@ -36,15 +88,11 @@ class AuthController extends Controller
                     'access_token' => $token,
                     'token_type' => 'Bearer',
                     'expires_in' => JWTAuth::factory()->getTTL() * 60,
-                    'user' => new UserResource(auth('api')->user()),
+                    'user' => new UserResource($user),
                 ]
-            ], 200);
+            ]);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Server error during login',
-                'data' => null
-            ], 500);
+            return response()->json(['success' => false, 'message' => 'Authentication failed'], 500);
         }
     }
 

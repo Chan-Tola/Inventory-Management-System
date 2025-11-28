@@ -154,10 +154,10 @@ const Sidebar = () => {
       requiredPermission: "view stock",
     },
     {
-      title: "Transaction",
-      to: "/transition",
+      title: "Order",
+      to: "/orders",
       icon: <InventoryOutlinedIcon />,
-      requiredPermission: "view transaction",
+      requiredPermission: "view order",
     },
   ];
 

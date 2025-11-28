@@ -7,6 +7,8 @@ import {
   Setting,
   StaffPage,
   CustomerPage,
+  TranscationPage,
+  OrderPage,
 } from "../pages/index";
 export const routes = [
   {
@@ -59,6 +61,28 @@ export const routes = [
       showInMenu: true,
     },
   },
+  {
+    path: "/transactions",
+    element: <TranscationPage />,
+    permission: "view transaction",
+    menu: {
+      title: "Transactions",
+      icon: "warehouse",
+      showInMenu: true,
+    },
+  },
+  // IMS-Order
+  {
+    path: "/orders",
+    element: <OrderPage />,
+    permission: "view order",
+    menu: {
+      title: "Orders",
+      icon: "warehouse",
+      showInMenu: true,
+    },
+  },
+  // IMS-User
   {
     path: "/staffs",
     element: <StaffPage />,

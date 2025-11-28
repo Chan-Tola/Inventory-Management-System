@@ -22,6 +22,20 @@ class User extends Authenticatable implements JWTSubject
     {
         return [];
     }
+    // In your User model
+    // public function getJWTCustomClaims()
+    // {
+    //     $this->loadMissing(['roles', 'permissions', 'staff', 'customer']);
+
+    //     return [
+    //         'email' => $this->email,
+    //         'name' => $this->name,
+    //         'permissions' => $this->getAllPermissions()->pluck('name')->toArray(),
+    //         'roles' => $this->getRoleNames()->toArray(),
+    //         'staff_id' => $this->staff?->id,
+    //         'user_type' => $this->getUserType()
+    //     ];
+    // }
 
     const TABLENAME = 'users';
     const ID = 'id';
@@ -61,6 +75,7 @@ class User extends Authenticatable implements JWTSubject
             self::PASSWORD => 'hashed',
         ];
     }
+
 
     // note: relation to staff
     public function staff()

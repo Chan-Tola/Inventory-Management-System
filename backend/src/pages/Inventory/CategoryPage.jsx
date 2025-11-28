@@ -10,14 +10,25 @@ import {
   createCategory,
   updateCategory,
   deleteCategory,
+  fetchCategories,
 } from "../../redux/slices/categorySlice";
 import { Notification } from "../../components/common/index";
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const CategoryIndex = () => {
   const dispatch = useDispatch();
   const [searchText, setSearchText] = useState("");
 
+  // ✅ Ref to prevent double fetch even in StrictMode
+  const hasFetched = useRef(false);
+
+  // ✅ Load categories on component mount
+  const handleRefresh = useCallback(() => {
+    if (!hasFetched.current) {
+      hasFetched.current = true;
+      dispatch(fetchCategories());
+    }
+  }, [dispatch]);
   const {
     categoryItems,
     loading,
@@ -30,11 +41,14 @@ const CategoryIndex = () => {
     setOpenDialog,
     setFormData,
     handleEditClick,
-    handleRefresh,
     handleDeleteClick,
     handleCloseSnackbar,
   } = useCategory();
 
+  // ✅ Only call once
+  useEffect(() => {
+    handleRefresh();
+  }, [handleRefresh]);
   // function filteritme base on Search
   const fileteredCategories = categoryItems.filter(
     (item) =>
@@ -52,7 +66,7 @@ const CategoryIndex = () => {
       console.log("Failed to create Category :", error);
     }
   };
-  
+
   // note:function update category
   const handleUpdateCategory = async () => {
     if (!currentCategory || !currentCategory.id) {
@@ -122,7 +136,6 @@ const CategoryIndex = () => {
           loading={loading}
           onEdit={handleEditClick}
           onDelete={handleDeleteClick}
-          onRefresh={handleRefresh} // Add this prop
         />
         {/* Add/Edit Category Form */}
         <CategoryForm

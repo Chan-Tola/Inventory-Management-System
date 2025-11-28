@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  fetchCategories,
   clearError,
   clearSuccess,
   setCurrentCategory,
@@ -21,11 +20,6 @@ export const useCategory = () => {
     name: "",
     description: "",
   });
-
-  // Load categories on component mount
-  useEffect(() => {
-    dispatch(fetchCategories());
-  }, [dispatch]);
 
   // Clear success after 3s
   useEffect(() => {
@@ -98,10 +92,6 @@ export const useCategory = () => {
     });
   };
 
-  const handleRefresh = () => {
-    dispatch(fetchCategories());
-  };
-
   const handleCloseSnackbar = () => {
     dispatch(clearError());
     dispatch(clearSuccess());
@@ -122,7 +112,6 @@ export const useCategory = () => {
     setIsEditing,
     handleEditClick,
     handleDeleteClick,
-    handleRefresh,
     handleCloseSnackbar,
   };
 };

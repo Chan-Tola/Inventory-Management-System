@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchStocks,
@@ -11,8 +11,9 @@ import {
 
 export const useStock = () => {
   const dispatch = useDispatch();
-  const { stockItems, loading, error, success, currentStock } = 
-  useSelector((state) => state.stocks);
+  const { stockItems, loading, error, success, currentStock } = useSelector(
+    (state) => state.stocks
+  );
 
   const [openDialog, setOpenDialog] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -25,11 +26,15 @@ export const useStock = () => {
     unit: "",
   });
 
+  // ✅ Ref to prevent double fetch even in StrictMode
+  const hasFetched = useRef(false);
   // Load stocks on component mount
-  useEffect(() => {
-    dispatch(fetchStocks());
+  const handleRefresh = useCallback(() => {
+    if (!hasFetched.current) {
+      hasFetched.current = true;
+      dispatch(fetchStocks());
+    }
   }, [dispatch]);
-
   // Clear success after 3s
   useEffect(() => {
     if (success) {
@@ -93,9 +98,6 @@ export const useStock = () => {
     console.log("Handle Delete Click: Dialog opened for deletion", {
       isDeleting,
     });
-  };
-  const handleRefresh = () => {
-    dispatch(fetchStocks());
   };
   const handleCloseSnackbar = () => {
     dispatch(clearError());

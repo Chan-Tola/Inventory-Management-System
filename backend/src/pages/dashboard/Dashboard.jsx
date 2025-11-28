@@ -1,97 +1,114 @@
 import {
   LineChartComponent,
   Card,
-  // PieChartComponent,
   BarChartComponent,
 } from "../../components/features/dashboard/index";
-import PeopleOutlinedIcon from "@mui/icons-material/PeopleOutlined";
-import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
-import AttachMoneyOutlinedIcon from "@mui/icons-material/AttachMoneyOutlined";
-import Groups2OutlinedIcon from "@mui/icons-material/Groups2Outlined";
-import { Box, Typography } from "@mui/material";
+import TrendingUpIcon from "@mui/icons-material/TrendingUp";
+import TrendingDownIcon from "@mui/icons-material/TrendingDown";
+import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
+import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
+import { Box, Typography, Paper, useTheme } from "@mui/material";
+// Hook
 import { useAuth } from "../../hooks/useAuth";
-import { useProduct } from "../../hooks/useProduct";
-import { useStaff } from "../../hooks/useStaff";
+import { useTransaction } from "../../hooks/useTransaction";
+import { useMonthlyStats } from "../../hooks/useMonthlyStats";
+import { useFinancialStats } from "../../hooks/useFinancialStats";
+import { useCustomer } from "../../hooks/useCustomer";
 
 const Dashboard = () => {
   const { user } = useAuth();
-  const { productItems } = useProduct();
-  const { staffItems } = useStaff();
-  // Example static data for card
+  const { customerItems } = useCustomer();
+  const { transactionItems } = useTransaction();
+  const theme = useTheme();
+
+  // 🆕 Use custom hooks for data calculation
+  const monthlyTransactionData = useMonthlyStats(transactionItems);
+  const financialStats = useFinancialStats(transactionItems);
+
+  // Format currency for cards
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: 0,
+    }).format(amount);
+  };
+
+  // Enhanced stats with better visual indicators
   const stats = [
     {
-      title: "Staff",
-      value: staffItems.length,
-      icon: <Groups2OutlinedIcon />,
-      bgColor: "#4caf50",
-    },
-    {
-      title: "Products",
-      value: productItems.length,
-      icon: <Inventory2OutlinedIcon />,
-      bgColor: "#2196f3",
+      title: "Customers",
+      value: customerItems.length,
+      icon: <GroupOutlinedIcon />,
+      bgColor: "linear-gradient(135deg, #2196f3 0%, #1976d2 100%)",
+      trend: null,
     },
     {
       title: "Orders",
-      value: 23,
+      value: transactionItems.length,
       icon: <ShoppingCartOutlinedIcon />,
-      bgColor: "#ff9800",
+      bgColor: "linear-gradient(135deg, #ff9800 0%, #f57c00 100%)",
+      trend: null,
     },
     {
       title: "Income",
-      value: "$12,000",
-      icon: <AttachMoneyOutlinedIcon />,
-      bgColor: "#9c27b0",
+      value: formatCurrency(financialStats.totalIncome),
+      icon: <TrendingUpIcon />,
+      bgColor: "linear-gradient(135deg, #9c27b0 0%, #7b1fa2 100%)",
+      trend: "up",
     },
     {
       title: "Expenses",
-      value: "$5,000",
-      icon: <AttachMoneyOutlinedIcon />,
-      bgColor: "#f44336",
+      value: formatCurrency(financialStats.totalExpenses),
+      icon: <TrendingDownIcon />,
+      bgColor: "linear-gradient(135deg, #f44336 0%, #d32f2f 100%)",
+      trend: "down",
+    },
+    {
+      title: "Net Profit",
+      value: formatCurrency(financialStats.netProfit),
+      icon: <AccountBalanceIcon />,
+      bgColor:
+        financialStats.netProfit >= 0
+          ? "linear-gradient(135deg, #4caf50 0%, #388e3c 100%)"
+          : "linear-gradient(135deg, #ff5722 0%, #d84315 100%)",
+      trend: financialStats.netProfit >= 0 ? "up" : "down",
     },
   ];
-  // Static line graph data
-  const lineGraphData = [
-    { month: "Jan", sales: 4000, expenses: 2000 },
-    { month: "Feb", sales: 3000, expenses: 1500 },
-    { month: "Mar", sales: 5000, expenses: 2500 },
-    { month: "Apr", sales: 4000, expenses: 2000 },
-    { month: "May", sales: 6000, expenses: 3000 },
-    { month: "Jun", sales: 7000, expenses: 3500 },
-    { month: "Jul", sales: 5000, expenses: 2500 },
-    { month: "Aug", sales: 6000, expenses: 3000 },
-    { month: "Sep", sales: 7000, expenses: 3500 },
-    { month: "Oct", sales: 8000, expenses: 4000 },
-    { month: "Nov", sales: 9000, expenses: 4500 },
-    { month: "Dec", sales: 10000, expenses: 5000 },
-  ];
-  // static data for dashboard data
-  const dashboardData = [
-    { name: "Products", value: 120 },
-    { name: "Orders", value: 80 },
-    { name: "Staff", value: 50 },
-  ];
 
-  const COLORS = ["#0088FE", "#00C49F", "#FFBB28"];
   return (
-    <>
-      {/* Welcome Section */}
-      <Box mb={4} px={2}>
-        <Typography variant="h5" fontWeight="bold" gutterBottom>
-          Welcome, {user?.name} 👋🏻
+    <Box sx={{ p: { xs: 1, sm: 2, md: 3 } }}>
+      {/* Enhanced Welcome Section */}
+      <Paper
+        elevation={0}
+        sx={{
+          mb: 4,
+          p: { xs: 2, sm: 3 },
+          background: `linear-gradient(135deg, ${theme.palette.primary.main}15 0%, ${theme.palette.secondary.main}15 100%)`,
+          border: `1px solid ${theme.palette.divider}`,
+          borderRadius: 2,
+        }}
+      >
+        <Typography
+          variant="h4"
+          fontWeight="bold"
+          gutterBottom
+          color="primary.main"
+        >
+          Welcome back, {user?.name}!
         </Typography>
-        <Typography variant="h6" color="text.secondary">
-          Manage with system makes your life better
+        <Typography variant="h6" color="text.secondary" sx={{ opacity: 0.8 }}>
+          Here's what's happening with your business today
         </Typography>
-      </Box>
+      </Paper>
 
-      {/* Stats Cards Grid */}
+      {/* Full Width Stats Cards Grid */}
       <Box
         display="grid"
         gridTemplateColumns="repeat(auto-fit, minmax(200px, 1fr))"
         gap={2}
-        p={2}
+        sx={{ mb: 4, width: "100%" }}
       >
         {stats.map((stat) => (
           <Card
@@ -100,10 +117,11 @@ const Dashboard = () => {
             value={stat.value}
             icon={stat.icon}
             bgColor={stat.bgColor}
+            trend={stat.trend}
           />
         ))}
       </Box>
-      {/* Chart Section */}
+      {/* Large Chart Section - Similar to original layout */}
       <Box
         p={3}
         display="flex"
@@ -121,9 +139,9 @@ const Dashboard = () => {
           }}
         >
           <Typography variant="h6" gutterBottom color="primary.main">
-            Line Graph Overview
+            Income vs Expenses Trend (Line Chart)
           </Typography>
-          <LineChartComponent data={lineGraphData} />
+          <LineChartComponent data={monthlyTransactionData} />
         </Box>
         {/* Line Chart Container */}
         <Box
@@ -134,28 +152,12 @@ const Dashboard = () => {
           }}
         >
           <Typography variant="h6" gutterBottom color="primary.main">
-            BarChart Overview
+            Monthly Comparison (Bar Chart)
           </Typography>
-          <BarChartComponent data={lineGraphData} />
+          <BarChartComponent data={monthlyTransactionData} />
         </Box>
-        {/* Pie Chart Container */}
-        {/* <Box
-          sx={{
-            flex: 1,
-            minHeight: 400,
-            width: "100%",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-          }}
-        >
-          <Typography variant="h6" gutterBottom color="primary.main">
-            Distribution
-          </Typography>
-          <PieChartComponent data={dashboardData} colors={COLORS} />
-        </Box> */}
       </Box>
-    </>
+    </Box>
   );
 };
 

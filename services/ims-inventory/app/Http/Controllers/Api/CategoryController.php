@@ -16,7 +16,7 @@ class CategoryController extends Controller
     public function index(): JsonResponse
     {
         try {
-            $categories = Category::all();
+            $categories = Category::select('id', 'name', 'description', 'staff_id')->get();
             return response()->json([
                 'message' => 'Categories retrieved successfully',
                 'data' => CategoryResource::collection($categories)
@@ -40,7 +40,7 @@ class CategoryController extends Controller
             return response()->json([
                 'message' => 'Category created successfully.',
                 'data' => new CategoryResource($category)
-            ]);
+            ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([

@@ -1,7 +1,6 @@
 import { useDispatch } from "react-redux";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Box } from "@mui/material";
-import { useProduct } from "../../hooks/useProduct";
 import { useStock } from "../../hooks/useStock";
 import {
   StockHeader,
@@ -12,29 +11,34 @@ import { Notification } from "../../components/common/index";
 const StockPage = () => {
   const dispatch = useDispatch();
   const [searchText, setSearchText] = useState("");
-  const { productItems } = useProduct();
   const {
     stockItems,
     loading,
     success,
     currentStock,
-    openDialog,
     isEditing,
-    isDeleting,
     formData,
-    setFormData,
     setOpenDialog,
     handleEditClick,
     handleDeleteClick,
     handleRefresh,
     handleCloseSnackbar,
   } = useStock();
+  // ✅ Only call once
+  useEffect(() => {
+    handleRefresh();
+  }, [handleRefresh]);
+
+  // ✅ Call handleRefresh to trigger data fetching
+  useEffect(() => {
+    console.log("StockPage mounted - calling handleRefresh");
+    handleRefresh();
+  }, [handleRefresh]);
   // function filteritme base on Search
   const filteredStocks = stockItems.filter((stock) => {
-    const product = productItems.find((p) => p.id === stock.product_id);
-    if (!product) return false;
-
-    return product.name.toLowerCase().includes(searchText.toLowerCase());
+    return stock.product?.name
+      ?.toLowerCase()
+      .includes(searchText.toLowerCase());
   });
   // note: fucntion create product
   const handleCreateStock = async () => {
@@ -94,11 +98,9 @@ const StockPage = () => {
         {/* Categories Table */}
         <StockTable
           stockItems={filteredStocks}
-          productItems={productItems}
           loading={loading}
           onEdit={handleEditClick}
           onDelete={handleDeleteClick}
-          onRefresh={handleRefresh} // Add this prop
         />
       </Box>
     </>

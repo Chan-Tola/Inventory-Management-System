@@ -39,33 +39,46 @@ class BaseService
             // Convert complex data to strings for multipart
             $data = $this->prepareMultipartData($data);
             $http = $http->asMultipart();
-            Log::info("Using MULTIPART format for request");
+            // Log::info("Using MULTIPART format for request");
         } else {
             $http = $http->asJson();
-            Log::info("Using JSON format for request");
+            // Log::info("Using JSON format for request");
         }
-        // TEMPORARY DEBUG
-        Log::info("Making {$method} request to: {$url}");
-        Log::info("Has files: " . ($hasFiles ? 'YES' : 'NO'));
-        Log::info("Final data being sent:", $data);
+        // ✅ ONLY log in debug mode or on errors
+        $debugMode = config('app.debug') === true;
 
-        // for GET requests with query parameters
-        if ($method === 'get' && !empty($data)) {
-            return $http->{$method}($url, $data)->throw();
+        try {
+            // For GET requests with query parameters
+            if ($method === 'get' && !empty($data)) {
+                $response = $http->{$method}($url, $data)->throw();
+            } else {
+                $response = $http->{$method}($url, $data)->throw();
+            }
+
+            // ✅ Log successful requests only in debug mode
+            if ($debugMode) {
+                Log::debug("Service call successful: {$method} {$endpoint}", [
+                    'status' => $response->status(),
+                    'response_size' => strlen($response->body()) . ' bytes'
+                ]);
+            }
+
+            return $response;
+        } catch (\Exception $e) {
+            // ✅ ALWAYS log errors
+            Log::error("Service call failed: {$method} {$endpoint}", [
+                'error' => $e->getMessage(),
+
+                'url' => $url
+            ]);
+            throw $e;
         }
-
-        // for other methods with data
-        $response = $http->{$method}($url, $data);
-
-        Log::info("Response status: " . $response->status());
-        Log::info("Response body: " . $response->body());
-        return $response->throw();
     }
 
     // note: function attachFiles
     private function attachFiles($http, array &$data, &$hasFiles)
     {
-        Log::info('Attach files called with data keys:', array_keys($data));
+   
         $filesToAttach = []; // change this variable name
 
         // Skip file processing for base64 requests
@@ -100,9 +113,9 @@ class BaseService
                 }
                 if ($allFiles) {
                     // Multiple files - use array syntax
-                    Log::info("Attaching multiple files for key: {$key}", [
-                        'count' => count($value)
-                    ]);
+                    // Log::info("Attaching multiple files for key: {$key}", [
+                    //     'count' => count($value)
+                    // ]);
                     foreach ($value as $index => $file) {
                         $http->attach(
                             "{$key}[{$index}]", // Array syntax for multiple files
@@ -110,9 +123,9 @@ class BaseService
                             $file->getClientOriginalName() ?? 'file',
                             // ['Content-Type' => $file->getMimeType()]
                         );
-                        Log::info("Attached file {$index}", [
-                            'name' => $file->getClientOriginalName()
-                        ]);
+                        // Log::info("Attached file {$index}", [
+                        //     'name' => $file->getClientOriginalName()
+                        // ]);
                     }
                     $filesToAttach[] = $key;
                     $hasFiles = true;
@@ -125,8 +138,8 @@ class BaseService
             unset($data[$key]);
         }
 
-        Log::info('Files to attach:', $filesToAttach);
-        Log::info('Data after processing:', array_keys($data));
+        // Log::info('Files to attach:', $filesToAttach);
+        // Log::info('Data after processing:', array_keys($data));
 
         return $http;
     }

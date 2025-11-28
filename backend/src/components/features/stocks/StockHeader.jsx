@@ -47,7 +47,7 @@ const StockHeader = ({ searchText, setSearchText, itemsCount, onAddStock }) => {
         <Box display="flex" gap={2}>
           {/* note: SEARCH SECTION  */}
           <Box
-            d
+            
             display="flex"
             backgroundColor={colors.primary[400]}
             borderRadius="3px"

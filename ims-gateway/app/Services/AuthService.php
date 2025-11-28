@@ -42,10 +42,10 @@ class AuthService extends BaseService
         // Use full URL with baseUrl
         $url = $this->baseUrl . '/api/auth/validate';
 
-        Log::info('AuthService: Validating token', [
-            'base_url' => $this->baseUrl,
-            'full_url' => $url
-        ]);
+        // Log::info('AuthService: Validating token', [
+        //     'base_url' => $this->baseUrl,
+        //     'full_url' => $url
+        // ]);
 
         return Http::withHeaders([
             'Authorization' => 'Bearer ' . $token,

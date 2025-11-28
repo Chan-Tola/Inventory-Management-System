@@ -44,8 +44,20 @@ return [
             'base_url' => env('USERS_SERVICE_URL', 'http://localhost:8004'),
             'timeout' => env('SERVICE_TIMEOUT', 30),
         ]
-
-
     ]
+    // 'services' => [
+    //     'inventory' => [
+    //         'base_url' => env('INVENTORY_SERVICE_URL', 'http://ims-inventory:9000'),
+    //         'timeout' => env('SERVICE_TIMEOUT', 30),
+    //     ],
+    //     'orders' => [
+    //         'base_url' => env('ORDERS_SERVICE_URL', 'http://ims-order:9000'),
+    //         'timeout' => env('SERVICE_TIMEOUT', 30),
+    //     ],
+    //     'users' => [
+    //         'base_url' => env('USERS_SERVICE_URL', 'http://ims-order:9000'),
+    //         'timeout' => env('SERVICE_TIMEOUT', 30),
+    //     ]
+    // ]
 
 ];

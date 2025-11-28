@@ -19,6 +19,7 @@ const ProductTableRow = ({ index, product, onEdit, onDelete, loading }) => {
         <TableCell>
           <Box
             component="img"
+            loading="lazy"
             src={product.primary_image?.url || "/no-image.png"} // safe access with fallback
             alt={product.name || "no image"}
             sx={{
@@ -30,13 +31,13 @@ const ProductTableRow = ({ index, product, onEdit, onDelete, loading }) => {
           />
         </TableCell>
         <TableCell>
-          <Typography valign="boddy1" fontWeight="medium">
+          <Typography variant="body1" fontWeight="medium">
             {product.name}
           </Typography>
         </TableCell>
         <TableCell>
           <Typography valign="boddy1" fontWeight="medium">
-            {product.category.name}
+            {product?.category.name}
           </Typography>
         </TableCell>
         <TableCell>

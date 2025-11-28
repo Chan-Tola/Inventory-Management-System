@@ -16,7 +16,22 @@ class TransactionController extends Controller
     public function index(Request $request): JsonResponse
     {
         try {
-            $query = Transaction::with(['product', 'supplier']);
+            $query = Transaction::select([
+                'id',
+                'transaction_type',
+                'quantity',
+                'transaction_date',
+                'notes',
+                'amount',
+                'money_type',
+                'product_id',
+                'supplier_id',
+                'staff_id',
+            ])->with([
+                'product:id,name',
+                'supplier:id,name',
+            ])->latest();
+            // $query = Transaction::with(['product', 'supplier']);
 
             // Filter by product_id
             if ($request->has('product_id')) {
@@ -36,14 +51,14 @@ class TransactionController extends Controller
                 ]);
             }
 
-            $transactions = $query->latest()->paginate(20);
+            $transactions = $query->paginate(20);
 
             return response()->json([
                 'message' => 'Transactions retrieved successfully',
                 'data' => TransactionResource::collection($transactions)
             ], 200);
         } catch (\Exception $e) {
-            Log::error('Failed to retrieve transactions: ' . $e->getMessage());
+            // Log::error('Failed to retrieve transactions: ' . $e->getMessage());
             return response()->json([
                 'message' => 'Failed to retrieve transactions',
                 'error' => $e->getMessage()
@@ -59,12 +74,12 @@ class TransactionController extends Controller
 
             DB::commit();
 
-            Log::info('Transaction created successfully', [
-                'transaction_id' => $transaction->id,
-                'product_id' => $transaction->product_id,
-                'type' => $transaction->transaction_type,
-                'quantity' => $transaction->quantity
-            ]);
+            // Log::info('Transaction created successfully', [
+            //     'transaction_id' => $transaction->id,
+            //     'product_id' => $transaction->product_id,
+            //     'type' => $transaction->transaction_type,
+            //     'quantity' => $transaction->quantity
+            // ]);
 
             return response()->json([
                 'message' => 'Transaction created successfully.',
@@ -72,7 +87,7 @@ class TransactionController extends Controller
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Transaction creation failed: ' . $e->getMessage());
+            // Log::error('Transaction creation failed: ' . $e->getMessage());
             return response()->json([
                 'message' => 'Failed to create transaction',
                 'error' => $e->getMessage()
@@ -106,7 +121,7 @@ class TransactionController extends Controller
 
     public function storeInternal(StoreTransactionRequest $request)
     {
-        Log::info('📥 INTERNAL: Transaction creation request received', $request->all());
+        // Log::info('📥 INTERNAL: Transaction creation request received', $request->all());
 
         $validated = $request->validated(); // clean
 
@@ -115,11 +130,11 @@ class TransactionController extends Controller
         try {
             $transaction = Transaction::create($validated);
 
-            Log::info('✅ INTERNAL: Transaction created', [
-                'transaction_id' => $transaction->id,
-                'product_id' => $transaction->product_id,
-                'quantity' => $transaction->quantity
-            ]);
+            // Log::info('✅ INTERNAL: Transaction created', [
+            //     'transaction_id' => $transaction->id,
+            //     'product_id' => $transaction->product_id,
+            //     'quantity' => $transaction->quantity
+            // ]);
 
             DB::commit();
 
@@ -138,10 +153,10 @@ class TransactionController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
 
-            Log::error('💥 INTERNAL: Transaction creation failed', [
-                'error' => $e->getMessage(),
-                'data' => $request->all()
-            ]);
+            // Log::error('💥 INTERNAL: Transaction creation failed', [
+            //     'error' => $e->getMessage(),
+            //     'data' => $request->all()
+            // ]);
 
             return response()->json([
                 'success' => false,

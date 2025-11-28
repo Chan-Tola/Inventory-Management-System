@@ -63,9 +63,9 @@ class UserManagementController extends Controller
     // store for staff
     public function createStaffUser(StoreStaffRequest $request): JsonResponse
     {
-        Log::info('Request data received for staff creation:', $request->all());
-        Log::info('Request files:', $request->files->all());
-        Log::info('Has profile file:', ['hasFile' => $request->hasFile(Staff::PROFILE_URL)]);
+        // Log::info('Request data received for staff creation:', $request->all());
+        // Log::info('Request files:', $request->files->all());
+        // Log::info('Has profile file:', ['hasFile' => $request->hasFile(Staff::PROFILE_URL)]);
         try {
             DB::beginTransaction();
 
@@ -76,23 +76,23 @@ class UserManagementController extends Controller
                 User::PASSWORD => Hash::make($request->{User::PASSWORD}),
                 User::IS_ACTIVE => $request->{User::IS_ACTIVE} ?? true,
             ]);
-            Log::info('User created successfully', ['user_id' => $user->id]);
+            // Log::info('User created successfully', ['user_id' => $user->id]);
 
             // Handle profile image upload to Cloudinary
 
             $profileData = null;
             if ($request->has(Staff::PROFILE_URL)) {
-                Log::info('Attempting to process profile image...');
+                // Log::info('Attempting to process profile image...');
                 $profileData = $this->handleProfileImageUpload($request);
                 // If main method fails, try test method
                 if (!$profileData) {
-                    Log::warning('Main upload method failed, trying test method...');
+                    // Log::warning('Main upload method failed, trying test method...');
                     $profileData = $this->testCloudinaryUpload($request);
                 }
                 if ($profileData) {
-                    Log::info('Profile image processed successfully', $profileData);
+                    // Log::info('Profile image processed successfully', $profileData);
                 } else {
-                    Log::warning('All profile image processing methods failed');
+                    // Log::warning('All profile image processing methods failed');
                 }
             }
 
@@ -111,9 +111,9 @@ class UserManagementController extends Controller
             if ($profileData) {
                 $staffData[Staff::PROFILE_URL] = $profileData['secure_url'];
                 $staffData[Staff::IMAGE_PUBLIC_ID] = $profileData['public_id'] ?? null;
-                Log::info('Profile URL set in staff data', ['url' => $profileData['secure_url']]);
+                // Log::info('Profile URL set in staff data', ['url' => $profileData['secure_url']]);
             } else {
-                Log::info('No profile URL to set in staff data');
+                // Log::info('No profile URL to set in staff data');
             }
 
             $staff = Staff::create($staffData);
@@ -125,21 +125,21 @@ class UserManagementController extends Controller
             // Assign roles
             if ($request->has('roles') && !empty($request->roles)) {
                 $user->syncRoles($request->roles);
-                Log::info('Roles assigned', ['roles' => $request->roles]);
+                // Log::info('Roles assigned', ['roles' => $request->roles]);
             } else {
                 $user->assignRole('staff');
-                Log::info('Default role assigned: staff');
+                // Log::info('Default role assigned: staff');
             }
 
             DB::commit();
 
             $user->load(['staff', 'roles']);
 
-            Log::info('Staff creation completed successfully', [
-                'user_id' => $user->id,
-                'staff_id' => $staff->id,
-                'roles' => $user->getRoleNames()
-            ]);
+            // Log::info('Staff creation completed successfully', [
+            //     'user_id' => $user->id,
+            //     'staff_id' => $staff->id,
+            //     'roles' => $user->getRoleNames()
+            // ]);
 
             return response()->json([
                 'success' => true,
@@ -148,7 +148,7 @@ class UserManagementController extends Controller
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Staff creation failed: ' . $e->getMessage());
+            // Log::error('Staff creation failed: ' . $e->getMessage());
 
             return response()->json([
                 'success' => false,
@@ -179,22 +179,22 @@ class UserManagementController extends Controller
             // Handle profile image upload to Cloudinary (using your existing function)
             $profileData = null;
             if ($request->has(Staff::PROFILE_URL)) {
-                Log::info('Attempting to process profile image for update...');
+                // Log::info('Attempting to process profile image for update...');
 
                 // ✅ ADD THIS: Delete old image BEFORE uploading new one
                 if ($staff->image_public_id) {
-                    Log::info('Deleting old staff image from Cloudinary', [
-                        'public_id' => $staff->image_public_id
-                    ]);
+                    // Log::info('Deleting old staff image from Cloudinary', [
+                    //     'public_id' => $staff->image_public_id
+                    // ]);
                     $this->deleteCloudinaryImage($staff->image_public_id);
                 }
 
                 $profileData = $this->handleProfileImageUpload($request);
 
                 if ($profileData) {
-                    Log::info('Profile image processed successfully for update', $profileData);
+                    // Log::info('Profile image processed successfully for update', $profileData);
                 } else {
-                    Log::warning('All profile image processing methods failed for update');
+                    // Log::warning('All profile image processing methods failed for update');
                 }
             }
 
@@ -214,12 +214,12 @@ class UserManagementController extends Controller
             if ($profileData) {
                 $staffUpdateData[Staff::PROFILE_URL] = $profileData['secure_url'];
                 $staffUpdateData[Staff::IMAGE_PUBLIC_ID] = $profileData['public_id'] ?? null;
-                Log::info('Profile URL updated in staff data', ['url' => $profileData['secure_url']]);
+                // Log::info('Profile URL updated in staff data', ['url' => $profileData['secure_url']]);
             } else if ($request->has(Staff::PROFILE_URL) && empty($request->{Staff::PROFILE_URL})) {
                 // If profile_url is explicitly set to empty, remove the image
                 $staffUpdateData[Staff::PROFILE_URL] = null;
                 $staffUpdateData[Staff::IMAGE_PUBLIC_ID] = null;
-                Log::info('Profile image removed from staff data');
+                // Log::info('Profile image removed from staff data');
             }
             // If no profile_url in request, keep the existing image
 
@@ -235,7 +235,7 @@ class UserManagementController extends Controller
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Staff update failed: ' . $e->getMessage());
+            // Log::error('Staff update failed: ' . $e->getMessage());
 
             return response()->json([
                 'success' => false,
@@ -278,7 +278,7 @@ class UserManagementController extends Controller
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Staff deletion failed: ' . $e->getMessage());
+            // Log::error('Staff deletion failed: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to delete staff',
@@ -341,10 +341,10 @@ class UserManagementController extends Controller
                 User::PASSWORD => Hash::make($request->{User::PASSWORD}),
                 User::IS_ACTIVE => $request->{User::IS_ACTIVE} ?? true,
             ]);
-            Log::info('User created successfully', ['user_id' => $user->id]);
+            // Log::info('User created successfully', ['user_id' => $user->id]);
 
             // Debug: Check the model fillable
-            Log::info('Customer fillable fields:', (new Customer())->getFillable());
+            // Log::info('Customer fillable fields:', (new Customer())->getFillable());
 
             // Create customer
             $customerCode = 'CUS' . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT);
@@ -355,18 +355,18 @@ class UserManagementController extends Controller
                 Customer::ADDRESS => $request->{Customer::ADDRESS},
             ];
 
-            Log::info('Attempting to create customer with data:', $customerData);
+            // Log::info('Attempting to create customer with data:', $customerData);
 
             $customer = Customer::create($customerData);
-            Log::info('Customer created successfully', ['customer_id' => $customer->id]);
+            // Log::info('Customer created successfully', ['customer_id' => $customer->id]);
 
             // Assign roles
             if ($request->has('roles') && !empty($request->roles)) {
                 $customer->syncRoles($request->roles);
-                Log::info('Roles assigned', ['roles' => $request->roles]);
+                // Log::info('Roles assigned', ['roles' => $request->roles]);
             } else {
                 $user->assignRole('customer');
-                Log::info('Default role assigned: customer');
+                // Log::info('Default role assigned: customer');
             }
 
             DB::commit();
@@ -380,7 +380,7 @@ class UserManagementController extends Controller
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Customer creation failed: ' . $e->getMessage());
+            // Log::error('Customer creation failed: ' . $e->getMessage());
 
             return response()->json([
                 'success' => false,
@@ -430,7 +430,7 @@ class UserManagementController extends Controller
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Customer update failed: ' . $e->getMessage());
+            // Log::error('Customer update failed: ' . $e->getMessage());
 
             return response()->json([
                 'success' => false,
@@ -467,7 +467,7 @@ class UserManagementController extends Controller
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Customer deletion failed: ' . $e->getMessage());
+            // Log::error('Customer deletion failed: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to delete staff',
@@ -532,17 +532,17 @@ class UserManagementController extends Controller
     private function handleProfileImageUpload($request): ?array
     {
         try {
-            Log::info('handleProfileImageUpload called', [
-                'has_profile_url' => $request->has(Staff::PROFILE_URL),
-                'is_base64' => $this->isBase64Image($request->{Staff::PROFILE_URL})
-            ]);
+            // Log::info('handleProfileImageUpload called', [
+            //     'has_profile_url' => $request->has(Staff::PROFILE_URL),
+            //     'is_base64' => $this->isBase64Image($request->{Staff::PROFILE_URL})
+            // ]);
 
             if ($request->has(Staff::PROFILE_URL) && $this->isBase64Image($request->{Staff::PROFILE_URL})) {
-                Log::info('Processing BASE64 upload for profile image');
+                // Log::info('Processing BASE64 upload for profile image');
 
                 $base64Data = $request->{Staff::PROFILE_URL};
 
-                Log::info('Base64 data length: ' . strlen($base64Data));
+                // Log::info('Base64 data length: ' . strlen($base64Data));
 
                 // Upload base64 to Cloudinary with better error handling
                 $result = cloudinary()->uploadApi()->upload($base64Data, [
@@ -551,23 +551,23 @@ class UserManagementController extends Controller
 
                 // ✅ ADD NULL CHECK for Cloudinary response
                 if (!$result || !is_array($result)) {
-                    Log::error('Cloudinary returned invalid response', ['response' => $result]);
+                    // Log::error('Cloudinary returned invalid response', ['response' => $result]);
                     return null;
                 }
 
                 // ✅ CHECK if required keys exist
                 if (!isset($result['secure_url']) || !isset($result['public_id'])) {
-                    Log::error('Cloudinary response missing required keys', [
-                        'available_keys' => array_keys($result),
-                        'response' => $result
-                    ]);
+                    // Log::error('Cloudinary response missing required keys', [
+                    //     'available_keys' => array_keys($result),
+                    //     'response' => $result
+                    // ]);
                     return null;
                 }
 
-                Log::info('Base64 image uploaded to Cloudinary successfully', [
-                    'public_id' => $result['public_id'],
-                    'url' => $result['secure_url']
-                ]);
+                // Log::info('Base64 image uploaded to Cloudinary successfully', [
+                //     'public_id' => $result['public_id'],
+                //     'url' => $result['secure_url']
+                // ]);
 
                 return [
                     'secure_url' => $result['secure_url'],
@@ -575,11 +575,11 @@ class UserManagementController extends Controller
                 ];
             }
 
-            Log::info('No valid image data found to process');
+            // Log::info('No valid image data found to process');
             return null;
         } catch (\Exception $e) {
-            Log::error('Profile image upload failed: ' . $e->getMessage());
-            Log::error('Upload error trace: ' . $e->getTraceAsString());
+            // Log::error('Profile image upload failed: ' . $e->getMessage());
+            // Log::error('Upload error trace: ' . $e->getTraceAsString());
             return null;
         }
     }
@@ -594,18 +594,18 @@ class UserManagementController extends Controller
     private function testCloudinaryUpload($request): ?array
     {
         try {
-            Log::info('Testing Cloudinary upload...');
+            // Log::info('Testing Cloudinary upload...');
 
             $base64Data = $request->{Staff::PROFILE_URL};
 
             // Test with a simple upload first
             $result = cloudinary()->uploadApi()->upload($base64Data);
 
-            Log::info('Cloudinary test upload result:', [
-                'success' => isset($result['secure_url']),
-                'url' => $result['secure_url'] ?? 'NOT_SET',
-                'public_id' => $result['public_id'] ?? 'NOT_SET'
-            ]);
+            // Log::info('Cloudinary test upload result:', [
+            //     'success' => isset($result['secure_url']),
+            //     'url' => $result['secure_url'] ?? 'NOT_SET',
+            //     'public_id' => $result['public_id'] ?? 'NOT_SET'
+            // ]);
 
             if (isset($result['secure_url']) && isset($result['public_id'])) {
                 return [
@@ -616,7 +616,7 @@ class UserManagementController extends Controller
 
             return null;
         } catch (\Exception $e) {
-            Log::error('Cloudinary test upload failed: ' . $e->getMessage());
+            // Log::error('Cloudinary test upload failed: ' . $e->getMessage());
             return null;
         }
     }
@@ -648,17 +648,17 @@ class UserManagementController extends Controller
         }
 
         try {
-            Log::info('Deleting Cloudinary image', ['public_id' => $publicId]);
+            // Log::info('Deleting Cloudinary image', ['public_id' => $publicId]);
 
             $result = cloudinary()->uploadApi()->destroy($publicId);
 
             Log::info('Cloudinary delete successful', ['result' => $result]);
             return true;
         } catch (\Exception $e) {
-            Log::error('Cloudinary delete failed: ' . $e->getMessage(), [
-                'public_id' => $publicId,
-                'error' => $e->getMessage()
-            ]);
+            // Log::error('Cloudinary delete failed: ' . $e->getMessage(), [
+            //     'public_id' => $publicId,
+            //     'error' => $e->getMessage()
+            // ]);
             return false;
         }
     }

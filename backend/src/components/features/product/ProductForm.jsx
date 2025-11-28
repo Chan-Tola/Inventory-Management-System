@@ -14,7 +14,6 @@ import {
   Box,
   Typography,
 } from "@mui/material";
-import { useState } from "react";
 
 // note: Component props
 const ProductForm = ({
