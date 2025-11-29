@@ -12,9 +12,10 @@ class InventoryService
 
     public function __construct()
     {
+        // docker
+        $this->baseUrl = env('INVENTORY_SERVICE_URL', 'http://ims-inventory:8000');
         // Use your Inventory service URL (port 8001)
-        // $this->baseUrl = env('INVENTORY_SERVICE_URL', 'http://ims-inventory:9000');
-        $this->baseUrl = 'http://127.0.0.1:8001';
+        // $this->baseUrl = 'http://127.0.0.1:8001';
     }
     public function createTransaction(array $data): array
     {

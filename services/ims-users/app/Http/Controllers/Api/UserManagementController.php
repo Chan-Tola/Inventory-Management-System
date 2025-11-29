@@ -63,9 +63,7 @@ class UserManagementController extends Controller
     // store for staff
     public function createStaffUser(StoreStaffRequest $request): JsonResponse
     {
-        // Log::info('Request data received for staff creation:', $request->all());
-        // Log::info('Request files:', $request->files->all());
-        // Log::info('Has profile file:', ['hasFile' => $request->hasFile(Staff::PROFILE_URL)]);
+
         try {
             DB::beginTransaction();
 

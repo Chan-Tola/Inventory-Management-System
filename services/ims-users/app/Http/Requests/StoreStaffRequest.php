@@ -23,7 +23,7 @@ class StoreStaffRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
+        $rules = [
             // User data validation
             User::NAME => 'required|string|max:255',
             User::EMAIL => 'required|email|unique:' . User::TABLENAME . ',' . User::EMAIL,
@@ -37,7 +37,7 @@ class StoreStaffRequest extends FormRequest
             Staff::HIRE_DATE => 'required|date|before_or_equal:today',
             // Roles validation
             'roles' => 'sometimes|array',
-            'roles.*' => 'string|in:admin,staff'
+            'roles.*' => 'string|in:admin,staff',
         ];
 
         if ($this->hasFile(Staff::PROFILE_URL)) {

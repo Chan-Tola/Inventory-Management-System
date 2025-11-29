@@ -33,45 +33,6 @@ class AuthController extends Controller
             // ✅ Get permissions and roles from Spatie
             $permissions = $userWithPermissions->getAllPermissions()->pluck('name')->toArray();
             $roles = $userWithPermissions->getRoleNames()->toArray();
-            // ✅ MANUALLY ADD PERMISSIONS FOR TESTING
-            // $permissions = [
-            //     "view category",
-            //     "create category",
-            //     "edit category",
-            //     "remove category",
-            //     "view product",
-            //     "create product",
-            //     "edit product",
-            //     "remove product",
-            //     "view stock",
-            //     "create stock",
-            //     "edit stock",
-            //     "remove stock",
-            //     "view staff",
-            //     "create staff",
-            //     "edit staff",
-            //     "remove staff",
-            //     "view customer",
-            //     "create customer",
-            //     "edit customer",
-            //     "remove customer",
-            //     "view supplier",
-            //     "create supplier",
-            //     "edit supplier",
-            //     "remove supplier",
-            //     "view transaction",
-            //     "create transaction",
-            //     "view order",
-            //     "create order",
-            //     "edit order",
-            //     "remove order",
-            //     "view order item",
-            //     "create order item",
-            //     "edit order item",
-            //     "remove order item"
-            // ];
-
-            // $roles = ["admin"];
 
             $token = JWTAuth::claims([
                 'email' => $user->email,

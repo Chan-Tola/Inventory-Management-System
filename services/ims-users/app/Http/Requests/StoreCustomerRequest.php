@@ -26,7 +26,7 @@ class StoreCustomerRequest extends FormRequest
         return [
             // User data validation
             User::NAME      => 'required|string|max:255',
-            User::EMAIL     => 'required|email|unique:' . User::TABLENAME . ',' . User::EMAIL,
+            User::EMAIL => 'required|email|unique:' . User::TABLENAME . ',' . User::EMAIL,
             User::PASSWORD  => 'required|string|min:8',
             User::IS_ACTIVE => 'sometimes|boolean',
 

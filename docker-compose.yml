@@ -1,0 +1,215 @@
+services:
+  # Redis Service - ADD THIS
+  redis:
+    image: redis:7-alpine
+    container_name: ims_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - ims_network
+  # MySQL Database (unchanged)
+  mysql:
+    image: mysql:8.0
+    container_name: ims_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: inventory_db
+      MYSQL_USER: ims_user
+      MYSQL_PASSWORD: ims_pass
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - ims_network
+
+  # Inventory Service - UPDATED
+  ims-inventory:
+    build:
+      context: ./services/ims-inventory
+      dockerfile: Dockerfile
+    container_name: ims_inventory
+    restart: unless-stopped
+    ports:
+      - "9001:8000" # External access for testing
+    volumes:
+      - ./services/ims-inventory:/var/www/html
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - DB_HOST=mysql
+      - DB_DATABASE=inventory_db
+      - DB_USERNAME=ims_user
+      - DB_PASSWORD=ims_pass
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=null
+      - REDIS_CLIENT=predis
+      - CACHE_DRIVER=array 
+      - QUEUE_CONNECTION=database
+      - SESSION_DRIVER=database
+      - CLOUDINARY_URL=cloudinary://733411814355151:UhblAz-44dMubVz1ZpxmX03y84U@dbfvtrcbw
+    command: >
+      sh -c "
+        php artisan config:clear &&
+        php artisan cache:clear &&
+        php artisan migrate --force &&
+        php artisan serve --host=0.0.0.0 --port=8000
+      "
+    networks:
+      - ims_network
+    depends_on:
+      - mysql
+      - redis
+
+  # User Service - UPDATED
+  ims-user:
+    build:
+      context: ./services/ims-users
+      dockerfile: Dockerfile
+    container_name: ims_user
+    restart: unless-stopped
+    ports:
+      - "9002:8000" # External access for testing
+    volumes:
+      - ./services/ims-users:/var/www/html
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - DB_HOST=mysql
+      - DB_DATABASE=inventory_db
+      - DB_USERNAME=ims_user
+      - DB_PASSWORD=ims_pass
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=null
+      - REDIS_CLIENT=predis
+      - CACHE_DRIVER=array 
+      - QUEUE_CONNECTION=database
+      - SESSION_DRIVER=database
+      - CLOUDINARY_URL=cloudinary://733411814355151:UhblAz-44dMubVz1ZpxmX03y84U@dbfvtrcbw
+      - JWT_SECRET=HjIF9ziM6NjHxrnjt29TymvHC1DzV3HaWAMO74aiJ1MrdnfpxhTNY5bEZeNPCFPl
+      - JWT_ALGO=HS256
+      - JWT_EXPIRATION=86400
+    command: >
+      sh -c "
+        php artisan config:clear &&
+        php artisan cache:clear &&
+        php artisan migrate --force &&
+        php artisan serve --host=0.0.0.0 --port=8000
+      "
+    networks:
+      - ims_network
+    depends_on:
+      - mysql
+      - redis
+
+  # Order Service - UPDATED
+  ims-order:
+    build:
+      context: ./services/ims-order
+      dockerfile: Dockerfile
+    container_name: ims_order
+    restart: unless-stopped
+    ports:
+      - "9003:8000" # External access for testing
+    volumes:
+      - ./services/ims-order:/var/www/html
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - DB_HOST=mysql
+      - DB_DATABASE=inventory_db
+      - DB_USERNAME=ims_user
+      - DB_PASSWORD=ims_pass
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=null
+      - REDIS_CLIENT=predis
+      - CACHE_DRIVER=array 
+      - QUEUE_CONNECTION=database
+      - SESSION_DRIVER=database
+      - INVENTORY_SERVICE_URL=http://ims-inventory:8000
+    command: >
+      sh -c "
+        php artisan config:clear &&
+        php artisan cache:clear &&
+        php artisan migrate --force &&
+        php artisan serve --host=0.0.0.0 --port=8000
+      "
+    networks:
+      - ims_network
+    depends_on:
+      - mysql
+      - ims-inventory
+      - redis
+
+  # Gateway Service - UPDATED
+  ims-gateway:
+    build:
+      context: ./ims-gateway
+      dockerfile: Dockerfile
+    container_name: ims_gateway
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./ims-gateway:/var/www/html
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - DB_HOST=mysql
+      - DB_DATABASE=inventory_db
+      - DB_USERNAME=ims_user
+      - DB_PASSWORD=ims_pass
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=null
+      - REDIS_CLIENT=predis
+      - CACHE_DRIVER=array 
+      - QUEUE_CONNECTION=database
+      - SESSION_DRIVER=database
+      - INVENTORY_SERVICE_URL=http://ims-inventory:8000
+      - ORDERS_SERVICE_URL=http://ims-order:8000
+      - USERS_SERVICE_URL=http://ims-user:8000
+      - JWT_SECRET=HjIF9ziM6NjHxrnjt29TymvHC1DzV3HaWAMO74aiJ1MrdnfpxhTNY5bEZeNPCFPl
+      - JWT_ALGORITHM=HS256
+      - JWT_EXPIRATION=86400
+    command: >
+      sh -c "
+        php artisan config:clear &&
+        php artisan cache:clear &&
+        php artisan migrate --force &&
+        php artisan serve --host=0.0.0.0 --port=8000
+      "
+    networks:
+      - ims_network
+    depends_on:
+      - ims-user
+      - ims-order
+      - ims-inventory
+      - redis
+
+  # Nginx (optional - you can remove this if not needed)
+  nginx:
+    image: nginx:alpine
+    container_name: ims_nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./ims-gateway/public:/var/www/html/public
+    networks:
+      - ims_network
+    depends_on:
+      - ims-gateway
+
+volumes:
+  mysql_data:
+
+networks:
+  ims_network:
+    driver: bridge

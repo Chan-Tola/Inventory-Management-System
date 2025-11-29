@@ -54,18 +54,19 @@ class JwtAuthMiddleware
             // ✅ Extract claims from decoded token
             $request->merge([
                 'user_id' => $payload['sub'] ?? $payload['user_id'] ?? null,
-                'email' => $payload['email'] ?? null,
+                // 'email' => $payload['email'] ?? null,
                 'user_permission' => $payload['permissions'] ?? [],
                 'user_roles' => $payload['roles'] ?? [],
                 'staff_id' => $payload['staff_id'] ?? null,
                 'user' => [
                     'id' => $payload['sub'] ?? $payload['user_id'] ?? null,
-                    'email' => $payload['email'] ?? null,
+                    // 'email' => $payload['email'] ?? null,
                     'staff_id' => $payload['staff_id'] ?? null,
                     'permission' => $payload['permissions'] ?? [],
                     'roles' => $payload['roles'] ?? [],
                 ]
             ]);
+
 
             Log::debug('✅ JWT validated locally (no service call, no extra packages)', [
                 'user_id' => $request->user_id,

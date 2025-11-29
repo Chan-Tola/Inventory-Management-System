@@ -47,15 +47,15 @@ return [
     ]
     // 'services' => [
     //     'inventory' => [
-    //         'base_url' => env('INVENTORY_SERVICE_URL', 'http://ims-inventory:9000'),
+    //         'base_url' => env('INVENTORY_SERVICE_URL', 'http://ims-inventory:8000'),  // Change 9000 to 8000
     //         'timeout' => env('SERVICE_TIMEOUT', 30),
     //     ],
     //     'orders' => [
-    //         'base_url' => env('ORDERS_SERVICE_URL', 'http://ims-order:9000'),
+    //         'base_url' => env('ORDERS_SERVICE_URL', 'http://ims-order:8000'),  // Change 9000 to 8000
     //         'timeout' => env('SERVICE_TIMEOUT', 30),
     //     ],
     //     'users' => [
-    //         'base_url' => env('USERS_SERVICE_URL', 'http://ims-order:9000'),
+    //         'base_url' => env('USERS_SERVICE_URL', 'http://ims-user:8000'),  // Change 9000 to 8000
     //         'timeout' => env('SERVICE_TIMEOUT', 30),
     //     ]
     // ]

@@ -78,7 +78,7 @@ class BaseService
     // note: function attachFiles
     private function attachFiles($http, array &$data, &$hasFiles)
     {
-   
+
         $filesToAttach = []; // change this variable name
 
         // Skip file processing for base64 requests
