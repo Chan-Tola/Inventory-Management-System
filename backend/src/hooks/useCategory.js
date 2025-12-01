@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   clearError,
@@ -20,6 +20,8 @@ export const useCategory = () => {
     name: "",
     description: "",
   });
+
+  const hasReset = useRef(false);
 
   // Clear success after 3s
   useEffect(() => {
@@ -70,7 +72,10 @@ export const useCategory = () => {
   // Reset entire category state when component unmounts
   useEffect(() => {
     return () => {
-      dispatch(resetCategoryState());
+      if (!hasReset.current) {
+        hasReset.current = true;
+        dispatch(resetCategoryState());
+      }
     };
   }, [dispatch]);
 

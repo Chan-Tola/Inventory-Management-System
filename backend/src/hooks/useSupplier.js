@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  fetchSuppliers,
   clearError,
   clearSuccess,
   setCurrentSupplier,
@@ -23,14 +22,7 @@ export const useSupplier = () => {
     address: "",
   });
 
-  // Load suppliers on component mount
-  const hasFetched = useRef(false);
-  useEffect(() => {
-    if (!hasFetched.current) {
-      hasFetched.current = true;
-      dispatch(fetchSuppliers());
-    }
-  }, [dispatch]);
+  const hasReset = useRef(false);
 
   // Clear success after 3s
   useEffect(() => {
@@ -79,10 +71,13 @@ export const useSupplier = () => {
     }
   }, [currentSupplier, isEditing, isDeleting]);
 
-  // Reset entire suppliers state when component unmounts
+  // Reset entire category state when component unmounts
   useEffect(() => {
     return () => {
-      dispatch(resetSupplierState());
+      if (!hasReset.current) {
+        hasReset.current = true;
+        dispatch(resetSupplierState());
+      }
     };
   }, [dispatch]);
 
@@ -104,9 +99,6 @@ export const useSupplier = () => {
     });
   };
 
-  const handleRefresh = () => {
-    dispatch(fetchSuppliers());
-  };
 
   const handleCloseSnackbar = () => {
     dispatch(clearError());
@@ -128,7 +120,6 @@ export const useSupplier = () => {
     setIsEditing,
     handleEditClick,
     handleDeleteClick,
-    handleRefresh,
     handleCloseSnackbar,
   };
 };

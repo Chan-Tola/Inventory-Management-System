@@ -1,7 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  fetchProducts,
   clearError,
   clearSuccess,
   setCurrentProduct,
@@ -28,6 +27,8 @@ export const useProduct = () => {
     images: [],
   });
 
+  const hasReset = useRef(false);
+  
   // Clear success after 3s
   useEffect(() => {
     if (success) {
@@ -90,7 +91,10 @@ export const useProduct = () => {
   // Reset entire category state when component unmounts
   useEffect(() => {
     return () => {
-      dispatch(resetProductState());
+      if (!hasReset.current) {
+        hasReset.current = true;
+        dispatch(resetProductState());
+      }
     };
   }, [dispatch]);
 

@@ -1,6 +1,6 @@
 import { useDispatch } from "react-redux";
 import { Box } from "@mui/material";
-import { useState } from "react"; // Added useEffect import
+import { useCallback, useEffect, useRef, useState } from "react"; // Added useEffect import
 import { useTransaction } from "../../hooks/useTransaction";
 import {
   TransactionHeader,
@@ -8,16 +8,25 @@ import {
   TranscationForm,
   TransactionDetailDialog,
 } from "../../components/features/transaction/index";
-import { createTransaction } from "../../redux/slices/transactionSlice";
+import {
+  createTransaction,
+  fetchTransactions,
+} from "../../redux/slices/transactionSlice";
 import { Notification } from "../../components/common/index";
-import { useProduct } from "../../hooks/useProduct";
-import { useSupplier } from "../../hooks/useSupplier";
+import { useSimpleProduct } from "../../hooks/useSimpleProduct";
+import { useSimpleSupplier } from "../../hooks/useSimpleSupplier";
 
 const TranscationPage = () => {
   const dispatch = useDispatch();
   const [searchText, setSearchText] = useState("");
-  const { productItems } = useProduct();
-  const { supplierItems } = useSupplier();
+  const { productItems } = useSimpleProduct();
+  const { supplierItems } = useSimpleSupplier();
+
+  const hasFetched = useRef(false);
+  // ✅ Only call once
+  const handleRefresh = useCallback(() => {
+    dispatch(fetchTransactions());
+  }, [dispatch]);
 
   // ✅ FIXED: Use ALL the hook properties like in your supplier page
   const {
@@ -36,10 +45,16 @@ const TranscationPage = () => {
     handleViewClick,
     handleEditClick,
     handleDeleteClick,
-    handleRefresh,
     handleCloseSnackbar,
     handleCloseDetail,
   } = useTransaction();
+
+  useEffect(() => {
+    if (!hasFetched.current) {
+      hasFetched.current = true;
+      handleRefresh();
+    }
+  }, [handleRefresh]);
 
   // ✅ FIXED: Filter transactions based on product name or notes
   const filteredTransactions = transactionItems.filter((item) =>

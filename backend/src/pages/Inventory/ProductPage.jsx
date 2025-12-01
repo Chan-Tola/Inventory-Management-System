@@ -19,15 +19,14 @@ const ProductPage = () => {
   const dispatch = useDispatch();
   const [searchText, setSearchText] = useState("");
   const { categoryItems } = useSimpleCategory();
+
   // ✅ Ref to prevent double fetch even in StrictMode
   const hasFetched = useRef(false);
   // Load products on component mount
   const handleRefresh = useCallback(() => {
-    if (!hasFetched.current) {
-      hasFetched.current = true;
-      dispatch(fetchProducts());
-    }
+    dispatch(fetchProducts());
   }, [dispatch]);
+
   const {
     productItems,
     loading,
@@ -46,7 +45,10 @@ const ProductPage = () => {
 
   // ✅ Only call once
   useEffect(() => {
-    handleRefresh();
+    if (!hasFetched.current) {
+      hasFetched.current = true;
+      handleRefresh();
+    }
   }, [handleRefresh]);
 
   // function filteritme base on Search

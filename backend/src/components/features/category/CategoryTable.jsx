@@ -43,27 +43,26 @@ const CategoryTable = ({ categoryItems, loading, onEdit, onDelete }) => {
     page * rowsPerPage + rowsPerPage
   );
 
-  
   if (loading && categoryItems.length === 0) {
     return (
-      <>
-        <Box className="flex justify-center item-center p-4">
-          <CircularProgress
-            sx={{
-              color: theme.palette.primary.main,
-            }}
-          />
-          <Typography
-            variant="h6"
-            sx={{
-              ml: 2,
-              color: theme.palette.text.primary,
-            }}
-          >
-            Loading categories...
-          </Typography>
-        </Box>
-      </>
+      <Box className="flex justify-center items-center p-4">
+        {" "}
+        {/* Fixed: changed 'item-center' to 'items-center' */}
+        <CircularProgress
+          sx={{
+            color: theme.palette.primary.main,
+          }}
+        />
+        <Typography
+          variant="h6"
+          sx={{
+            ml: 2,
+            color: theme.palette.text.primary,
+          }}
+        >
+          Loading categories...
+        </Typography>
+      </Box>
     );
   }
   return (
@@ -109,9 +108,10 @@ const CategoryTable = ({ categoryItems, loading, onEdit, onDelete }) => {
               </TableBody>
             </Table>
           </TableContainer>
+
           {/* Table Pagination */}
           <TablePagination
-            rowsPerPageOptions={[5]}
+            rowsPerPageOptions={[5, 10, 25]}
             component="div"
             count={categoryItems.length}
             rowsPerPage={rowsPerPage}

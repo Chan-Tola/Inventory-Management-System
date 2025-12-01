@@ -1,16 +1,27 @@
 import { useDispatch } from "react-redux";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Box } from "@mui/material";
 import { useStock } from "../../hooks/useStock";
 import {
   StockHeader,
   StockTable,
 } from "../../components/features/stocks/index";
-import { createStock, updateStock } from "../../redux/slices/stockSlice";
+import {
+  createStock,
+  updateStock,
+  fetchStocks,
+} from "../../redux/slices/stockSlice";
 import { Notification } from "../../components/common/index";
 const StockPage = () => {
   const dispatch = useDispatch();
   const [searchText, setSearchText] = useState("");
+
+  const hasFetched = useRef(false);
+
+  const handleRefresh = useCallback(() => {
+    dispatch(fetchStocks());
+  }, [dispatch]);
+
   const {
     stockItems,
     loading,
@@ -21,19 +32,17 @@ const StockPage = () => {
     setOpenDialog,
     handleEditClick,
     handleDeleteClick,
-    handleRefresh,
     handleCloseSnackbar,
   } = useStock();
+
   // ✅ Only call once
   useEffect(() => {
-    handleRefresh();
+    if (!hasFetched.current) {
+      hasFetched.current = true;
+      handleRefresh();
+    }
   }, [handleRefresh]);
 
-  // ✅ Call handleRefresh to trigger data fetching
-  useEffect(() => {
-    console.log("StockPage mounted - calling handleRefresh");
-    handleRefresh();
-  }, [handleRefresh]);
   // function filteritme base on Search
   const filteredStocks = stockItems.filter((stock) => {
     return stock.product?.name
@@ -83,7 +92,6 @@ const StockPage = () => {
           searchText={searchText}
           setSearchText={setSearchText}
           loading={loading}
-          onRefresh={handleRefresh}
           onAddStock={() => setOpenDialog(true)}
         />
         {/* Notification */}

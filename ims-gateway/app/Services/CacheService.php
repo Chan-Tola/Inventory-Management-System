@@ -10,17 +10,32 @@ class CacheService
     /**
      * Safe cache retrieval with fallback
      */
-    public function remember(string $key, int $ttl, callable $callback)
+    public function remember(string $key, int $ttl, callable $callback, string $tag = null)
     {
         try {
+            if ($tag) {
+                return Cache::tags([$tag])->remember($key, $ttl, $callback);
+            }
             return Cache::remember($key, $ttl, $callback);
         } catch (\Exception $e) {
-            // If Redis fails, just execute the callback (database call)
             Log::warning('Redis cache failed, using direct call', [
                 'error' => $e->getMessage(),
                 'key' => $key
             ]);
             return $callback();
+        }
+    }
+
+    public function clearByTag(string $tag): void
+    {
+        try {
+            Cache::tags([$tag])->flush();
+            Log::info("Cleared cache tag: {$tag}");
+        } catch (\Exception $e) {
+            Log::warning('Failed to clear cache by tag', [
+                'error' => $e->getMessage(),
+                'tag' => $tag
+            ]);
         }
     }
 

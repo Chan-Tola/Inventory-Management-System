@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  fetchTransactions,
   fetchTransaction, // transactioin get by id
   clearError,
   clearSuccess,
@@ -30,13 +29,7 @@ export const useTransaction = () => {
     notes: "",
   });
 
-  const hasFetched = useRef(false);
-  useEffect(() => {
-    if (!hasFetched.current) {
-      hasFetched.current = true;
-      dispatch(fetchTransactions());
-    }
-  }, [dispatch]);
+  const hasReset = useRef(false);
 
   // Clear success after 3s
   useEffect(() => {
@@ -100,7 +93,10 @@ export const useTransaction = () => {
   // Reset entire transaction state when component unmounts
   useEffect(() => {
     return () => {
-      dispatch(resetTransactionState());
+      if (!hasReset.current) {
+        hasReset.current = true;
+        dispatch(resetTransactionState());
+      }
     };
   }, [dispatch]);
 
@@ -143,9 +139,6 @@ export const useTransaction = () => {
     dispatch(clearCurrentTransaction());
   };
 
-  const handleRefresh = () => {
-    dispatch(fetchTransactions());
-  };
 
   const handleCloseSnackbar = () => {
     dispatch(clearError());
@@ -174,7 +167,6 @@ export const useTransaction = () => {
     handleDeleteClick, // ADDED
     handleViewClick, // Add view action
     handleCloseDetail, // Add close detail action
-    handleRefresh,
     handleCloseSnackbar,
     fetchTransactionById, // ✅ Now this will work
   };

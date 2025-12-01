@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  fetchStocks,
+
   clearError,
   clearSuccess,
   clearCurrentStock,
@@ -27,14 +27,8 @@ export const useStock = () => {
   });
 
   // ✅ Ref to prevent double fetch even in StrictMode
-  const hasFetched = useRef(false);
-  // Load stocks on component mount
-  const handleRefresh = useCallback(() => {
-    if (!hasFetched.current) {
-      hasFetched.current = true;
-      dispatch(fetchStocks());
-    }
-  }, [dispatch]);
+  const hasReset = useRef(false);
+
   // Clear success after 3s
   useEffect(() => {
     if (success) {
@@ -86,7 +80,10 @@ export const useStock = () => {
   // Reset entire category state when component unmounts
   useEffect(() => {
     return () => {
-      dispatch(resetStockState());
+      if (!hasReset.current) {
+        hasReset.current = true;
+        dispatch(resetStockState());
+      }
     };
   }, [dispatch]);
 
@@ -118,7 +115,6 @@ export const useStock = () => {
     setOpenDialog,
     handleEditClick,
     handleDeleteClick,
-    handleRefresh,
     handleCloseSnackbar,
   };
 };

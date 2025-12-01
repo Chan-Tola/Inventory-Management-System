@@ -23,6 +23,14 @@ class BaseService
         $url = $this->baseUrl . $endpoint;
         // Get the original request's bearer token
         $token = request()->bearerToken();
+        Log::debug('BaseService Request Details', [
+            'method' => $method,
+            'endpoint' => $endpoint,
+            'url' => $url,
+            'has_token' => !empty($token),
+            'token_prefix' => $token ? substr($token, 0, 20) . '...' : 'No token',
+            'data_keys' => array_keys($data)
+        ]);
         $http = Http::timeout($this->timeout)->withHeaders([
             'Authorization' => 'Bearer ' . $token, //    Forward the JWT token
             'Accept' => 'application/json',

@@ -1,94 +1,83 @@
 <?php
 
-// use Illuminate\Http\Request;
-
-use App\Http\Controllers\GatewayController;
 use Illuminate\Support\Facades\Route;
-
-Route::get('/', function () {
-    return response()->json(['message' => 'IMS API Gateway is running']);
-});
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\GatewayCategoryController;
+use App\Http\Controllers\GatewayController;
+use App\Http\Controllers\GatewayProductController;
+use App\Http\Controllers\GatewayStockController;
+use App\Http\Controllers\GatewaySupplierController;
+use App\Http\Controllers\GatewayTransactionController;
+use App\Http\Controllers\GatewayStaffController;
+use App\Http\Controllers\GatewayCustomerController;
+use App\Http\Controllers\GatewayOrderController;
 
 // note: publice route no need JWT token
 Route::prefix('auth')->group(function () {
-    Route::post('/login', [GatewayController::class, 'login']);
-    // Route::post('register',[GatewayController:class, 'register']);
+    Route::post('/login', [AuthController::class, 'login']);
 });
 
 // note: protected routes need JWT token
 Route::middleware(['jwt.auth'])->group(function () {
     // note: Auth logout
-    Route::post('auth/logout', [GatewayController::class, 'logout']);
+    Route::post('auth/logout', [AuthController::class, 'logout']);
 
     // //note: /api/inventory/prodcuts
     Route::prefix('inventory')->group(function () {
         // note: Categories CRUD
-        Route::get('/categories', [GatewayController::class, 'getCategories'])->middleware('permission:view category');
-        Route::get('/categories/{id}', [GatewayController::class, 'getCategory'])->middleware('permission:view category');
-        Route::post('/categories', [GatewayController::class, 'createCategory'])->middleware('permission:create category');
-        Route::put('/categories/{id}', [GatewayController::class, 'updateCategory'])->middleware('permission:edit category');
-        Route::delete('/categories/{id}', [GatewayController::class, 'deleteCategory'])->middleware('permission:remove category');
+        Route::get('/categories', [GatewayCategoryController::class, 'getCategories'])->middleware('permission:view category');
+        // Route::get('/categories', [GatewayCategoryController::class, 'getCategories']);
+        Route::get('/categories/{id}', [GatewayCategoryController::class, 'getCategory'])->middleware('permission:view category');
+        Route::post('/categories', [GatewayCategoryController::class, 'createCategory'])->middleware('permission:create category');
+        Route::put('/categories/{id}', [GatewayCategoryController::class, 'updateCategory'])->middleware('permission:edit category');
+        Route::delete('/categories/{id}', [GatewayCategoryController::class, 'deleteCategory'])->middleware('permission:remove category');
 
         // note:  Products CRUD
-        Route::get('/products', [GatewayController::class, 'getProducts'])->middleware('permission:view product');
-        Route::get('/products/{id}', [GatewayController::class, 'getProduct'])->middleware('permission:view product');
-        Route::post('/products', [GatewayController::class, 'createProduct'])->middleware('permission:create product');
-        Route::put('/products/{id}', [GatewayController::class, 'updateProduct'])->middleware('permission:edit product');
-        Route::delete('/products/{id}', [GatewayController::class, 'deleteProduct'])->middleware('permission:remove product');
+        Route::get('/products', [GatewayProductController::class, 'getProducts'])->middleware('permission:view product');
+        Route::get('/products/{id}', [GatewayProductController::class, 'getProduct'])->middleware('permission:view product');
+        Route::post('/products', [GatewayProductController::class, 'createProduct'])->middleware('permission:create product');
+        Route::put('/products/{id}', [GatewayProductController::class, 'updateProduct'])->middleware('permission:edit product');
+        Route::delete('/products/{id}', [GatewayProductController::class, 'deleteProduct'])->middleware('permission:remove product');
 
         // note:  Stocks  CRUD
-        Route::get('/stocks', [GatewayController::class, 'getStocks'])->middleware('permission:view stock');
-        Route::get('/stocks/{id}', [GatewayController::class, 'getStock'])->middleware('permission:view stock');
-        Route::post('/stocks', [GatewayController::class, 'createStock'])->middleware('permission:create stock');
-        Route::put('/stocks/{id}', [GatewayController::class, 'updateStock'])->middleware('permission:edit stock');
-        Route::delete('/stocks/{id}', [GatewayController::class, 'deleteStock'])->middleware('permission:remove stock');
+        Route::get('/stocks', [GatewayStockController::class, 'getStocks'])->middleware('permission:view stock');
+        Route::get('/stocks/{id}', [GatewayStockController::class, 'getStock'])->middleware('permission:view stock');
+        Route::post('/stocks', [GatewayStockController::class, 'createStock'])->middleware('permission:create stock');
+        Route::put('/stocks/{id}', [GatewayStockController::class, 'updateStock'])->middleware('permission:edit stock');
+        Route::delete('/stocks/{id}', [GatewayStockController::class, 'deleteStock'])->middleware('permission:remove stock');
 
         // note:  Suppliers  CRUD
-        Route::get('/suppliers', [GatewayController::class, 'getSuppliers'])->middleware('permission:view supplier');
-        Route::get('/suppliers/{id}', [GatewayController::class, 'getSupplier'])->middleware('permission:view supplier');
-        Route::post('/suppliers', [GatewayController::class, 'createSupplier'])->middleware('permission:create supplier');
-        Route::put('/suppliers/{id}', [GatewayController::class, 'updateSupplier'])->middleware('permission:edit supplier');
-        Route::delete('/suppliers/{id}', [GatewayController::class, 'deleteSupplier'])->middleware('permission:remove supplier');
+        Route::get('/suppliers', [GatewaySupplierController::class, 'getSuppliers'])->middleware('permission:view supplier');
+        Route::get('/suppliers/{id}', [GatewaySupplierController::class, 'getSupplier'])->middleware('permission:view supplier');
+        Route::post('/suppliers', [GatewaySupplierController::class, 'createSupplier'])->middleware('permission:create supplier');
+        Route::put('/suppliers/{id}', [GatewaySupplierController::class, 'updateSupplier'])->middleware('permission:edit supplier');
+        Route::delete('/suppliers/{id}', [GatewaySupplierController::class, 'deleteSupplier'])->middleware('permission:remove supplier');
         // note: Transaction CRUD
-        Route::get('/transactions', [GatewayController::class, 'getTransactions'])->middleware('permission:view transaction');
-        Route::get('/transactions/{id}', [GatewayController::class, 'getTransaction'])->middleware('permission:view transaction');
-        Route::post('/transactions', [GatewayController::class, 'createTransaction'])->middleware('permission:create transaction');
+        Route::get('/transactions', [GatewayTransactionController::class, 'getTransactions'])->middleware('permission:view transaction');
+        Route::get('/transactions/{id}', [GatewayTransactionController::class, 'getTransaction'])->middleware('permission:view transaction');
+        Route::post('/transactions', [GatewayTransactionController::class, 'createTransaction'])->middleware('permission:create transaction');
     });
     //note: /api/users
     Route::prefix('users')->group(function () {
-
         // note:  Staff  CRUD
-        Route::get('/staffs', [GatewayController::class, 'getStaffUsers'])->middleware('permission:view staff');
-        Route::get('/staffs/{id}', [GatewayController::class, 'getStaffUser'])->middleware('permission:view staff');
-        Route::post('/staffs', [GatewayController::class, 'createStaffUser'])->middleware('permission:create staff');
-        Route::put('/staffs/{id}', [GatewayController::class, 'updateStaffUser'])->middleware('permission:edit staff');
-        Route::delete('/staffs/{id}', [GatewayController::class, 'deleteStaffUser'])->middleware('permission:remove staff');
-
+        Route::get('/staffs', [GatewayStaffController::class, 'getStaffUsers'])->middleware('permission:view staff');
+        Route::get('/staffs/{id}', [GatewayStaffController::class, 'getStaffUser'])->middleware('permission:view staff');
+        Route::post('/staffs', [GatewayStaffController::class, 'createStaffUser'])->middleware('permission:create staff');
+        Route::put('/staffs/{id}', [GatewayStaffController::class, 'updateStaffUser'])->middleware('permission:edit staff');
+        Route::delete('/staffs/{id}', [GatewayStaffController::class, 'deleteStaffUser'])->middleware('permission:remove staff');
         // note:  Customer  CRUD
-        Route::get('/customers', [GatewayController::class, 'getCustomerUsers'])->middleware('permission:view customer');
-        Route::get('/customers/{id}', [GatewayController::class, 'getCustomerUser'])->middleware('permission:view customer');
-        Route::post('/customers', [GatewayController::class, 'createCustomerUser'])->middleware('permission:create customer');
-        Route::put('/customers/{id}', [GatewayController::class, 'updateCustomerUser'])->middleware('permission:edit customer');
-        Route::delete('/customers/{id}', [GatewayController::class, 'deleteCustomerUser'])->middleware('permission:remove customer');
+        Route::get('/customers', [GatewayCustomerController::class, 'getCustomerUsers'])->middleware('permission:view customer');
+        Route::get('/customers/{id}', [GatewayCustomerController::class, 'getCustomerUser'])->middleware('permission:view customer');
+        Route::post('/customers', [GatewayCustomerController::class, 'createCustomerUser'])->middleware('permission:create customer');
+        Route::put('/customers/{id}', [GatewayCustomerController::class, 'updateCustomerUser'])->middleware('permission:edit customer');
+        Route::delete('/customers/{id}', [GatewayCustomerController::class, 'deleteCustomerUser'])->middleware('permission:remove customer');
     });
-
-    // ✅ Order Routes with appropriate permissions
+    //note: /api/orders
     Route::prefix('orders')->group(function () {
-        // Admin & Staff & Customer can view orders
-        Route::get('/', [GatewayController::class, 'getOrders'])->middleware('permission:view order');
-
-        // Admin & Staff & Customer can create orders
-        Route::post('/', [GatewayController::class, 'createOrder'])->middleware('permission:create order');
-
-        // Admin & Staff & Customer can view single order
-        Route::get('/{id}', [GatewayController::class, 'getOrder'])->middleware('permission:view order');
-
-        // Only Admin & Staff can update order status
-        Route::put('/{id}/status', [GatewayController::class, 'updateOrderStatus'])->middleware('permission:edit order');
-
-        // Only Admin can delete orders
-        Route::delete('/{id}', [GatewayController::class, 'deleteOrder'])->middleware('permission:remove order');
+        Route::get('/', [GatewayOrderController::class, 'getOrders'])->middleware('permission:view order');
+        Route::post('/', [GatewayOrderController::class, 'createOrder'])->middleware('permission:create order');
+        Route::get('/{id}', [GatewayOrderController::class, 'getOrder'])->middleware('permission:view order');
+        Route::put('/{id}/status', [GatewayOrderController::class, 'updateOrderStatus'])->middleware('permission:edit order');
+        Route::delete('/{id}', [GatewayOrderController::class, 'deleteOrder'])->middleware('permission:remove order');
     });
-    // Health check route
-    Route::get('/health/orders', [GatewayController::class, 'healthCheck']);
 });

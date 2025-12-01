@@ -142,7 +142,7 @@ const TranscationForm = ({
                   </MenuItem>
                   {suppliers.map((supplier) => (
                     <MenuItem key={supplier.id} value={supplier.id}>
-                      {supplier.id} - {supplier.name}
+                      {supplier.name}
                     </MenuItem>
                   ))}
                 </Select>

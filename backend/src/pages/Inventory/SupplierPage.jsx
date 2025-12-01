@@ -1,6 +1,6 @@
 import { useDispatch } from "react-redux";
 import { Box } from "@mui/material";
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useSupplier } from "../../hooks/useSupplier";
 import {
   SupplierHeader,
@@ -11,12 +11,19 @@ import {
   createSupplier,
   updateSupplier,
   deleteSupplier,
+  fetchSuppliers,
 } from "../../redux/slices/supplierSlice";
 import { Notification } from "../../components/common/index";
 
 const SupplierPage = () => {
   const dispatch = useDispatch();
   const [searchText, setSearchText] = useState("");
+
+  const hasFetched = useRef(false);
+  // Load products on component mount
+  const handleRefresh = useCallback(() => {
+    dispatch(fetchSuppliers());
+  }, [dispatch]);
 
   const {
     supplierItems,
@@ -30,11 +37,17 @@ const SupplierPage = () => {
     setOpenDialog,
     setFormData,
     handleEditClick,
-    handleRefresh,
     handleDeleteClick,
     handleCloseSnackbar,
   } = useSupplier();
 
+  // ✅ Only call once
+  useEffect(() => {
+    if (!hasFetched.current) {
+      hasFetched.current = true;
+      handleRefresh();
+    }
+  }, [handleRefresh]);
   // function filteritme base on Search
   const fileteredSuppliers = supplierItems.filter((item) =>
     item.name.toLowerCase().includes(searchText.toLocaleLowerCase())
@@ -120,7 +133,6 @@ const SupplierPage = () => {
           loading={loading}
           onEdit={handleEditClick}
           onDelete={handleDeleteClick}
-          onRefresh={handleRefresh} // Add this prop
         />
         {/* Add/Edit Category Form */}
         <SupplierForm

@@ -52,15 +52,4 @@ class OrderService extends BaseService
         return $this->delete("/api/orders/{$id}");
     }
 
-    // ✅ Get sales report
-    public function getSalesReport(array $query = []): Response
-    {
-        return $this->get('/api/orders/reports/sales', $query);
-    }
-
-    // ✅ Health check
-    public function healthCheck(): Response
-    {
-        return $this->get('/api/health');
-    }
 }

@@ -7,20 +7,46 @@ import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import TrendingDownIcon from "@mui/icons-material/TrendingDown";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
-import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
-import { Box, Typography, Paper, useTheme } from "@mui/material";
-// Hook
+import {
+  Box,
+  Typography,
+  Paper,
+  useTheme,
+  CircularProgress,
+} from "@mui/material";
+// Hooks
 import { useAuth } from "../../hooks/useAuth";
-import { useTransaction } from "../../hooks/useTransaction";
 import { useMonthlyStats } from "../../hooks/useMonthlyStats";
 import { useFinancialStats } from "../../hooks/useFinancialStats";
-import { useCustomer } from "../../hooks/useCustomer";
+import { useTransaction } from "../../hooks/useTransaction";
+import { useCallback, useEffect, useRef } from "react";
+import { useDispatch, useSelector } from "react-redux"; // ✅ Add useSelector
+import { fetchTransactions } from "../../redux/slices/transactionSlice"; // Note: check if this is fetchTransaction or fetchTransactions
 
 const Dashboard = () => {
   const { user } = useAuth();
-  const { customerItems } = useCustomer();
-  const { transactionItems } = useTransaction();
   const theme = useTheme();
+  const dispatch = useDispatch();
+
+  // ✅ Get transaction state directly from Redux for Dashboard
+  const { transactionItems, loading, error } = useSelector(
+    (state) => state.transactions
+  );
+
+  const hasFetched = useRef(false);
+
+  // ✅ Only call once
+  const handleRefresh = useCallback(() => {
+    // Check which function name is correct in your slice
+    dispatch(fetchTransactions()); // or fetchTransaction() depending on your slice
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (!hasFetched.current) {
+      hasFetched.current = true;
+      handleRefresh();
+    }
+  }, [handleRefresh]);
 
   // 🆕 Use custom hooks for data calculation
   const monthlyTransactionData = useMonthlyStats(transactionItems);
@@ -37,13 +63,6 @@ const Dashboard = () => {
 
   // Enhanced stats with better visual indicators
   const stats = [
-    {
-      title: "Customers",
-      value: customerItems.length,
-      icon: <GroupOutlinedIcon />,
-      bgColor: "linear-gradient(135deg, #2196f3 0%, #1976d2 100%)",
-      trend: null,
-    },
     {
       title: "Orders",
       value: transactionItems.length,
@@ -76,6 +95,35 @@ const Dashboard = () => {
       trend: financialStats.netProfit >= 0 ? "up" : "down",
     },
   ];
+
+  // ✅ Show loading state
+  if (loading && transactionItems.length === 0) {
+    return (
+      <Box
+        sx={{
+          p: 4,
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "50vh",
+        }}
+      >
+        <CircularProgress size={40} sx={{ mr: 2 }} />
+        <Typography variant="h6">Loading dashboard data...</Typography>
+      </Box>
+    );
+  }
+
+  // ✅ Show error state
+  if (error) {
+    return (
+      <Box sx={{ p: 4 }}>
+        <Typography color="error" variant="h6">
+          Error loading dashboard data: {error}
+        </Typography>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ p: { xs: 1, sm: 2, md: 3 } }}>
@@ -121,7 +169,8 @@ const Dashboard = () => {
           />
         ))}
       </Box>
-      {/* Large Chart Section - Similar to original layout */}
+
+      {/* Large Chart Section */}
       <Box
         p={3}
         display="flex"
@@ -143,7 +192,8 @@ const Dashboard = () => {
           </Typography>
           <LineChartComponent data={monthlyTransactionData} />
         </Box>
-        {/* Line Chart Container */}
+
+        {/* Bar Chart Container */}
         <Box
           sx={{
             flex: 1,

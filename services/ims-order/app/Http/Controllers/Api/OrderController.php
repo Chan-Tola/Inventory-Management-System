@@ -21,75 +21,7 @@ class OrderController extends Controller
         $this->inventoryService = $inventoryService;
     }
 
-    public function store(StoreOrderRequest $request): JsonResponse
-    {
-        DB::beginTransaction();
-        try {
-            // Log::info('🟢 Order creation started', [
-            //     'customer_id' => $request->customer_id,
-            //     'staff_id' => $request->staff_id,
-            //     'items_count' => count($request->items)
-            // ]);
 
-            // Calculate total amount
-            $totalAmount = collect($request->items)->sum(function ($item) {
-                return $item['quantity'] * $item['unit_price'];
-            });
-
-            // Create order with validated data
-            $order = Order::create([
-                'customer_id' => $request->customer_id,
-                'staff_id' => $request->staff_id,
-                'total_amount' => $totalAmount,
-            ]);
-
-            // Create order items
-            foreach ($request->items as $itemData) {
-                $order->items()->create([
-                    'product_id' => $itemData['product_id'],
-                    'quantity' => $itemData['quantity'],
-                    'unit_price' => $itemData['unit_price'],
-                ]);
-            }
-
-            // ✅ Load the items relationship
-            $order->load('items');
-
-            DB::commit();
-
-            // ✅ Create inventory transactions RIGHT HERE after everything is committed
-            // Log::info('🔄 Creating inventory transactions after order commit', [
-            //     'order_id' => $order->id,
-            //     'items_count' => $order->items->count()
-            // ]);
-
-            $transactionResults = [];
-            foreach ($order->items as $item) {
-                $result = $order->createInventoryTransaction($item);
-                $transactionResults[] = $result;
-            }
-
-            // Log::info('✅ Order creation completed with inventory transactions', [
-            //     'order_id' => $order->id,
-            //     'transactions_created' => count($transactionResults)
-            // ]);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Order created successfully',
-                'data' => new OrderResource($order)
-            ], 201);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            // Log::error('💥 Order creation failed', ['error' => $e->getMessage()]);
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to create order: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
-    // ✅ LIST all orders (using OrderResource collection)
     public function index(Request $request): JsonResponse
     {
         try {
@@ -129,8 +61,6 @@ class OrderController extends Controller
         }
     }
 
-
-    // In show method:
     public function show($id): JsonResponse
     {
         try {
@@ -149,10 +79,58 @@ class OrderController extends Controller
                 'data' => new OrderResource($order)
             ]);
         } catch (\Exception $e) {
-            // Log::error('Failed to retrieve order', ['order_id' => $id, 'error' => $e->getMessage()]);
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to retrieve order'
+            ], 500);
+        }
+    }
+
+    public function store(StoreOrderRequest $request): JsonResponse
+    {
+        DB::beginTransaction();
+        try {
+
+            // Calculate total amount
+            $totalAmount = collect($request->items)->sum(function ($item) {
+                return $item['quantity'] * $item['unit_price'];
+            });
+
+            // Create order with validated data
+            $order = Order::create([
+                'customer_id' => $request->customer_id,
+                'staff_id' => $request->staff_id,
+                'total_amount' => $totalAmount,
+            ]);
+            // Create order items
+            foreach ($request->items as $itemData) {
+                $order->items()->create([
+                    'product_id' => $itemData['product_id'],
+                    'quantity' => $itemData['quantity'],
+                    'unit_price' => $itemData['unit_price'],
+                ]);
+            }
+            // ✅ Load the items relationship
+            $order->load('items');
+
+            DB::commit();
+
+            $transactionResults = [];
+            foreach ($order->items as $item) {
+                $result = $order->createInventoryTransaction($item);
+                $transactionResults[] = $result;
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Order created successfully',
+                'data' => new OrderResource($order)
+            ], 201);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to create order: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -218,42 +196,6 @@ class OrderController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to delete order'
-            ], 500);
-        }
-    }
-
-    // ✅ GET sales report (no resource needed for reports)
-    public function salesReport(Request $request): JsonResponse
-    {
-        try {
-            $query = Order::where('status', 'completed');
-
-            // Filter by date range
-            if ($request->has('start_date') && $request->has('end_date')) {
-                $query->whereBetween('order_date', [
-                    $request->start_date,
-                    $request->end_date
-                ]);
-            }
-
-            $report = $query->selectRaw('
-                COUNT(*) as total_orders,
-                SUM(total_amount) as total_revenue,
-                AVG(total_amount) as average_order_value,
-                MIN(order_date) as start_date,
-                MAX(order_date) as end_date
-            ')->first();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Sales report generated successfully',
-                'data' => $report
-            ]);
-        } catch (\Exception $e) {
-            Log::error('Failed to generate sales report', ['error' => $e->getMessage()]);
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to generate sales report'
             ], 500);
         }
     }

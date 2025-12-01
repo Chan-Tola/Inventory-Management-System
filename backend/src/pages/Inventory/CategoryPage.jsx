@@ -24,11 +24,9 @@ const CategoryIndex = () => {
 
   // ✅ Load categories on component mount
   const handleRefresh = useCallback(() => {
-    if (!hasFetched.current) {
-      hasFetched.current = true;
-      dispatch(fetchCategories());
-    }
+    dispatch(fetchCategories());
   }, [dispatch]);
+
   const {
     categoryItems,
     loading,
@@ -45,10 +43,14 @@ const CategoryIndex = () => {
     handleCloseSnackbar,
   } = useCategory();
 
-  // ✅ Only call once
+  // ✅ Single effect with proper cleanup
   useEffect(() => {
-    handleRefresh();
+    if (!hasFetched.current) {
+      hasFetched.current = true;
+      handleRefresh();
+    }
   }, [handleRefresh]);
+
   // function filteritme base on Search
   const fileteredCategories = categoryItems.filter(
     (item) =>

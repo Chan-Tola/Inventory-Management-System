@@ -16,30 +16,13 @@ class CheckPermissionMiddleware
      */
     public function handle(Request $request, Closure $next, string $permission): Response
     {
+        // ✅ OPTIMIZED: Direct check without extra variables
         $userPermissions = $request->user_permission ?? [];
-        // log::info("Permission Check Debug", [
-        //     'request_method' => $request->method(),
-        //     'request_url' => $request->fullUrl(),
-        //     'required_permission' => $permission,
-        //     'user_permissions_available' => $userPermissions,
-        //     'has_permission' => in_array($permission, $userPermissions),
-        //     'user_id' => $request->user_id ?? 'unknown'
-        // ]);
-        if (!in_array($permission, $userPermissions)) {
-            // Log::warning('❌ Permission Denied', [
-            //     'required_permission' => $permission,
-            //     'user_permissions' => $userPermissions,
-            //     'user_id' => $request->user_id
-            // ]);
 
-            return response()->json([
-                'message' => 'You do not have the required permission.'
-            ], 403);
+        if (empty($userPermissions) || !in_array($permission, $userPermissions)) {
+            return response()->json(['message' => 'Permission denied'], 403);
         }
-        // Log::info('✅ Permission Granted', [
-        //     'permission' => $permission,
-        //     'user_id' => $request->user_id
-        // ]);
+
         return $next($request);
     }
 }

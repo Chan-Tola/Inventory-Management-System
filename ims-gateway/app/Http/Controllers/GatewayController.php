@@ -423,12 +423,6 @@ class GatewayController extends Controller
     public function getStaffUsers(Request $request): JsonResponse
     {
         try {
-            // $queryParams = $request->query();
-            // $cacheKey = $this->cacheService->generateKey('staffUsers', $queryParams);
-            // $data = $this->cacheService->remember($cacheKey, 300, function () use ($request) {
-            //     $response = $this->userService->getStaffUsers($request->query());
-            //     return $response->json();
-            // });
             $response = $this->userService->getStaffUsers($request->query());
             $data = $response->json();
 
@@ -497,8 +491,6 @@ class GatewayController extends Controller
     {
         try {
             $response = $this->userService->deleteStaffUser($id);
-
-
             return response()->json($response->json(), $response->status());
         } catch (RequestException $e) {
             return $this->handleServiceError($e);
@@ -663,25 +655,6 @@ class GatewayController extends Controller
                 'success' => false,
                 'message' => 'Failed to delete order: ' . $e->getMessage()
             ], 500);
-        }
-    }
-
-    public function healthCheck(): JsonResponse
-    {
-        try {
-            $response = $this->orderService->healthCheck();
-
-            return response()->json(
-                $response->json(),
-                $response->status()
-            );
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => 'ERROR',
-                'service' => 'IMS Order Service',
-                'message' => 'Service unavailable: ' . $e->getMessage(),
-                'timestamp' => now()
-            ], 503);
         }
     }
 

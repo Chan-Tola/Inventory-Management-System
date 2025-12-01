@@ -27,7 +27,7 @@ const ProductTable = ({ productItems, loading, onEdit, onDelete }) => {
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
   // note: page change
-  const handleChangePage = (newPage) => {
+  const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
 
