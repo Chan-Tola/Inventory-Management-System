@@ -15,11 +15,89 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Http\Request;
 
 class UserManagementController extends Controller
 {
-    // Staff Controller
+    /**
+     * Get customer names by customer IDs
+     */
+    public function getCustomersBatchInternal(Request $request)
+    {
+        Log::info('📥 Batch customer request received', [
+            'all_params' => $request->all()
+        ]);
 
+        $request->validate([
+            'customer_ids' => 'required|array|min:1',
+            'customer_ids.*' => 'integer'
+        ]);
+
+        // Get customers with their user relationship
+        $customers = Customer::with('user:id,name')
+            ->whereIn('id', $request->customer_ids)
+            ->get()
+            ->map(function ($customer) {
+                return [
+                    // 'id' => $customer->user_id, // user_id as the main ID
+                    // 'customer_id' => $customer->id, // original customer_id for reference
+                    'id' => $customer->id, // ← CRITICAL: Return staff_id, NOT user_id!
+                    'user_id' => $customer->user_id, // Optional
+                    'name' => $customer->user->name ?? 'Unknown Customer'
+                ];
+            });
+
+
+        Log::info('📤 Batch customers response', [
+            'requested_count' => count($request->customer_ids),
+            'found_count' => $customers->count()
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'data' => $customers
+        ]);
+    }
+
+    /**
+     * Get staff names by staff IDs
+     */
+    public function getStaffBatchInternal(Request $request)
+    {
+        Log::info('📥 Batch staff request received', [
+            'all_params' => $request->all()
+        ]);
+
+        $request->validate([
+            'staff_ids' => 'required|array|min:1',
+            'staff_ids.*' => 'integer'
+        ]);
+
+        // Get staff with their user relationship
+        $staff = Staff::with('user:id,name')
+            ->whereIn('id', $request->staff_ids)
+            ->get()
+            ->map(function ($staffMember) {
+                return [
+                    // 'id' => $staffMember->user_id, // user_id as the main ID
+                    // 'staff_id' => $staffMember->id, // original staff_id for reference
+                    'id' => $staffMember->id, // user_id as the main ID
+                    'staff_id' => $staffMember->user_id, // original staff_id for reference
+                    'name' => $staffMember->user->name ?? 'Unknown Staff'
+                ];
+            });
+
+        Log::info('📤 Batch staff response', [
+            'requested_count' => count($request->staff_ids),
+            'found_count' => $staff->count()
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'data' => $staff
+        ]);
+    }
+    // Staff Controller
     // index for staff
     public function getStaffUsers(): JsonResponse
     {

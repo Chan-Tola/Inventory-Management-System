@@ -13,17 +13,18 @@ import {
   CircularProgress,
   useTheme,
   TablePagination,
+  Skeleton,
 } from "@mui/material";
 import { tokens } from "../../../theme.js";
-import TranscationTableRow from "./TranscationTableRow.jsx";
+import TransactionTableRow from "./TranscationTableRow.jsx";
 import { useState } from "react";
 
 const TransactionTable = ({
-  transactionItems, // ✅ CHANGED: from supplierItems
+  transactionItems,
   loading,
   onEdit,
   onDelete,
-  onView, // ADD THIS
+  onView,
 }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -39,38 +40,234 @@ const TransactionTable = ({
 
   // note: page funtion change row per page
   const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10)); // ✅ FIXED: changed 5 to 10
+    setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
 
   // note: Calculate paginated data
   const paginatedItems = transactionItems.slice(
-    // ✅ CHANGED: from supplierItems
     page * rowsPerPage,
     page * rowsPerPage + rowsPerPage
   );
 
+  // Skeleton loading state
   if (loading && transactionItems.length === 0) {
-    // ✅ CHANGED: from supplierItems
     return (
-      <>
-        <Box className="flex justify-center item-center p-4">
-          <CircularProgress
+      <Card
+        sx={{
+          background: `${colors.primary[400]}`,
+          borderRadius: 2,
+          overflow: "hidden",
+        }}
+      >
+        <CardContent>
+          {/* Table Header Skeleton */}
+          <TableContainer component={Paper}>
+            <Table
+              sx={{
+                background: `${colors.primary[400]}`,
+              }}
+            >
+              <TableHead>
+                <TableRow>
+                  {[
+                    "ID",
+                    "Type",
+                    "Product",
+                    "Quantity",
+                    "Amount",
+                    "Date",
+                    "Actions",
+                  ].map((header) => (
+                    <TableCell key={header}>
+                      <Skeleton
+                        variant="text"
+                        width={
+                          header === "Product"
+                            ? "80%"
+                            : header === "Type" || header === "Date"
+                            ? "60%"
+                            : "70%"
+                        }
+                        height={30}
+                        sx={{
+                          bgcolor: colors.primary[500],
+                          mx: "auto",
+                        }}
+                      />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {/* Skeleton Rows */}
+                {Array.from({ length: rowsPerPage }).map((_, rowIndex) => (
+                  <TableRow
+                    key={rowIndex}
+                    sx={{
+                      backgroundColor:
+                        rowIndex % 2 === 0
+                          ? "transparent"
+                          : colors.primary[300] + "30",
+                    }}
+                  >
+                    <TableCell>
+                      <Skeleton
+                        variant="rounded"
+                        width={40}
+                        height={32}
+                        sx={{
+                          bgcolor: colors.primary[500],
+                          borderRadius: 1,
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton
+                        variant="rounded"
+                        width={80}
+                        height={32}
+                        sx={{
+                          bgcolor: colors.primary[500],
+                          borderRadius: 2,
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                      >
+                        <Skeleton
+                          variant="circular"
+                          width={32}
+                          height={32}
+                          sx={{ bgcolor: colors.primary[500] }}
+                        />
+                        <Skeleton
+                          variant="text"
+                          width={100}
+                          height={24}
+                          sx={{ bgcolor: colors.primary[500] }}
+                        />
+                      </Box>
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton
+                        variant="rounded"
+                        width={60}
+                        height={32}
+                        sx={{
+                          bgcolor: colors.primary[500],
+                          borderRadius: 1,
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton
+                        variant="text"
+                        width={80}
+                        height={24}
+                        sx={{ bgcolor: colors.primary[500] }}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton
+                        variant="text"
+                        width={90}
+                        height={24}
+                        sx={{ bgcolor: colors.primary[500] }}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Box sx={{ display: "flex", gap: 1 }}>
+                        <Skeleton
+                          variant="rounded"
+                          width={70}
+                          height={32}
+                          sx={{
+                            bgcolor: colors.primary[500],
+                            borderRadius: 2,
+                          }}
+                        />
+                        <Skeleton
+                          variant="rounded"
+                          width={70}
+                          height={32}
+                          sx={{
+                            bgcolor: colors.primary[500],
+                            borderRadius: 2,
+                          }}
+                        />
+                      </Box>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+
+          {/* Pagination Skeleton */}
+          <Box
             sx={{
-              color: theme.palette.primary.main,
-            }}
-          />
-          <Typography
-            variant="h6"
-            sx={{
-              ml: 2,
-              color: theme.palette.text.primary,
+              mt: 2,
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
             }}
           >
-            Loading transactions...
-          </Typography>
-        </Box>
-      </>
+            <Skeleton
+              variant="text"
+              width={200}
+              height={40}
+              sx={{ bgcolor: colors.primary[500] }}
+            />
+            <Box sx={{ display: "flex", gap: 1 }}>
+              {[1, 2, 3].map((item) => (
+                <Skeleton
+                  key={item}
+                  variant="rounded"
+                  width={40}
+                  height={32}
+                  sx={{
+                    bgcolor: colors.primary[500],
+                    borderRadius: 1,
+                  }}
+                />
+              ))}
+            </Box>
+          </Box>
+
+          {/* Loading Indicator */}
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              py: 3,
+              mt: 2,
+              borderTop: 1,
+              borderColor: colors.primary[300] + "50",
+            }}
+          >
+            <CircularProgress
+              size={20}
+              sx={{
+                color: colors.greenAccent[500],
+                mr: 2,
+              }}
+            />
+            <Typography
+              variant="body2"
+              sx={{
+                color: colors.grey[100],
+                fontWeight: 500,
+              }}
+            >
+              Loading transactions...
+            </Typography>
+          </Box>
+        </CardContent>
+      </Card>
     );
   }
 
@@ -94,19 +291,19 @@ const TransactionTable = ({
                     <strong>ID</strong>
                   </TableCell>
                   <TableCell>
-                    <strong>Type</strong> {/* ✅ CHANGED: from Name */}
+                    <strong>Type</strong>
                   </TableCell>
                   <TableCell>
-                    <strong>Product</strong> {/* ✅ CHANGED: from Contacts */}
+                    <strong>Product</strong>
                   </TableCell>
                   <TableCell>
-                    <strong>Quantity</strong> {/* ✅ CHANGED: from Address */}
+                    <strong>Quantity</strong>
                   </TableCell>
                   <TableCell>
-                    <strong>Amount</strong> {/* ✅ ADDED: New column */}
+                    <strong>Amount</strong>
                   </TableCell>
                   <TableCell>
-                    <strong>Date</strong> {/* ✅ ADDED: New column */}
+                    <strong>Date</strong>
                   </TableCell>
                   <TableCell>
                     <strong>Actions</strong>
@@ -114,30 +311,25 @@ const TransactionTable = ({
                 </TableRow>
               </TableHead>
               <TableBody>
-                {paginatedItems.map(
-                  (
-                    transaction,
-                    index // ✅ CHANGED: from supplier
-                  ) => (
-                    <TranscationTableRow
-                      key={transaction.id}
-                      index={page * rowsPerPage + index + 1} // Calculate global index
-                      transaction={transaction} // ✅ CHANGED: from supplier
-                      onEdit={onEdit}
-                      onDelete={onDelete}
-                      onView={onView} // ADD THIS
-                    />
-                  )
-                )}
+                {paginatedItems.map((transaction, index) => (
+                  <TransactionTableRow
+                    key={transaction.id}
+                    index={page * rowsPerPage + index + 1}
+                    transaction={transaction}
+                    onEdit={onEdit}
+                    onDelete={onDelete}
+                    onView={onView}
+                  />
+                ))}
               </TableBody>
             </Table>
           </TableContainer>
 
           {/* Table Pagination */}
           <TablePagination
-            rowsPerPageOptions={[5, 10, 25]} // ✅ IMPROVED: Added more options
+            rowsPerPageOptions={[5, 10, 25]}
             component="div"
-            count={transactionItems.length} // ✅ CHANGED: from supplierItems
+            count={transactionItems.length}
             rowsPerPage={rowsPerPage}
             page={page}
             onPageChange={handleChangePage}
@@ -152,14 +344,13 @@ const TransactionTable = ({
             }}
           />
 
-          {transactionItems.length === 0 &&
-            !loading && ( // ✅ CHANGED: from supplierItems
-              <Box className="text-center p-4">
-                <Typography variant="h6" color="text.secondary">
-                  No transactions found. {/* ✅ CHANGED: message */}
-                </Typography>
-              </Box>
-            )}
+          {transactionItems.length === 0 && !loading && (
+            <Box className="text-center p-4">
+              <Typography variant="h6" color="text.secondary">
+                No transactions found.
+              </Typography>
+            </Box>
+          )}
         </CardContent>
       </Card>
     </>

@@ -7,11 +7,13 @@ import {
   Tooltip,
 } from "@mui/material";
 import { Visibility } from "@mui/icons-material";
-import { useCustomer } from "../../../hooks/useCustomer";
+import { useNavigate } from "react-router-dom";
+import { PictureAsPdf } from "@mui/icons-material";
+// import { useCustomer } from "../../../hooks/useCustomer";
 
 const OrderTableRow = ({ order, onView }) => {
-  const { customerItems } = useCustomer();
-
+  // const { customerItems } = useCustomer();
+  const navigate = useNavigate();
   const formatAmount = (amount) => {
     if (!amount) return "-";
     return `$${parseFloat(amount).toFixed(2)}`;
@@ -21,10 +23,23 @@ const OrderTableRow = ({ order, onView }) => {
     return new Date(dateString).toLocaleDateString();
   };
 
-  // ✅ Correct: get name from nested "customer" object
-  const getCustomerName = (id) => {
-    const customerObj = customerItems.find((c) => c.customer?.id === id);
-    return customerObj ? customerObj.name : "Unknown Customer";
+  // // ✅ Correct: get name from nested "customer" object
+  // const getCustomerName = (id) => {
+  //   const customerObj = customerItems.find((c) => c.customer?.id === id);
+  //   return customerObj ? customerObj.name : "Unknown Customer";
+  // };
+  // Navigate to PDF page
+  const handlePDFClick = () => {
+    navigate(`/orders/${order.id}/pdf`, {
+      state: {
+        order: order, // Pass the whole transaction object
+        from: "order-page",
+        timestamp: Date.now(),
+      },
+    });
+
+    // OR if you want to open in NEW TAB:
+    // window.open(`/transactions/${transaction.id}/pdf`, "_blank");
   };
 
   return (
@@ -39,7 +54,7 @@ const OrderTableRow = ({ order, onView }) => {
       {/* customer name */}
       <TableCell>
         <Typography variant="body1" fontWeight="medium">
-          {getCustomerName(order.customer_id)}
+          {order.customer_name}
         </Typography>
       </TableCell>
 
@@ -72,7 +87,7 @@ const OrderTableRow = ({ order, onView }) => {
       </TableCell>
 
       {/* View button */}
-      <TableCell>
+      {/* <TableCell>
         <Box display="flex" gap={1}>
           <Tooltip title="View Details">
             <IconButton
@@ -84,6 +99,21 @@ const OrderTableRow = ({ order, onView }) => {
             </IconButton>
           </Tooltip>
         </Box>
+      </TableCell> */}
+      {/* Separate cell for PDF button - if you want it separate */}
+      <TableCell>
+        <Tooltip title="Export PDF">
+          <IconButton
+            size="small"
+            onClick={handlePDFClick}
+            sx={{
+              color: "#e74c3c",
+              "&:hover": { bgcolor: "rgba(231, 76, 60, 0.1)" },
+            }}
+          >
+            <PictureAsPdf fontSize="small" />
+          </IconButton>
+        </Tooltip>
       </TableCell>
     </TableRow>
   );

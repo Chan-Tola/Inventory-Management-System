@@ -6,6 +6,7 @@ import { fetchCategories } from "../redux/slices/categorySlice";
 export const useSimpleCategory = () => {
   const dispatch = useDispatch();
   const { categoryItems, loading } = useSelector((state) => state.categories);
+  
 
   useEffect(() => {
     // Only fetch if we don't have categories yet

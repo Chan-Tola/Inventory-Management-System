@@ -13,6 +13,7 @@ import {
   CircularProgress,
   useTheme,
   TablePagination,
+  Skeleton,
 } from "@mui/material";
 import { tokens } from "../../../theme.js";
 import CategoryTableRow from "./CategoryTableRow";
@@ -43,26 +44,186 @@ const CategoryTable = ({ categoryItems, loading, onEdit, onDelete }) => {
     page * rowsPerPage + rowsPerPage
   );
 
+  // Skeleton loading state
   if (loading && categoryItems.length === 0) {
     return (
-      <Box className="flex justify-center items-center p-4">
-        {" "}
-        {/* Fixed: changed 'item-center' to 'items-center' */}
-        <CircularProgress
-          sx={{
-            color: theme.palette.primary.main,
-          }}
-        />
-        <Typography
-          variant="h6"
-          sx={{
-            ml: 2,
-            color: theme.palette.text.primary,
-          }}
-        >
-          Loading categories...
-        </Typography>
-      </Box>
+      <Card
+        sx={{
+          background: `${colors.primary[400]}`,
+          borderRadius: 2,
+          overflow: "hidden",
+        }}
+      >
+        <CardContent>
+          {/* Table Header Skeleton */}
+          <TableContainer component={Paper}>
+            <Table
+              sx={{
+                background: `${colors.primary[400]}`,
+              }}
+            >
+              <TableHead>
+                <TableRow>
+                  {["ID", "Name", "Description", "Actions"].map((header) => (
+                    <TableCell key={header}>
+                      <Skeleton
+                        variant="text"
+                        width={header === "Description" ? "80%" : "60%"}
+                        height={30}
+                        sx={{
+                          bgcolor: colors.primary[500],
+                          mx: "auto",
+                        }}
+                      />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {/* Skeleton Rows */}
+                {Array.from({ length: rowsPerPage }).map((_, rowIndex) => (
+                  <TableRow
+                    key={rowIndex}
+                    sx={{
+                      backgroundColor:
+                        rowIndex % 2 === 0
+                          ? "transparent"
+                          : colors.primary[300] + "30",
+                    }}
+                  >
+                    <TableCell>
+                      <Skeleton
+                        variant="rounded"
+                        width={40}
+                        height={32}
+                        sx={{
+                          bgcolor: colors.primary[500],
+                          borderRadius: 1,
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                      >
+                        <Skeleton
+                          variant="circular"
+                          width={32}
+                          height={32}
+                          sx={{ bgcolor: colors.primary[500] }}
+                        />
+                        <Skeleton
+                          variant="text"
+                          width={120}
+                          height={24}
+                          sx={{ bgcolor: colors.primary[500] }}
+                        />
+                      </Box>
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton
+                        variant="text"
+                        width="90%"
+                        height={20}
+                        sx={{ bgcolor: colors.primary[500] }}
+                      />
+                      <Skeleton
+                        variant="text"
+                        width="70%"
+                        height={20}
+                        sx={{ bgcolor: colors.primary[500], mt: 0.5 }}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Box sx={{ display: "flex", gap: 1 }}>
+                        <Skeleton
+                          variant="rounded"
+                          width={70}
+                          height={32}
+                          sx={{
+                            bgcolor: colors.primary[500],
+                            borderRadius: 2,
+                          }}
+                        />
+                        <Skeleton
+                          variant="rounded"
+                          width={70}
+                          height={32}
+                          sx={{
+                            bgcolor: colors.primary[500],
+                            borderRadius: 2,
+                          }}
+                        />
+                      </Box>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+
+          {/* Pagination Skeleton */}
+          <Box
+            sx={{
+              mt: 2,
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <Skeleton
+              variant="text"
+              width={200}
+              height={40}
+              sx={{ bgcolor: colors.primary[500] }}
+            />
+            <Box sx={{ display: "flex", gap: 1 }}>
+              {[1, 2, 3].map((item) => (
+                <Skeleton
+                  key={item}
+                  variant="rounded"
+                  width={40}
+                  height={32}
+                  sx={{
+                    bgcolor: colors.primary[500],
+                    borderRadius: 1,
+                  }}
+                />
+              ))}
+            </Box>
+          </Box>
+
+          {/* Loading Indicator */}
+          {/* <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              py: 3,
+              mt: 2,
+              borderTop: 1,
+              borderColor: colors.primary[300] + "50",
+            }}
+          >
+            <CircularProgress
+              size={20}
+              sx={{
+                color: colors.greenAccent[500],
+                mr: 2,
+              }}
+            />
+            <Typography
+              variant="body2"
+              sx={{
+                color: colors.grey[100],
+                fontWeight: 500,
+              }}
+            >
+              Loading categories...
+            </Typography>
+          </Box> */}
+        </CardContent>
+      </Card>
     );
   }
   return (

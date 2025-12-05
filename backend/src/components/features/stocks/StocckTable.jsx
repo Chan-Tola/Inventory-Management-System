@@ -16,6 +16,7 @@ import {
   Alert,
   IconButton,
   Tooltip,
+  Skeleton,
 } from "@mui/material";
 import { tokens } from "../../../theme";
 import { useState } from "react";
@@ -58,24 +59,194 @@ const StockTable = ({
   );
   const criticalStockItems = stockItems.filter((stock) => stock.quantity === 0);
 
+  // Skeleton loading state
   if (loading && stockItems.length === 0) {
     return (
-      <Box className="flex justify-center item-center p-4">
-        <CircularProgress
-          sx={{
-            color: theme.palette.primary.main,
-          }}
-        />
-        <Typography
-          variant="h6"
-          sx={{
-            ml: 2,
-            color: theme.palette.text.primary,
-          }}
-        >
-          Loading stocks...
-        </Typography>
-      </Box>
+      <Card
+        sx={{
+          background: `${colors.primary[400]}`,
+          borderRadius: 2,
+          overflow: "hidden",
+        }}
+      >
+        <CardContent>
+          {/* Alert Skeletons */}
+          <Box sx={{ mb: 2 }}>
+            <Skeleton
+              variant="rounded"
+              width="100%"
+              height={56}
+              sx={{
+                bgcolor: colors.primary[500],
+                borderRadius: 1,
+              }}
+            />
+          </Box>
+
+          {/* Table Header Skeleton */}
+          <TableContainer
+            component={Paper}
+            sx={{
+              border: `1px solid ${colors.primary[300]}`,
+            }}
+          >
+            <Table>
+              <TableHead>
+                <TableRow sx={{ backgroundColor: colors.primary[400] }}>
+                  {[
+                    "Product Name",
+                    "Current Quantity",
+                    "Min Quantity",
+                    "Status",
+                    "Unit",
+                  ].map((header) => (
+                    <TableCell key={header}>
+                      <Skeleton
+                        variant="text"
+                        width={header === "Product Name" ? "80%" : "70%"}
+                        height={30}
+                        sx={{
+                          bgcolor: colors.primary[500],
+                          mx: "auto",
+                        }}
+                      />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {/* Skeleton Rows */}
+                {Array.from({ length: rowsPerpage }).map((_, rowIndex) => (
+                  <TableRow
+                    key={rowIndex}
+                    sx={{
+                      backgroundColor:
+                        rowIndex % 2 === 0
+                          ? "transparent"
+                          : colors.primary[300] + "30",
+                    }}
+                  >
+                    <TableCell>
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                      >
+                        <Skeleton
+                          variant="circular"
+                          width={32}
+                          height={32}
+                          sx={{ bgcolor: colors.primary[500] }}
+                        />
+                        <Skeleton
+                          variant="text"
+                          width={120}
+                          height={24}
+                          sx={{ bgcolor: colors.primary[500] }}
+                        />
+                      </Box>
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton
+                        variant="text"
+                        width={60}
+                        height={24}
+                        sx={{ bgcolor: colors.primary[500] }}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton
+                        variant="text"
+                        width={50}
+                        height={24}
+                        sx={{ bgcolor: colors.primary[500] }}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton
+                        variant="rounded"
+                        width={80}
+                        height={32}
+                        sx={{
+                          bgcolor: colors.primary[500],
+                          borderRadius: 2,
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton
+                        variant="text"
+                        width={40}
+                        height={24}
+                        sx={{ bgcolor: colors.primary[500] }}
+                      />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+
+          {/* Pagination Skeleton */}
+          <Box
+            sx={{
+              mt: 2,
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <Skeleton
+              variant="text"
+              width={200}
+              height={40}
+              sx={{ bgcolor: colors.primary[500] }}
+            />
+            <Box sx={{ display: "flex", gap: 1 }}>
+              {[1, 2, 3].map((item) => (
+                <Skeleton
+                  key={item}
+                  variant="rounded"
+                  width={40}
+                  height={32}
+                  sx={{
+                    bgcolor: colors.primary[500],
+                    borderRadius: 1,
+                  }}
+                />
+              ))}
+            </Box>
+          </Box>
+
+          {/* Loading Indicator */}
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              py: 3,
+              mt: 2,
+              borderTop: 1,
+              borderColor: colors.primary[300] + "50",
+            }}
+          >
+            <CircularProgress
+              size={20}
+              sx={{
+                color: colors.greenAccent[500],
+                mr: 2,
+              }}
+            />
+            <Typography
+              variant="body2"
+              sx={{
+                color: colors.grey[100],
+                fontWeight: 500,
+              }}
+            >
+              Loading stocks...
+            </Typography>
+          </Box>
+        </CardContent>
+      </Card>
     );
   }
 

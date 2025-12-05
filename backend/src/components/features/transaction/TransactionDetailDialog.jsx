@@ -10,17 +10,9 @@ import {
   Divider,
   CircularProgress,
   Grid,
-  Paper,
   Stack,
 } from "@mui/material";
-import {
-  Receipt,
-  Inventory,
-  AttachMoney,
-  Person,
-  CalendarToday,
-  Notes,
-} from "@mui/icons-material";
+
 
 const TransactionDetailDialog = ({ open, onClose, transaction, loading }) => {
   if (!transaction) return null;

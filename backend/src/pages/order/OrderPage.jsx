@@ -1,15 +1,24 @@
+import { useDispatch } from "react-redux";
 import { Box } from "@mui/material";
 import { uesOrder } from "../../hooks/uesOrder";
-import { useState } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
+import { fetchOrders } from "../../redux/slices/orderSlice";
 import {
   OrderHeader,
   OrderTable,
-  OrderDetailDialog,
 } from "../../components/features/order/index";
 import { Notification } from "../../components/common/index";
 const OrderPage = () => {
+  const dispatch = useDispatch();
   //   search state for order
   const [searchText, setSearchText] = useState("");
+
+  const hasFetched = useRef(false);
+  // ✅ Only call once
+  const handleRefresh = useCallback(() => {
+    dispatch(fetchOrders());
+  }, [dispatch]);
+
   const {
     orderItems,
     loading,
@@ -20,10 +29,16 @@ const OrderPage = () => {
     isViewing,
     setOpenDialog,
     handleViewClick,
-    handleRefresh,
     handleCloseSnackbar,
     handleCloseDetail,
   } = uesOrder();
+
+  useEffect(() => {
+    if (!hasFetched.current) {
+      hasFetched.current = true;
+      handleRefresh();
+    }
+  });
 
   // ✅ FIXED: Filter orders based on order_code
   const filteredOrders = orderItems.filter((item) =>

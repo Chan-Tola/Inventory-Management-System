@@ -25,4 +25,5 @@ Route::prefix('inventory')->group(function () {
 Route::prefix('internal')->group(function () {
     // Internal transaction creation for service-to-service calls
     Route::post('/transactions', [TransactionController::class, 'storeInternal']);
+    Route::post('/products/batch', [ProductController::class, 'getProductsBatchInternal']);
 });

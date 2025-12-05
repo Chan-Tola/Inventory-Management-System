@@ -7,37 +7,44 @@ use App\Models\Order;
 use App\Http\Requests\StoreOrderRequest;
 use App\Http\Resources\OrderResource;
 use App\Services\InventoryService;
+use App\Services\UserService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Http;
 
 class OrderController extends Controller
 {
+
+    protected UserService $userService;
     protected InventoryService $inventoryService;
 
-    public function __construct(InventoryService $inventoryService)
-    {
+    public function __construct(
+        UserService $userService,
+        InventoryService $inventoryService
+    ) {
+        $this->userService = $userService;
         $this->inventoryService = $inventoryService;
     }
 
 
     public function index(Request $request): JsonResponse
     {
+        $startTime = microtime(true);
         try {
-            $query = Order::with('items'); // ✅ Only load items
+            // --- 1. QUERY ORDERS ---
+            $query = Order::with('items');
 
-            // Filter by customer_id
+            // Apply filters
             if ($request->has('customer_id')) {
                 $query->where('customer_id', $request->customer_id);
             }
 
-            // Filter by staff_id
             if ($request->has('staff_id')) {
                 $query->where('staff_id', $request->staff_id);
             }
 
-            // Filter by date range
             if ($request->has('start_date') && $request->has('end_date')) {
                 $query->whereBetween('order_date', [
                     $request->start_date,
@@ -46,6 +53,94 @@ class OrderController extends Controller
             }
 
             $orders = $query->latest()->paginate(20);
+            Log::info('Orders fetched from DB', ['count' => $orders->count()]);
+            // --- 2. EXTRACT IDs ---
+            $orderCollection = $orders->getCollection();
+
+            $productIds = $orderCollection
+                ->pluck('items')
+                ->flatten()
+                ->pluck('product_id')
+                ->unique()
+                ->values()
+                ->toArray();
+
+            $customerIds = $orderCollection
+                ->pluck('customer_id')
+                ->filter()
+                ->unique()
+                ->values()
+                ->toArray();
+
+            $staffIds = $orderCollection
+                ->pluck('staff_id')
+                ->filter()
+                ->unique()
+                ->values()
+                ->toArray();
+
+            Log::info('📦 Extracted IDs', [
+                'product_ids' => $productIds,
+                'customer_ids' => $customerIds,
+                'staff_ids' => $staffIds
+            ]);
+
+            // --- 3. PARALLEL API CALLS ---
+            $promises = [];
+
+            if (!empty($productIds)) {
+                $promises['products'] = $this->inventoryService->buildProductBatchRequest($productIds);
+            }
+
+            if (!empty($customerIds)) {
+                $promises['customers'] = $this->userService->buildCustomerBatchRequest($customerIds);
+            }
+
+            if (!empty($staffIds)) {
+                $promises['staff'] = $this->userService->buildStaffBatchRequest($staffIds);
+            }
+
+            Log::info('🚀 Making parallel requests', ['request_count' => count($promises)]);
+
+            // Wait for all promises
+            $responses = [];
+            foreach ($promises as $key => $promise) {
+                try {
+                    $responses[$key] = $promise->wait();
+                } catch (\Exception $e) {
+                    Log::error("❌ {$key} request failed", ['error' => $e->getMessage()]);
+                    $responses[$key] = null;
+                }
+            }
+
+            // --- 4. PROCESS RESPONSES ---
+            $productNames = $this->inventoryService->processProductResponse($responses['products'] ?? null);
+            $customerNames = $this->userService->processCustomerResponse($responses['customers'] ?? null);
+            $staffNames = $this->userService->processStaffResponse($responses['staff'] ?? null);
+
+            Log::info('📦 Data fetched', [
+                'products' => count($productNames),
+                'customers' => count($customerNames),
+                'staff' => count($staffNames),
+                'customer_2' => $customerNames[2] ?? 'NOT FOUND',
+                'staff_5' => $staffNames[5] ?? 'NOT FOUND'
+            ]);
+
+            // --- 5. TRANSFORM ORDERS ---
+            $orders->getCollection()->transform(function ($order) use ($productNames, $customerNames, $staffNames) {
+                $order->customer_name = $customerNames[$order->customer_id] ?? 'Unknown Customer';
+                $order->staff_name = $staffNames[$order->staff_id] ?? 'Unknown Staff';
+
+                $order->items->transform(function ($item) use ($productNames) {
+                    $item->product_name = $productNames[$item->product_id] ?? 'Unknown Product';
+                    return $item;
+                });
+
+                return $order;
+            });
+
+            $duration = round((microtime(true) - $startTime) * 1000, 2);
+            Log::info("✅ Request completed in {$duration}ms");
 
             return response()->json([
                 'success' => true,
@@ -53,7 +148,7 @@ class OrderController extends Controller
                 'data' => OrderResource::collection($orders)
             ]);
         } catch (\Exception $e) {
-            // Log::error('Failed to retrieve orders', ['error' => $e->getMessage()]);
+            Log::error('Failed to retrieve orders', ['error' => $e->getMessage()]);
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to retrieve orders'
@@ -102,6 +197,7 @@ class OrderController extends Controller
                 'staff_id' => $request->staff_id,
                 'total_amount' => $totalAmount,
             ]);
+
             // Create order items
             foreach ($request->items as $itemData) {
                 $order->items()->create([

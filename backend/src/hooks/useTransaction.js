@@ -17,6 +17,7 @@ export const useTransaction = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isViewing, setIsViewing] = useState(false); // Add viewing state
+  const [isPdfExport, setIsPdfExport] = useState(false); // Add viewing state
   const [isDeleting, setIsDeleting] = useState(false);
   const [formData, setFormData] = useState({
     // Adjust form fields based on transaction data structure
@@ -132,13 +133,22 @@ export const useTransaction = () => {
     setIsDeleting(false);
     setOpenDialog(true);
   };
+  
+  // In your useTransaction hook
+  const handleViewPDF = (transaction) => {
+    // Optional: You can keep this if you want, or remove it
+    console.log("Navigating to PDF page for:", transaction.id);
+
+    // Store data and navigate
+    localStorage.setItem("pdfTransactionData", JSON.stringify(transaction));
+    navigate(`/transactions/${transaction.id}/pdf`);
+  };
 
   const handleCloseDetail = () => {
     setOpenDialog(false);
     setIsViewing(false);
     dispatch(clearCurrentTransaction());
   };
-
 
   const handleCloseSnackbar = () => {
     dispatch(clearError());
@@ -156,15 +166,19 @@ export const useTransaction = () => {
     isEditing,
     isDeleting,
     isViewing, // Add viewing state
+    isPdfExport, // Add viewing state
     formData,
     // Setters
     setFormData,
     setOpenDialog,
+    setIsViewing,
     setIsEditing,
+    setIsPdfExport,
 
     // Actions
     handleEditClick, // ADDED
     handleDeleteClick, // ADDED
+    handleViewPDF,
     handleViewClick, // Add view action
     handleCloseDetail, // Add close detail action
     handleCloseSnackbar,

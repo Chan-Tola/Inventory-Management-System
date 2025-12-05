@@ -8,6 +8,8 @@ import {
   Tooltip,
 } from "@mui/material";
 import { Visibility, Edit, Delete } from "@mui/icons-material";
+import { PictureAsPdf } from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
 
 const TranscationTableRow = ({
   index,
@@ -17,6 +19,7 @@ const TranscationTableRow = ({
   onDelete,
   loading,
 }) => {
+  const navigate = useNavigate(); // Add this hook
   // Format date for display
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString();
@@ -37,7 +40,19 @@ const TranscationTableRow = ({
   const getTypeText = (type) => {
     return type === "in" ? "Stock In" : "Stock Out";
   };
+  // Navigate to PDF page
+  const handlePDFClick = () => {
+    navigate(`/transactions/${transaction.id}/pdf`, {
+      state: {
+        transaction: transaction, // Pass the whole transaction object
+        from: "transactions-page",
+        timestamp: Date.now(),
+      },
+    });
 
+    // OR if you want to open in NEW TAB:
+    // window.open(`/transactions/${transaction.id}/pdf`, "_blank");
+  };
   return (
     <>
       <TableRow key={transaction.id} hover>
@@ -82,7 +97,7 @@ const TranscationTableRow = ({
             {formatDate(transaction.transaction_date)}
           </Typography>
         </TableCell>
-        <TableCell>
+        {/* <TableCell>
           <Box display="flex" gap={1}>
             <Tooltip title="View Details">
               <IconButton
@@ -94,6 +109,22 @@ const TranscationTableRow = ({
               </IconButton>
             </Tooltip>
           </Box>
+        </TableCell> */}
+
+        {/* Separate cell for PDF button - if you want it separate */}
+        <TableCell>
+          <Tooltip title="Export PDF">
+            <IconButton
+              size="small"
+              onClick={handlePDFClick}
+              sx={{
+                color: "#e74c3c",
+                "&:hover": { bgcolor: "rgba(231, 76, 60, 0.1)" },
+              }}
+            >
+              <PictureAsPdf fontSize="small" />
+            </IconButton>
+          </Tooltip>
         </TableCell>
       </TableRow>
     </>

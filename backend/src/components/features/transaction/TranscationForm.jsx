@@ -11,8 +11,10 @@ import {
   Select,
   MenuItem,
   Box,
-  Typography,
 } from "@mui/material";
+import { useSimpleProduct } from "../../../hooks/useSimpleProduct";
+import { useSimpleSupplier } from "../../../hooks/useSimpleSupplier";
+import { useEffect, useState } from "react";
 
 const TranscationForm = ({
   open,
@@ -24,9 +26,34 @@ const TranscationForm = ({
   onSubmit,
   onDelete,
   onFormDataChange,
-  products = [],
-  suppliers = [],
 }) => {
+  const { productItems: products, loading: productsLoading } =
+    useSimpleProduct(false);
+  const { supplierItems: suppliers, loading: suppliersLoading } =
+    useSimpleSupplier(false);
+
+  const [hasFetchedData, setHasFetchedData] = useState(false);
+
+  // --- Fetch data only when form opens ---
+  useEffect(() => {
+    const loadData = async () => {
+      if (open && !isDeleting && !hasFetchedData) {
+        // You might need to dispatch fetch actions manually
+        // This depends on how your Redux is set up
+        // For now, the hooks will fetch when component mounts
+        setHasFetchedData(true);
+      }
+    };
+
+    loadData();
+  }, [open, isDeleting, hasFetchedData]);
+
+  // Reset when form closes
+  useEffect(() => {
+    if (!open) {
+      setHasFetchedData(false);
+    }
+  }, [open]);
   // --- Safe defaults ---
   const safeFormData = {
     transaction_type: "in",
@@ -38,6 +65,7 @@ const TranscationForm = ({
     notes: "",
     ...formData,
   };
+
   //  Then we destructure:
   const {
     transaction_type,

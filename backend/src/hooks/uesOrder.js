@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  fetchOrders,
   fetchOrder, // order get by id
   clearError,
   clearSuccess,
@@ -17,15 +16,10 @@ export const uesOrder = () => {
 
   const [openDialog, setOpenDialog] = useState(false);
   const [isViewing, setIsViewing] = useState(false);
+  const [isPdfExport, setIsPdfExport] = useState(false); // Add viewing state
 
   //   load orders on component mount
-  const hasFetched = useRef(false);
-  useEffect(() => {
-    if (!hasFetched.current) {
-      hasFetched.current = true;
-      dispatch(fetchOrders());
-    }
-  }, [dispatch]);
+  const hasReset = useRef(false);
 
   //   Clear success after 3s
   useEffect(() => {
@@ -49,9 +43,11 @@ export const uesOrder = () => {
 
   // Reset entire transaction state when component unmounts
   useEffect(() => {
-    return () => {
-      dispatch(resetOrderState());
-    };
+    if (!hasReset.current) {
+      return () => {
+        dispatch(resetOrderState());
+      };
+    }
   }, [dispatch]);
   // fetch order by id
   const fetchOrderById = (orderId) => {
@@ -63,14 +59,21 @@ export const uesOrder = () => {
     setIsViewing(true);
     setOpenDialog(true);
   };
+
+  // In your useTransaction hook
+  const handleViewPDF = (order) => {
+    // Optional: You can keep this if you want, or remove it
+    console.log("Navigating to PDF page for:", order.id);
+
+    // Store data and navigate
+    localStorage.setItem("pdfOrderData", JSON.stringify(order));
+    navigate(`/orders/${order.id}/pdf`);
+  };
+
   const handleCloseDetail = () => {
     setOpenDialog(false);
     setIsViewing(false);
     dispatch(clearCurrentOrder());
-  };
-
-  const handleRefresh = () => {
-    dispatch(fetchOrderById());
   };
   const handleCloseSnackbar = () => {
     dispatch(clearError());
@@ -85,13 +88,15 @@ export const uesOrder = () => {
     currentOrder,
     openDialog,
     isViewing,
+    isPdfExport,
 
     // setters
     setOpenDialog,
+    setIsPdfExport,
 
     // actions
-    handleRefresh,
     handleViewClick,
+    handleViewPDF,
     handleCloseDetail,
     fetchOrderById,
     handleCloseSnackbar,

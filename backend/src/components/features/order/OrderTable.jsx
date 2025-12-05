@@ -13,16 +13,13 @@ import {
   CircularProgress,
   useTheme,
   TablePagination,
+  Skeleton,
 } from "@mui/material";
 import { tokens } from "../../../theme.js";
 import { useState } from "react";
 import OrderTableRow from "./OrderTableRow.jsx";
 
-const OrderTable = ({
-  orderItems, // ✅ CHANGED: from supplierItems
-  loading,
-  onView, // ADD THIS
-}) => {
+const OrderTable = ({ orderItems, loading, onView }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
@@ -37,38 +34,223 @@ const OrderTable = ({
 
   // note: page funtion change row per page
   const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10)); // ✅ FIXED: changed 5 to 10
+    setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
 
   // note: Calculate paginated data
   const paginatedItems = orderItems.slice(
-    // ✅ CHANGED: from supplierItems
     page * rowsPerPage,
     page * rowsPerPage + rowsPerPage
   );
 
+  // Skeleton loading state
   if (loading && orderItems.length === 0) {
-    // ✅ CHANGED: from supplierItems
     return (
-      <>
-        <Box className="flex justify-center item-center p-4">
-          <CircularProgress
+      <Card
+        sx={{
+          background: `${colors.primary[400]}`,
+          borderRadius: 2,
+          overflow: "hidden",
+        }}
+      >
+        <CardContent>
+          {/* Table Header Skeleton */}
+          <TableContainer component={Paper}>
+            <Table
+              sx={{
+                background: `${colors.primary[400]}`,
+              }}
+            >
+              <TableHead>
+                <TableRow>
+                  {[
+                    "Order Code",
+                    "Customer Name",
+                    "Order Items",
+                    "Status",
+                    "Order Date",
+                    "Total Amount",
+                    "Actions",
+                  ].map((header) => (
+                    <TableCell key={header}>
+                      <Skeleton
+                        variant="text"
+                        width={
+                          header === "Customer Name" || header === "Order Items"
+                            ? "80%"
+                            : header === "Order Code" ||
+                              header === "Total Amount"
+                            ? "70%"
+                            : "65%"
+                        }
+                        height={30}
+                        sx={{
+                          bgcolor: colors.primary[500],
+                          mx: "auto",
+                        }}
+                      />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {/* Skeleton Rows */}
+                {Array.from({ length: rowsPerPage }).map((_, rowIndex) => (
+                  <TableRow
+                    key={rowIndex}
+                    sx={{
+                      backgroundColor:
+                        rowIndex % 2 === 0
+                          ? "transparent"
+                          : colors.primary[300] + "30",
+                    }}
+                  >
+                    <TableCell>
+                      <Skeleton
+                        variant="rounded"
+                        width={100}
+                        height={32}
+                        sx={{
+                          bgcolor: colors.primary[500],
+                          borderRadius: 1,
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                      >
+                        <Skeleton
+                          variant="circular"
+                          width={32}
+                          height={32}
+                          sx={{ bgcolor: colors.primary[500] }}
+                        />
+                        <Skeleton
+                          variant="text"
+                          width={120}
+                          height={24}
+                          sx={{ bgcolor: colors.primary[500] }}
+                        />
+                      </Box>
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton
+                        variant="text"
+                        width={80}
+                        height={24}
+                        sx={{ bgcolor: colors.primary[500] }}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton
+                        variant="rounded"
+                        width={80}
+                        height={32}
+                        sx={{
+                          bgcolor: colors.primary[500],
+                          borderRadius: 2,
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton
+                        variant="text"
+                        width={90}
+                        height={24}
+                        sx={{ bgcolor: colors.primary[500] }}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton
+                        variant="text"
+                        width={80}
+                        height={24}
+                        sx={{ bgcolor: colors.primary[500] }}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Box sx={{ display: "flex", gap: 1 }}>
+                        <Skeleton
+                          variant="rounded"
+                          width={70}
+                          height={32}
+                          sx={{
+                            bgcolor: colors.primary[500],
+                            borderRadius: 2,
+                          }}
+                        />
+                      </Box>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+
+          {/* Pagination Skeleton */}
+          <Box
             sx={{
-              color: theme.palette.primary.main,
-            }}
-          />
-          <Typography
-            variant="h6"
-            sx={{
-              ml: 2,
-              color: theme.palette.text.primary,
+              mt: 2,
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
             }}
           >
-            Loading orders...
-          </Typography>
-        </Box>
-      </>
+            <Skeleton
+              variant="text"
+              width={200}
+              height={40}
+              sx={{ bgcolor: colors.primary[500] }}
+            />
+            <Box sx={{ display: "flex", gap: 1 }}>
+              {[1, 2, 3].map((item) => (
+                <Skeleton
+                  key={item}
+                  variant="rounded"
+                  width={40}
+                  height={32}
+                  sx={{
+                    bgcolor: colors.primary[500],
+                    borderRadius: 1,
+                  }}
+                />
+              ))}
+            </Box>
+          </Box>
+
+          {/* Loading Indicator */}
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              py: 3,
+              mt: 2,
+              borderTop: 1,
+              borderColor: colors.primary[300] + "50",
+            }}
+          >
+            <CircularProgress
+              size={20}
+              sx={{
+                color: colors.greenAccent[500],
+                mr: 2,
+              }}
+            />
+            <Typography
+              variant="body2"
+              sx={{
+                color: colors.grey[100],
+                fontWeight: 500,
+              }}
+            >
+              Loading orders...
+            </Typography>
+          </Box>
+        </CardContent>
+      </Card>
     );
   }
 
@@ -112,28 +294,23 @@ const OrderTable = ({
                 </TableRow>
               </TableHead>
               <TableBody>
-                {paginatedItems.map(
-                  (
-                    order,
-                    index // ✅ CHANGED: from supplier
-                  ) => (
-                    <OrderTableRow
-                      key={order.id}
-                      index={page * rowsPerPage + index + 1} // Calculate global index
-                      order={order} // ✅ CHANGED: from supplier
-                      onView={onView} // ADD THIS
-                    />
-                  )
-                )}
+                {paginatedItems.map((order, index) => (
+                  <OrderTableRow
+                    key={order.id}
+                    index={page * rowsPerPage + index + 1}
+                    order={order}
+                    onView={onView}
+                  />
+                ))}
               </TableBody>
             </Table>
           </TableContainer>
 
           {/* Table Pagination */}
           <TablePagination
-            rowsPerPageOptions={[5, 10, 25]} // ✅ IMPROVED: Added more options
+            rowsPerPageOptions={[5, 10, 25]}
             component="div"
-            count={orderItems.length} // ✅ CHANGED: from supplierItems
+            count={orderItems.length}
             rowsPerPage={rowsPerPage}
             page={page}
             onPageChange={handleChangePage}
@@ -148,14 +325,13 @@ const OrderTable = ({
             }}
           />
 
-          {orderItems.length === 0 &&
-            !loading && ( // ✅ CHANGED: from supplierItems
-              <Box className="text-center p-4">
-                <Typography variant="h6" color="text.secondary">
-                  No orders found.
-                </Typography>
-              </Box>
-            )}
+          {orderItems.length === 0 && !loading && (
+            <Box className="text-center p-4">
+              <Typography variant="h6" color="text.secondary">
+                No orders found.
+              </Typography>
+            </Box>
+          )}
         </CardContent>
       </Card>
     </>

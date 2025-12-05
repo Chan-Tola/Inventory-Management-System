@@ -13,6 +13,7 @@ import {
   Paper,
   useTheme,
   CircularProgress,
+  Skeleton,
 } from "@mui/material";
 // Hooks
 import { useAuth } from "../../hooks/useAuth";
@@ -96,20 +97,62 @@ const Dashboard = () => {
     },
   ];
 
-  // ✅ Show loading state
+  // // ✅ Show loading state
+  // if (loading && transactionItems.length === 0) {
+  //   return (
+  //     <Box
+  //       sx={{
+  //         p: 4,
+  //         display: "flex",
+  //         justifyContent: "center",
+  //         alignItems: "center",
+  //         height: "50vh",
+  //       }}
+  //     >
+  //       <CircularProgress size={40} sx={{ mr: 2 }} />
+  //       <Typography variant="h6">Loading dashboard data...</Typography>
+  //     </Box>
+  //   );
+  // }
   if (loading && transactionItems.length === 0) {
     return (
-      <Box
-        sx={{
-          p: 4,
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "50vh",
-        }}
-      >
-        <CircularProgress size={40} sx={{ mr: 2 }} />
-        <Typography variant="h6">Loading dashboard data...</Typography>
+      <Box sx={{ p: 3 }}>
+        {/* Header Skeleton */}
+        <Box sx={{ mb: 4 }}>
+          <Skeleton variant="text" width="40%" height={40} sx={{ mb: 2 }} />
+          <Skeleton variant="text" width="60%" height={24} />
+        </Box>
+
+        {/* Stats Skeleton */}
+        <Box sx={{ display: "flex", gap: 3, mb: 4 }}>
+          {[1, 2, 3].map((item) => (
+            <Skeleton
+              key={item}
+              variant="rounded"
+              width="100%"
+              height={120}
+              sx={{ flex: 1 }}
+            />
+          ))}
+        </Box>
+
+        {/* Table Skeleton */}
+        <Skeleton variant="rounded" height={300} sx={{ mb: 2 }} />
+
+        {/* Loading indicator */}
+        {/* <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            py: 4,
+          }}
+        >
+          <CircularProgress size={30} sx={{ mr: 2 }} />
+          <Typography variant="body1" color="text.secondary">
+            Loading transaction data...
+          </Typography>
+        </Box> */}
       </Box>
     );
   }

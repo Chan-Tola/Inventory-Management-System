@@ -12,7 +12,7 @@ use App\Http\Requests\UpdateProductRequest;
 use App\Http\Resources\ProductResource;
 use App\Models\ProductImage;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
-
+use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
@@ -39,6 +39,23 @@ class ProductController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+    public function getProductsBatchInternal(Request $request)
+    {
+        $request->validate([
+            'product_ids' => 'required|array|min:1',
+            'product_ids.*' => 'integer'
+        ]);
+
+        $products = Product::whereIn('id', $request->product_ids)
+            ->select('id', 'name')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $products
+        ]);
     }
 
     /**

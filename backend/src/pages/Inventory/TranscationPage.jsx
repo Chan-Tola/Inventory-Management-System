@@ -13,14 +13,12 @@ import {
   fetchTransactions,
 } from "../../redux/slices/transactionSlice";
 import { Notification } from "../../components/common/index";
-import { useSimpleProduct } from "../../hooks/useSimpleProduct";
-import { useSimpleSupplier } from "../../hooks/useSimpleSupplier";
 
 const TranscationPage = () => {
   const dispatch = useDispatch();
   const [searchText, setSearchText] = useState("");
-  const { productItems } = useSimpleProduct();
-  const { supplierItems } = useSimpleSupplier();
+  // const { productItems } = useSimpleProduct();
+  // const { supplierItems } = useSimpleSupplier();
 
   const hasFetched = useRef(false);
   // ✅ Only call once
@@ -39,10 +37,13 @@ const TranscationPage = () => {
     isEditing,
     isDeleting,
     isViewing,
+    isPdfExport,
     formData,
     setOpenDialog,
     setFormData,
+    setIsPdfExport,
     handleViewClick,
+    handleViewPDF,
     handleEditClick,
     handleDeleteClick,
     handleCloseSnackbar,
@@ -152,7 +153,7 @@ const TranscationPage = () => {
           onDelete={handleDeleteClick}
           onView={handleViewClick} // ADD THIS
         />
-        {/* Conditional Rendering based on mode */}
+
         {isViewing ? (
           // View Details Dialog
           <TransactionDetailDialog
@@ -173,8 +174,8 @@ const TranscationPage = () => {
             onSubmit={handleCreateTransaction}
             onFormDataChange={setFormData}
             currentTransaction={currentTransaction}
-            products={productItems}
-            suppliers={supplierItems}
+            // products={productItems}
+            // suppliers={supplierItems}
           />
         )}
       </Box>

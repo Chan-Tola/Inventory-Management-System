@@ -30,3 +30,8 @@ Route::prefix('users')->middleware('auth:api')->group(function () {
     Route::get('/{userId}/staff', [UserManagementController::class, 'getStaffByUser']);
     Route::get('/{userId}/customers', [UserManagementController::class, 'getCustomerByUser']);
 });
+
+Route::prefix('internal')->group(function () {
+    Route::post('/customers/batch', [UserManagementController::class, 'getCustomersBatchInternal']);
+    Route::post('/staffs/batch', [UserManagementController::class, 'getStaffBatchInternal']);
+});

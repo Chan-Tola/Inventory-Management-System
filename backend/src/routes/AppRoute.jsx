@@ -6,6 +6,8 @@ import PrivateRoute from "./PrivateRoute";
 import { routes } from "./routes";
 import { LoginPage } from "../pages";
 import UnauthorizedPage from "../pages/UnauthorizedPage";
+import { TransactionPDFExport } from "../components/features/transaction";
+import OrderPDFExport from "../components/features/order/OrderPDFExport";
 
 const AppRoute = () => {
   return (
@@ -22,6 +24,24 @@ const AppRoute = () => {
         />
         {/* Unauthorized page */}
         <Route path="unauthorized" element={<UnauthorizedPage />} />
+        {/* PDF Export Page - SEPARATE route with no layout */}
+        <Route
+          path="/transactions/:transactionId/pdf"
+          element={
+            <PrivateRoute>
+              <TransactionPDFExport />
+            </PrivateRoute>
+          }
+        />
+        {/* PDF Export Page - SEPARATE route with no layout */}
+        <Route
+          path="/orders/:orderId/pdf"
+          element={
+            <PrivateRoute>
+              <OrderPDFExport />
+            </PrivateRoute>
+          }
+        />
         {/* Protected App Routes */}
         <Route
           path="/"
