@@ -56,20 +56,37 @@ const TransactionTable = ({
       <Card
         sx={{
           background: `${colors.primary[400]}`,
-          borderRadius: 2,
+          borderRadius: 3,
           overflow: "hidden",
+          boxShadow:
+            theme.palette.mode === "dark"
+              ? "0 8px 32px rgba(0, 0, 0, 0.3)"
+              : "0 4px 20px rgba(0, 0, 0, 0.08)",
         }}
       >
-        <CardContent>
+        <CardContent sx={{ p: 0 }}>
           {/* Table Header Skeleton */}
-          <TableContainer component={Paper}>
+          <TableContainer
+            component={Paper}
+            sx={{
+              borderRadius: 2,
+              overflow: "hidden",
+              background: "transparent",
+              boxShadow: "none",
+            }}
+          >
             <Table
               sx={{
                 background: `${colors.primary[400]}`,
               }}
             >
               <TableHead>
-                <TableRow>
+                <TableRow
+                  sx={{
+                    backgroundColor: colors.primary[500] + "20",
+                    borderBottom: `2px solid ${colors.primary[300]}50`,
+                  }}
+                >
                   {[
                     "ID",
                     "Type",
@@ -79,22 +96,23 @@ const TransactionTable = ({
                     "Date",
                     "Actions",
                   ].map((header) => (
-                    <TableCell key={header}>
-                      <Skeleton
-                        variant="text"
-                        width={
-                          header === "Product"
-                            ? "80%"
-                            : header === "Type" || header === "Date"
-                            ? "60%"
-                            : "70%"
-                        }
-                        height={30}
+                    <TableCell
+                      key={header}
+                      sx={{
+                        py: 2,
+                        borderBottom: "none",
+                      }}
+                    >
+                      <Typography
+                        variant="subtitle2"
                         sx={{
-                          bgcolor: colors.primary[500],
-                          mx: "auto",
+                          color: colors.grey[100],
+                          fontWeight: 600,
+                          letterSpacing: "0.5px",
                         }}
-                      />
+                      >
+                        {header}
+                      </Typography>
                     </TableCell>
                   ))}
                 </TableRow>
@@ -105,43 +123,49 @@ const TransactionTable = ({
                   <TableRow
                     key={rowIndex}
                     sx={{
-                      backgroundColor:
-                        rowIndex % 2 === 0
-                          ? "transparent"
-                          : colors.primary[300] + "30",
+                      backgroundColor: "transparent",
+                      borderBottom:
+                        rowIndex < rowsPerPage - 1
+                          ? `1px solid ${colors.primary[300]}20`
+                          : "none",
+                      "&:hover": {
+                        backgroundColor: colors.primary[300] + "10",
+                      },
                     }}
                   >
-                    <TableCell>
+                    <TableCell sx={{ py: 2 }}>
                       <Skeleton
                         variant="rounded"
                         width={40}
-                        height={32}
+                        height={28}
                         sx={{
                           bgcolor: colors.primary[500],
                           borderRadius: 1,
                         }}
                       />
                     </TableCell>
-                    <TableCell>
+                    <TableCell sx={{ py: 2 }}>
                       <Skeleton
                         variant="rounded"
                         width={80}
-                        height={32}
+                        height={28}
                         sx={{
                           bgcolor: colors.primary[500],
-                          borderRadius: 2,
+                          borderRadius: 6,
                         }}
                       />
                     </TableCell>
-                    <TableCell>
+                    <TableCell sx={{ py: 2 }}>
                       <Box
                         sx={{ display: "flex", alignItems: "center", gap: 1 }}
                       >
                         <Skeleton
                           variant="circular"
-                          width={32}
-                          height={32}
-                          sx={{ bgcolor: colors.primary[500] }}
+                          width={36}
+                          height={36}
+                          sx={{
+                            bgcolor: colors.primary[500],
+                          }}
                         />
                         <Skeleton
                           variant="text"
@@ -151,18 +175,18 @@ const TransactionTable = ({
                         />
                       </Box>
                     </TableCell>
-                    <TableCell>
+                    <TableCell sx={{ py: 2 }}>
                       <Skeleton
                         variant="rounded"
                         width={60}
-                        height={32}
+                        height={28}
                         sx={{
                           bgcolor: colors.primary[500],
                           borderRadius: 1,
                         }}
                       />
                     </TableCell>
-                    <TableCell>
+                    <TableCell sx={{ py: 2 }}>
                       <Skeleton
                         variant="text"
                         width={80}
@@ -170,7 +194,7 @@ const TransactionTable = ({
                         sx={{ bgcolor: colors.primary[500] }}
                       />
                     </TableCell>
-                    <TableCell>
+                    <TableCell sx={{ py: 2 }}>
                       <Skeleton
                         variant="text"
                         width={90}
@@ -178,24 +202,14 @@ const TransactionTable = ({
                         sx={{ bgcolor: colors.primary[500] }}
                       />
                     </TableCell>
-                    <TableCell>
+                    <TableCell sx={{ py: 2 }}>
                       <Box sx={{ display: "flex", gap: 1 }}>
                         <Skeleton
-                          variant="rounded"
-                          width={70}
-                          height={32}
+                          variant="circular"
+                          width={36}
+                          height={36}
                           sx={{
                             bgcolor: colors.primary[500],
-                            borderRadius: 2,
-                          }}
-                        />
-                        <Skeleton
-                          variant="rounded"
-                          width={70}
-                          height={32}
-                          sx={{
-                            bgcolor: colors.primary[500],
-                            borderRadius: 2,
                           }}
                         />
                       </Box>
@@ -205,127 +219,148 @@ const TransactionTable = ({
               </TableBody>
             </Table>
           </TableContainer>
-
-          {/* Pagination Skeleton */}
-          <Box
-            sx={{
-              mt: 2,
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <Skeleton
-              variant="text"
-              width={200}
-              height={40}
-              sx={{ bgcolor: colors.primary[500] }}
-            />
-            <Box sx={{ display: "flex", gap: 1 }}>
-              {[1, 2, 3].map((item) => (
-                <Skeleton
-                  key={item}
-                  variant="rounded"
-                  width={40}
-                  height={32}
-                  sx={{
-                    bgcolor: colors.primary[500],
-                    borderRadius: 1,
-                  }}
-                />
-              ))}
-            </Box>
-          </Box>
-
-          {/* Loading Indicator */}
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              py: 3,
-              mt: 2,
-              borderTop: 1,
-              borderColor: colors.primary[300] + "50",
-            }}
-          >
-            <CircularProgress
-              size={20}
-              sx={{
-                color: colors.greenAccent[500],
-                mr: 2,
-              }}
-            />
-            <Typography
-              variant="body2"
-              sx={{
-                color: colors.grey[100],
-                fontWeight: 500,
-              }}
-            >
-              Loading transactions...
-            </Typography>
-          </Box>
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <>
-      <Card
-        sx={{
-          background: `${colors.primary[400]}`,
-        }}
-      >
-        <CardContent>
-          <TableContainer component={Paper}>
-            <Table
-              sx={{
-                background: `${colors.primary[400]}`,
-              }}
-            >
-              <TableHead>
-                <TableRow>
-                  <TableCell>
-                    <strong>ID</strong>
-                  </TableCell>
-                  <TableCell>
-                    <strong>Type</strong>
-                  </TableCell>
-                  <TableCell>
-                    <strong>Product</strong>
-                  </TableCell>
-                  <TableCell>
-                    <strong>Quantity</strong>
-                  </TableCell>
-                  <TableCell>
-                    <strong>Amount</strong>
-                  </TableCell>
-                  <TableCell>
-                    <strong>Date</strong>
-                  </TableCell>
-                  <TableCell>
-                    <strong>Actions</strong>
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {paginatedItems.map((transaction, index) => (
-                  <TransactionTableRow
-                    key={transaction.id}
-                    index={page * rowsPerPage + index + 1}
-                    transaction={transaction}
-                    onEdit={onEdit}
-                    onDelete={onDelete}
-                    onView={onView}
-                  />
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+    <Card
+      sx={{
+        background: `${colors.primary[400]}`,
+        borderRadius: 3,
+        overflow: "hidden",
+        boxShadow:
+          theme.palette.mode === "dark"
+            ? "0 8px 32px rgba(0, 0, 0, 0.3)"
+            : "0 4px 20px rgba(0, 0, 0, 0.08)",
+      }}
+    >
+      <CardContent sx={{ p: 0 }}>
+        <TableContainer
+          component={Paper}
+          sx={{
+            borderRadius: 2,
+            overflow: "hidden",
+            background: "transparent",
+            boxShadow: "none",
+          }}
+        >
+          <Table
+            sx={{
+              background: `${colors.primary[400]}`,
+            }}
+          >
+            <TableHead>
+              <TableRow
+                sx={{
+                  backgroundColor: colors.primary[500] + "20",
+                  borderBottom: `2px solid ${colors.primary[300]}50`,
+                }}
+              >
+                <TableCell sx={{ py: 2, borderBottom: "none" }}>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      color: colors.grey[100],
+                      fontWeight: 600,
+                      letterSpacing: "0.5px",
+                    }}
+                  >
+                    ID
+                  </Typography>
+                </TableCell>
+                <TableCell sx={{ py: 2, borderBottom: "none" }}>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      color: colors.grey[100],
+                      fontWeight: 600,
+                      letterSpacing: "0.5px",
+                    }}
+                  >
+                    Type
+                  </Typography>
+                </TableCell>
+                <TableCell sx={{ py: 2, borderBottom: "none" }}>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      color: colors.grey[100],
+                      fontWeight: 600,
+                      letterSpacing: "0.5px",
+                    }}
+                  >
+                    Product
+                  </Typography>
+                </TableCell>
+                <TableCell sx={{ py: 2, borderBottom: "none" }}>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      color: colors.grey[100],
+                      fontWeight: 600,
+                      letterSpacing: "0.5px",
+                    }}
+                  >
+                    Quantity
+                  </Typography>
+                </TableCell>
+                <TableCell sx={{ py: 2, borderBottom: "none" }}>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      color: colors.grey[100],
+                      fontWeight: 600,
+                      letterSpacing: "0.5px",
+                    }}
+                  >
+                    Amount
+                  </Typography>
+                </TableCell>
+                <TableCell sx={{ py: 2, borderBottom: "none" }}>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      color: colors.grey[100],
+                      fontWeight: 600,
+                      letterSpacing: "0.5px",
+                    }}
+                  >
+                    Date
+                  </Typography>
+                </TableCell>
+                <TableCell sx={{ py: 2, borderBottom: "none" }}>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      color: colors.grey[100],
+                      fontWeight: 600,
+                      letterSpacing: "0.5px",
+                    }}
+                  >
+                    Actions
+                  </Typography>
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {paginatedItems.map((transaction, index) => (
+                <TransactionTableRow
+                  key={transaction.id}
+                  index={page * rowsPerPage + index + 1}
+                  transaction={transaction}
+                  onEdit={onEdit}
+                  onDelete={onDelete}
+                  onView={onView}
+                />
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
 
-          {/* Table Pagination */}
+        {/* Table Pagination */}
+        {transactionItems.length > 0 && (
           <TablePagination
             rowsPerPageOptions={[5, 10, 25]}
             component="div"
@@ -335,25 +370,54 @@ const TransactionTable = ({
             onPageChange={handleChangePage}
             onRowsPerPageChange={handleChangeRowsPerPage}
             sx={{
-              background: `${colors.primary[400]}`,
+              background: colors.primary[400],
               color: theme.palette.text.primary,
+              borderTop: `1px solid ${colors.primary[300]}30`,
               "& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows":
                 {
                   color: theme.palette.text.primary,
+                  fontSize: "0.875rem",
                 },
+              "& .MuiTablePagination-actions button": {
+                color: theme.palette.text.primary,
+              },
+              "& .MuiTablePagination-select": {
+                borderRadius: 2,
+                border: `1px solid ${colors.primary[300]}50`,
+              },
             }}
           />
+        )}
 
-          {transactionItems.length === 0 && !loading && (
-            <Box className="text-center p-4">
-              <Typography variant="h6" color="text.secondary">
-                No transactions found.
-              </Typography>
-            </Box>
-          )}
-        </CardContent>
-      </Card>
-    </>
+        {transactionItems.length === 0 && !loading && (
+          <Box
+            sx={{
+              textAlign: "center",
+              py: 8,
+              background: colors.primary[400],
+            }}
+          >
+            <Typography
+              variant="h6"
+              sx={{
+                color: colors.grey[100],
+                mb: 1,
+              }}
+            >
+              No transactions found
+            </Typography>
+            <Typography
+              variant="body2"
+              sx={{
+                color: colors.grey[300],
+              }}
+            >
+              Create your first transaction to get started
+            </Typography>
+          </Box>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 

@@ -15,6 +15,7 @@ class Product extends Model
     const SKU = 'sku';
     const BRAND = 'brand';
     const PRICE = 'price';
+    const SALE_PRICE = 'sale_price';
     const DESCRIPTION = 'description';
     const CREATED_AT = 'created_at';
     const UPDATED_AT = 'updated_at';
@@ -32,6 +33,7 @@ class Product extends Model
         self::CATEGORY_ID,
         self::BRAND,
         self::PRICE,
+        self::SALE_PRICE,
         self::DESCRIPTION,
         self::STAFF_ID
     ];

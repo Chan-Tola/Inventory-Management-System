@@ -22,12 +22,13 @@ class ProductController extends Controller
     public function index(): JsonResponse
     {
         try {
-            $products = Product::select('id', 'name', 'sku', 'brand', 'price', 'category_id', 'description', 'staff_id')
+            $products = Product::select('id', 'name', 'sku', 'brand', 'price', 'sale_price', 'category_id', 'description', 'staff_id')
                 ->with([
                     'category:id,name',      // also select only needed category fields
                     'images'
                 ])
                 ->get();
+
             // $products = Product::with(['category', 'images'])->get();
             return response()->json([
                 'message' => 'Product retrieved successfully',

@@ -49,28 +49,45 @@ const StaffTable = ({ staffItems, loading, onEdit, onDelete }) => {
       <Card
         sx={{
           background: `${colors.primary[400]}`,
-          borderRadius: 2,
+          borderRadius: 3,
           overflow: "hidden",
+          boxShadow:
+            theme.palette.mode === "dark"
+              ? "0 8px 32px rgba(0, 0, 0, 0.3)"
+              : "0 4px 20px rgba(0, 0, 0, 0.08)",
         }}
       >
-        <CardContent>
+        <CardContent sx={{ p: 0 }}>
           {/* Table Header Skeleton */}
-          <TableContainer component={Paper}>
+          <TableContainer
+            component={Paper}
+            sx={{
+              borderRadius: 2,
+              overflow: "hidden",
+              background: "transparent",
+              boxShadow: "none",
+            }}
+          >
             <Table
               sx={{
                 background: `${colors.primary[400]}`,
               }}
             >
               <TableHead>
-                <TableRow>
+                <TableRow
+                  sx={{
+                    backgroundColor: colors.primary[500] + "20",
+                    borderBottom: `2px solid ${colors.primary[300]}50`,
+                  }}
+                >
                   {[
                     "ID",
                     "Role",
                     "Image",
                     "Name",
                     "Gender",
+                    "Phone",
                     "Salary",
-                    "Phone Number",
                     "Hire Date",
                     "Address",
                     "Actions",
@@ -78,27 +95,23 @@ const StaffTable = ({ staffItems, loading, onEdit, onDelete }) => {
                     <TableCell
                       key={header}
                       align={header === "Actions" ? "right" : "left"}
+                      sx={{
+                        py: 2,
+                        borderBottom: "none",
+                        whiteSpace: "nowrap",
+                      }}
                     >
-                      <Skeleton
-                        variant="text"
-                        width={
-                          header === "Address"
-                            ? "80%"
-                            : header === "Phone Number"
-                            ? "90%"
-                            : header === "Hire Date"
-                            ? "70%"
-                            : header === "Image"
-                            ? "60%"
-                            : "70%"
-                        }
-                        height={30}
+                      <Typography
+                        variant="subtitle2"
                         sx={{
-                          bgcolor: colors.primary[500],
-                          mx: header === "Actions" ? "0" : "auto",
-                          ml: header === "Actions" ? "auto" : "0",
+                          color: colors.grey[100],
+                          fontWeight: 600,
+                          letterSpacing: "0.5px",
+                          textAlign: header === "Actions" ? "right" : "left",
                         }}
-                      />
+                      >
+                        {header}
+                      </Typography>
                     </TableCell>
                   ))}
                 </TableRow>
@@ -109,74 +122,68 @@ const StaffTable = ({ staffItems, loading, onEdit, onDelete }) => {
                   <TableRow
                     key={rowIndex}
                     sx={{
-                      backgroundColor:
-                        rowIndex % 2 === 0
-                          ? "transparent"
-                          : colors.primary[300] + "30",
+                      backgroundColor: "transparent",
+                      borderBottom:
+                        rowIndex < rowsPerPage - 1
+                          ? `1px solid ${colors.primary[300]}20`
+                          : "none",
+                      "&:hover": {
+                        backgroundColor: colors.primary[300] + "10",
+                      },
                     }}
                   >
-                    <TableCell>
+                    <TableCell sx={{ py: 2 }}>
                       <Skeleton
                         variant="rounded"
-                        width={40}
-                        height={32}
+                        width={80}
+                        height={28}
                         sx={{
                           bgcolor: colors.primary[500],
                           borderRadius: 1,
                         }}
                       />
                     </TableCell>
-                    <TableCell>
+                    <TableCell sx={{ py: 2 }}>
                       <Skeleton
                         variant="rounded"
                         width={80}
-                        height={32}
+                        height={28}
                         sx={{
                           bgcolor: colors.primary[500],
-                          borderRadius: 2,
+                          borderRadius: 6,
                         }}
                       />
                     </TableCell>
-                    <TableCell>
+                    <TableCell sx={{ py: 2 }}>
                       <Skeleton
                         variant="circular"
                         width={40}
                         height={40}
-                        sx={{ bgcolor: colors.primary[500] }}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Box
-                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                      >
-                        <Skeleton
-                          variant="text"
-                          width={120}
-                          height={24}
-                          sx={{ bgcolor: colors.primary[500] }}
-                        />
-                      </Box>
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton
-                        variant="rounded"
-                        width={60}
-                        height={32}
                         sx={{
                           bgcolor: colors.primary[500],
-                          borderRadius: 2,
                         }}
                       />
                     </TableCell>
-                    <TableCell>
+                    <TableCell sx={{ py: 2 }}>
                       <Skeleton
                         variant="text"
-                        width={80}
+                        width={120}
                         height={24}
                         sx={{ bgcolor: colors.primary[500] }}
                       />
                     </TableCell>
-                    <TableCell>
+                    <TableCell sx={{ py: 2 }}>
+                      <Skeleton
+                        variant="rounded"
+                        width={60}
+                        height={28}
+                        sx={{
+                          bgcolor: colors.primary[500],
+                          borderRadius: 6,
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell sx={{ py: 2 }}>
                       <Skeleton
                         variant="text"
                         width={100}
@@ -184,7 +191,15 @@ const StaffTable = ({ staffItems, loading, onEdit, onDelete }) => {
                         sx={{ bgcolor: colors.primary[500] }}
                       />
                     </TableCell>
-                    <TableCell>
+                    <TableCell sx={{ py: 2 }}>
+                      <Skeleton
+                        variant="text"
+                        width={80}
+                        height={24}
+                        sx={{ bgcolor: colors.primary[500] }}
+                      />
+                    </TableCell>
+                    <TableCell sx={{ py: 2 }}>
                       <Skeleton
                         variant="text"
                         width={90}
@@ -192,7 +207,7 @@ const StaffTable = ({ staffItems, loading, onEdit, onDelete }) => {
                         sx={{ bgcolor: colors.primary[500] }}
                       />
                     </TableCell>
-                    <TableCell>
+                    <TableCell sx={{ py: 2 }}>
                       <Skeleton
                         variant="text"
                         width="90%"
@@ -206,7 +221,7 @@ const StaffTable = ({ staffItems, loading, onEdit, onDelete }) => {
                         sx={{ bgcolor: colors.primary[500], mt: 0.5 }}
                       />
                     </TableCell>
-                    <TableCell align="right">
+                    <TableCell align="right" sx={{ py: 2 }}>
                       <Box
                         sx={{
                           display: "flex",
@@ -215,21 +230,19 @@ const StaffTable = ({ staffItems, loading, onEdit, onDelete }) => {
                         }}
                       >
                         <Skeleton
-                          variant="rounded"
-                          width={70}
-                          height={32}
+                          variant="circular"
+                          width={36}
+                          height={36}
                           sx={{
                             bgcolor: colors.primary[500],
-                            borderRadius: 2,
                           }}
                         />
                         <Skeleton
-                          variant="rounded"
-                          width={70}
-                          height={32}
+                          variant="circular"
+                          width={36}
+                          height={36}
                           sx={{
                             bgcolor: colors.primary[500],
-                            borderRadius: 2,
                           }}
                         />
                       </Box>
@@ -239,134 +252,204 @@ const StaffTable = ({ staffItems, loading, onEdit, onDelete }) => {
               </TableBody>
             </Table>
           </TableContainer>
-
-          {/* Pagination Skeleton */}
-          <Box
-            sx={{
-              mt: 2,
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <Skeleton
-              variant="text"
-              width={200}
-              height={40}
-              sx={{ bgcolor: colors.primary[500] }}
-            />
-            <Box sx={{ display: "flex", gap: 1 }}>
-              {[1, 2, 3].map((item) => (
-                <Skeleton
-                  key={item}
-                  variant="rounded"
-                  width={40}
-                  height={32}
-                  sx={{
-                    bgcolor: colors.primary[500],
-                    borderRadius: 1,
-                  }}
-                />
-              ))}
-            </Box>
-          </Box>
-
-          {/* Loading Indicator */}
-          {/* <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              py: 3,
-              mt: 2,
-              borderTop: 1,
-              borderColor: colors.primary[300] + "50",
-            }}
-          >
-            <CircularProgress
-              size={20}
-              sx={{
-                color: colors.greenAccent[500],
-                mr: 2,
-              }}
-            />
-            <Typography
-              variant="body2"
-              sx={{
-                color: colors.grey[100],
-                fontWeight: 500,
-              }}
-            >
-              Loading staff data...
-            </Typography>
-          </Box> */}
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <>
-      <Card
-        sx={{
-          background: `${colors.primary[400]}`,
-        }}
-      >
-        <CardContent>
-          <TableContainer component={Paper}>
-            <Table
-              sx={{
-                background: `${colors.primary[400]}`,
-              }}
-            >
-              <TableHead>
-                <TableRow>
-                  <TableCell>
-                    <strong>ID</strong>
-                  </TableCell>
-                  <TableCell>
-                    <strong>Role</strong>
-                  </TableCell>
-                  <TableCell>
-                    <strong>Image</strong>
-                  </TableCell>
-                  <TableCell>
-                    <strong>Name</strong>
-                  </TableCell>
-                  <TableCell>
-                    <strong>Gender</strong>
-                  </TableCell>
-                  <TableCell>
-                    <strong>Salary</strong>
-                  </TableCell>
-                  <TableCell>
-                    <strong>Phone Number</strong>
-                  </TableCell>
-                  <TableCell>
-                    <strong>Hire Date</strong>
-                  </TableCell>
-                  <TableCell>
-                    <strong>Address</strong>
-                  </TableCell>
-                  <TableCell align="right">
-                    <strong>Actions</strong>
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {paginatedItems.map((staffInfo, index) => (
-                  <StaffTableRow
-                    key={staffInfo.id}
-                    index={page * rowsPerPage + index + 1}
-                    staffInfo={staffInfo}
-                    onEdit={onEdit}
-                    onDelete={onDelete}
-                  />
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-          {/* Table Pagination */}
+    <Card
+      sx={{
+        background: `${colors.primary[400]}`,
+        borderRadius: 3,
+        overflow: "hidden",
+        boxShadow:
+          theme.palette.mode === "dark"
+            ? "0 8px 32px rgba(0, 0, 0, 0.3)"
+            : "0 4px 20px rgba(0, 0, 0, 0.08)",
+      }}
+    >
+      <CardContent sx={{ p: 0 }}>
+        <TableContainer
+          component={Paper}
+          sx={{
+            borderRadius: 2,
+            overflow: "hidden",
+            background: "transparent",
+            boxShadow: "none",
+          }}
+        >
+          <Table
+            sx={{
+              background: `${colors.primary[400]}`,
+            }}
+          >
+            <TableHead>
+              <TableRow
+                sx={{
+                  backgroundColor: colors.primary[500] + "20",
+                  borderBottom: `2px solid ${colors.primary[300]}50`,
+                }}
+              >
+                <TableCell
+                  sx={{ py: 2, borderBottom: "none", whiteSpace: "nowrap" }}
+                >
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      color: colors.grey[100],
+                      fontWeight: 600,
+                      letterSpacing: "0.5px",
+                    }}
+                  >
+                    Staff ID
+                  </Typography>
+                </TableCell>
+                <TableCell
+                  sx={{ py: 2, borderBottom: "none", whiteSpace: "nowrap" }}
+                >
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      color: colors.grey[100],
+                      fontWeight: 600,
+                      letterSpacing: "0.5px",
+                    }}
+                  >
+                    Role
+                  </Typography>
+                </TableCell>
+                <TableCell
+                  sx={{ py: 2, borderBottom: "none", whiteSpace: "nowrap" }}
+                >
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      color: colors.grey[100],
+                      fontWeight: 600,
+                      letterSpacing: "0.5px",
+                    }}
+                  >
+                    Image
+                  </Typography>
+                </TableCell>
+                <TableCell
+                  sx={{ py: 2, borderBottom: "none", whiteSpace: "nowrap" }}
+                >
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      color: colors.grey[100],
+                      fontWeight: 600,
+                      letterSpacing: "0.5px",
+                    }}
+                  >
+                    Name
+                  </Typography>
+                </TableCell>
+                <TableCell
+                  sx={{ py: 2, borderBottom: "none", whiteSpace: "nowrap" }}
+                >
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      color: colors.grey[100],
+                      fontWeight: 600,
+                      letterSpacing: "0.5px",
+                    }}
+                  >
+                    Gender
+                  </Typography>
+                </TableCell>
+                <TableCell
+                  sx={{ py: 2, borderBottom: "none", whiteSpace: "nowrap" }}
+                >
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      color: colors.grey[100],
+                      fontWeight: 600,
+                      letterSpacing: "0.5px",
+                    }}
+                  >
+                    Phone
+                  </Typography>
+                </TableCell>
+                <TableCell
+                  sx={{ py: 2, borderBottom: "none", whiteSpace: "nowrap" }}
+                >
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      color: colors.grey[100],
+                      fontWeight: 600,
+                      letterSpacing: "0.5px",
+                    }}
+                  >
+                    Salary
+                  </Typography>
+                </TableCell>
+                <TableCell
+                  sx={{ py: 2, borderBottom: "none", whiteSpace: "nowrap" }}
+                >
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      color: colors.grey[100],
+                      fontWeight: 600,
+                      letterSpacing: "0.5px",
+                    }}
+                  >
+                    Hire Date
+                  </Typography>
+                </TableCell>
+                <TableCell
+                  sx={{ py: 2, borderBottom: "none", whiteSpace: "nowrap" }}
+                >
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      color: colors.grey[100],
+                      fontWeight: 600,
+                      letterSpacing: "0.5px",
+                    }}
+                  >
+                    Address
+                  </Typography>
+                </TableCell>
+                <TableCell
+                  align="right"
+                  sx={{ py: 2, borderBottom: "none", whiteSpace: "nowrap" }}
+                >
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      color: colors.grey[100],
+                      fontWeight: 600,
+                      letterSpacing: "0.5px",
+                    }}
+                  >
+                    Actions
+                  </Typography>
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {paginatedItems.map((staffInfo, index) => (
+                <StaffTableRow
+                  key={staffInfo.id}
+                  index={page * rowsPerPage + index + 1}
+                  staffInfo={staffInfo}
+                  onEdit={onEdit}
+                  onDelete={onDelete}
+                />
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+
+        {/* Table Pagination */}
+        {staffItems.length > 0 && (
           <TablePagination
             rowsPerPageOptions={[5]}
             component="div"
@@ -376,24 +459,54 @@ const StaffTable = ({ staffItems, loading, onEdit, onDelete }) => {
             onPageChange={handleChangePage}
             onRowsPerPageChange={handleChangeRowsPerPage}
             sx={{
-              background: `${colors.primary[400]}`,
+              background: colors.primary[400],
               color: theme.palette.text.primary,
+              borderTop: `1px solid ${colors.primary[300]}30`,
               "& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows":
                 {
                   color: theme.palette.text.primary,
+                  fontSize: "0.875rem",
                 },
+              "& .MuiTablePagination-actions button": {
+                color: theme.palette.text.primary,
+              },
+              "& .MuiTablePagination-select": {
+                borderRadius: 2,
+                border: `1px solid ${colors.primary[300]}50`,
+              },
             }}
           />
-          {staffItems.length === 0 && !loading && (
-            <Box className="text-center p-4">
-              <Typography variant="h6" color="text.secondary">
-                No staff found. Create your first staff member!
-              </Typography>
-            </Box>
-          )}
-        </CardContent>
-      </Card>
-    </>
+        )}
+
+        {staffItems.length === 0 && !loading && (
+          <Box
+            sx={{
+              textAlign: "center",
+              py: 8,
+              background: colors.primary[400],
+            }}
+          >
+            <Typography
+              variant="h6"
+              sx={{
+                color: colors.grey[100],
+                mb: 1,
+              }}
+            >
+              No staff members found
+            </Typography>
+            <Typography
+              variant="body2"
+              sx={{
+                color: colors.grey[300],
+              }}
+            >
+              Create your first staff member to get started
+            </Typography>
+          </Box>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 

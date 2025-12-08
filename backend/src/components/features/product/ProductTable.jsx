@@ -49,53 +49,67 @@ const ProductTable = ({ productItems, loading, onEdit, onDelete }) => {
       <Card
         sx={{
           background: `${colors.primary[400]}`,
-          borderRadius: 2,
+          borderRadius: 3,
           overflow: "hidden",
+          boxShadow:
+            theme.palette.mode === "dark"
+              ? "0 8px 32px rgba(0, 0, 0, 0.3)"
+              : "0 4px 20px rgba(0, 0, 0, 0.08)",
         }}
       >
-        <CardContent>
+        <CardContent sx={{ p: 0 }}>
           {/* Table Header Skeleton */}
-          <TableContainer component={Paper}>
+          <TableContainer
+            component={Paper}
+            sx={{
+              borderRadius: 2,
+              overflow: "hidden",
+              background: "transparent",
+              boxShadow: "none",
+            }}
+          >
             <Table
               sx={{
                 background: `${colors.primary[400]}`,
               }}
             >
               <TableHead>
-                <TableRow>
+                <TableRow
+                  sx={{
+                    backgroundColor: colors.primary[500] + "20",
+                    borderBottom: `2px solid ${colors.primary[300]}50`,
+                  }}
+                >
                   {[
                     "ID",
                     "Image",
                     "Product Name",
-                    "Category Name",
-                    "Sku",
+                    "Category",
+                    "SKU",
                     "Brand",
-                    "Price",
+                    "Unit Price",
+                    "Sale Price",
                     "Actions",
                   ].map((header) => (
                     <TableCell
                       key={header}
                       align={header === "Actions" ? "right" : "left"}
+                      sx={{
+                        py: 2,
+                        borderBottom: "none",
+                      }}
                     >
-                      <Skeleton
-                        variant="text"
-                        width={
-                          header === "Product Name" ||
-                          header === "Category Name"
-                            ? "80%"
-                            : header === "Actions"
-                            ? "70%"
-                            : header === "Image"
-                            ? "60%"
-                            : "70%"
-                        }
-                        height={30}
+                      <Typography
+                        variant="subtitle2"
                         sx={{
-                          bgcolor: colors.primary[500],
-                          mx: header === "Actions" ? "0" : "auto",
-                          ml: header === "Actions" ? "auto" : "0",
+                          color: colors.grey[100],
+                          fontWeight: 600,
+                          letterSpacing: "0.5px",
+                          textAlign: header === "Actions" ? "right" : "left",
                         }}
-                      />
+                      >
+                        {header}
+                      </Typography>
                     </TableCell>
                   ))}
                 </TableRow>
@@ -106,13 +120,17 @@ const ProductTable = ({ productItems, loading, onEdit, onDelete }) => {
                   <TableRow
                     key={rowIndex}
                     sx={{
-                      backgroundColor:
-                        rowIndex % 2 === 0
-                          ? "transparent"
-                          : colors.primary[300] + "30",
+                      backgroundColor: "transparent",
+                      borderBottom:
+                        rowIndex < rowsPerPage - 1
+                          ? `1px solid ${colors.primary[300]}20`
+                          : "none",
+                      "&:hover": {
+                        backgroundColor: colors.primary[300] + "10",
+                      },
                     }}
                   >
-                    <TableCell>
+                    <TableCell sx={{ py: 2 }}>
                       <Skeleton
                         variant="rounded"
                         width={40}
@@ -123,15 +141,18 @@ const ProductTable = ({ productItems, loading, onEdit, onDelete }) => {
                         }}
                       />
                     </TableCell>
-                    <TableCell>
+                    <TableCell sx={{ py: 2 }}>
                       <Skeleton
                         variant="circular"
-                        width={40}
-                        height={40}
-                        sx={{ bgcolor: colors.primary[500] }}
+                        width={50}
+                        height={50}
+                        sx={{
+                          bgcolor: colors.primary[500],
+                          borderRadius: 2,
+                        }}
                       />
                     </TableCell>
-                    <TableCell>
+                    <TableCell sx={{ py: 2 }}>
                       <Skeleton
                         variant="text"
                         width={120}
@@ -139,29 +160,29 @@ const ProductTable = ({ productItems, loading, onEdit, onDelete }) => {
                         sx={{ bgcolor: colors.primary[500] }}
                       />
                     </TableCell>
-                    <TableCell>
+                    <TableCell sx={{ py: 2 }}>
                       <Skeleton
                         variant="rounded"
                         width={100}
-                        height={32}
+                        height={28}
                         sx={{
                           bgcolor: colors.primary[500],
-                          borderRadius: 2,
+                          borderRadius: 6,
                         }}
                       />
                     </TableCell>
-                    <TableCell>
+                    <TableCell sx={{ py: 2 }}>
                       <Skeleton
                         variant="rounded"
                         width={80}
-                        height={32}
+                        height={28}
                         sx={{
                           bgcolor: colors.primary[500],
                           borderRadius: 1,
                         }}
                       />
                     </TableCell>
-                    <TableCell>
+                    <TableCell sx={{ py: 2 }}>
                       <Skeleton
                         variant="text"
                         width={80}
@@ -169,7 +190,7 @@ const ProductTable = ({ productItems, loading, onEdit, onDelete }) => {
                         sx={{ bgcolor: colors.primary[500] }}
                       />
                     </TableCell>
-                    <TableCell>
+                    <TableCell sx={{ py: 2 }}>
                       <Skeleton
                         variant="text"
                         width={70}
@@ -177,7 +198,15 @@ const ProductTable = ({ productItems, loading, onEdit, onDelete }) => {
                         sx={{ bgcolor: colors.primary[500] }}
                       />
                     </TableCell>
-                    <TableCell align="right">
+                    <TableCell sx={{ py: 2 }}>
+                      <Skeleton
+                        variant="text"
+                        width={70}
+                        height={24}
+                        sx={{ bgcolor: colors.primary[500] }}
+                      />
+                    </TableCell>
+                    <TableCell align="right" sx={{ py: 2 }}>
                       <Box
                         sx={{
                           display: "flex",
@@ -186,21 +215,19 @@ const ProductTable = ({ productItems, loading, onEdit, onDelete }) => {
                         }}
                       >
                         <Skeleton
-                          variant="rounded"
-                          width={70}
-                          height={32}
+                          variant="circular"
+                          width={36}
+                          height={36}
                           sx={{
                             bgcolor: colors.primary[500],
-                            borderRadius: 2,
                           }}
                         />
                         <Skeleton
-                          variant="rounded"
-                          width={70}
-                          height={32}
+                          variant="circular"
+                          width={36}
+                          height={36}
                           sx={{
                             bgcolor: colors.primary[500],
-                            borderRadius: 2,
                           }}
                         />
                       </Box>
@@ -210,128 +237,171 @@ const ProductTable = ({ productItems, loading, onEdit, onDelete }) => {
               </TableBody>
             </Table>
           </TableContainer>
-
-          {/* Pagination Skeleton */}
-          <Box
-            sx={{
-              mt: 2,
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <Skeleton
-              variant="text"
-              width={200}
-              height={40}
-              sx={{ bgcolor: colors.primary[500] }}
-            />
-            <Box sx={{ display: "flex", gap: 1 }}>
-              {[1, 2, 3].map((item) => (
-                <Skeleton
-                  key={item}
-                  variant="rounded"
-                  width={40}
-                  height={32}
-                  sx={{
-                    bgcolor: colors.primary[500],
-                    borderRadius: 1,
-                  }}
-                />
-              ))}
-            </Box>
-          </Box>
-
-          {/* Loading Indicator */}
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              py: 3,
-              mt: 2,
-              borderTop: 1,
-              borderColor: colors.primary[300] + "50",
-            }}
-          >
-            <CircularProgress
-              size={20}
-              sx={{
-                color: colors.greenAccent[500],
-                mr: 2,
-              }}
-            />
-            <Typography
-              variant="body2"
-              sx={{
-                color: colors.grey[100],
-                fontWeight: 500,
-              }}
-            >
-              Loading products...
-            </Typography>
-          </Box>
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <>
-      <Card
-        sx={{
-          background: `${colors.primary[400]}`,
-        }}
-      >
-        <CardContent>
-          <TableContainer component={Paper}>
-            <Table
-              sx={{
-                background: `${colors.primary[400]}`,
-              }}
-            >
-              <TableHead>
-                <TableRow>
-                  <TableCell>
-                    <strong>ID</strong>
-                  </TableCell>
-                  <TableCell>
-                    <strong>Image</strong>
-                  </TableCell>
-                  <TableCell>
-                    <strong>Product Name</strong>
-                  </TableCell>
-                  <TableCell>
-                    <strong>Category Name</strong>
-                  </TableCell>
-                  <TableCell>
-                    <strong>Sku</strong>
-                  </TableCell>
-                  <TableCell>
-                    <strong>Brand</strong>
-                  </TableCell>
-                  <TableCell>
-                    <strong>Price</strong>
-                  </TableCell>
-                  <TableCell align="right">
-                    <strong>Actions</strong>
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {paginatedItems.map((product, index) => (
-                  <ProductTableRow
-                    key={product.id}
-                    index={page * rowsPerPage + index + 1}
-                    product={product}
-                    onEdit={onEdit}
-                    onDelete={onDelete}
-                  />
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-          {/* Table Pagination */}
+    <Card
+      sx={{
+        background: `${colors.primary[400]}`,
+        borderRadius: 3,
+        overflow: "hidden",
+        boxShadow:
+          theme.palette.mode === "dark"
+            ? "0 8px 32px rgba(0, 0, 0, 0.3)"
+            : "0 4px 20px rgba(0, 0, 0, 0.08)",
+      }}
+    >
+      <CardContent sx={{ p: 0 }}>
+        <TableContainer
+          component={Paper}
+          sx={{
+            borderRadius: 2,
+            overflow: "hidden",
+            background: "transparent",
+            boxShadow: "none",
+          }}
+        >
+          <Table
+            sx={{
+              background: `${colors.primary[400]}`,
+            }}
+          >
+            <TableHead>
+              <TableRow
+                sx={{
+                  backgroundColor: colors.primary[500] + "20",
+                  borderBottom: `2px solid ${colors.primary[300]}50`,
+                }}
+              >
+                <TableCell sx={{ py: 2, borderBottom: "none" }}>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      color: colors.grey[100],
+                      fontWeight: 600,
+                      letterSpacing: "0.5px",
+                    }}
+                  >
+                    ID
+                  </Typography>
+                </TableCell>
+                <TableCell sx={{ py: 2, borderBottom: "none" }}>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      color: colors.grey[100],
+                      fontWeight: 600,
+                      letterSpacing: "0.5px",
+                    }}
+                  >
+                    Image
+                  </Typography>
+                </TableCell>
+                <TableCell sx={{ py: 2, borderBottom: "none" }}>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      color: colors.grey[100],
+                      fontWeight: 600,
+                      letterSpacing: "0.5px",
+                    }}
+                  >
+                    Product Name
+                  </Typography>
+                </TableCell>
+                <TableCell sx={{ py: 2, borderBottom: "none" }}>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      color: colors.grey[100],
+                      fontWeight: 600,
+                      letterSpacing: "0.5px",
+                    }}
+                  >
+                    Category
+                  </Typography>
+                </TableCell>
+                <TableCell sx={{ py: 2, borderBottom: "none" }}>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      color: colors.grey[100],
+                      fontWeight: 600,
+                      letterSpacing: "0.5px",
+                    }}
+                  >
+                    SKU
+                  </Typography>
+                </TableCell>
+                <TableCell sx={{ py: 2, borderBottom: "none" }}>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      color: colors.grey[100],
+                      fontWeight: 600,
+                      letterSpacing: "0.5px",
+                    }}
+                  >
+                    Brand
+                  </Typography>
+                </TableCell>
+                <TableCell sx={{ py: 2, borderBottom: "none" }}>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      color: colors.grey[100],
+                      fontWeight: 600,
+                      letterSpacing: "0.5px",
+                    }}
+                  >
+                    Unit Price
+                  </Typography>
+                </TableCell>
+                <TableCell sx={{ py: 2, borderBottom: "none" }}>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      color: colors.grey[100],
+                      fontWeight: 600,
+                      letterSpacing: "0.5px",
+                    }}
+                  >
+                    Sale Price
+                  </Typography>
+                </TableCell>
+                <TableCell align="right" sx={{ py: 2, borderBottom: "none" }}>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      color: colors.grey[100],
+                      fontWeight: 600,
+                      letterSpacing: "0.5px",
+                    }}
+                  >
+                    Actions
+                  </Typography>
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {paginatedItems.map((product, index) => (
+                <ProductTableRow
+                  key={product.id}
+                  index={page * rowsPerPage + index + 1}
+                  product={product}
+                  onEdit={onEdit}
+                  onDelete={onDelete}
+                />
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+
+        {/* Table Pagination */}
+        {productItems.length > 0 && (
           <TablePagination
             rowsPerPageOptions={[5]}
             component="div"
@@ -341,24 +411,54 @@ const ProductTable = ({ productItems, loading, onEdit, onDelete }) => {
             onPageChange={handleChangePage}
             onRowsPerPageChange={handleChangeRowsPerPage}
             sx={{
-              background: `${colors.primary[400]}`,
+              background: colors.primary[400],
               color: theme.palette.text.primary,
+              borderTop: `1px solid ${colors.primary[300]}30`,
               "& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows":
                 {
                   color: theme.palette.text.primary,
+                  fontSize: "0.875rem",
                 },
+              "& .MuiTablePagination-actions button": {
+                color: theme.palette.text.primary,
+              },
+              "& .MuiTablePagination-select": {
+                borderRadius: 2,
+                border: `1px solid ${colors.primary[300]}50`,
+              },
             }}
           />
-          {productItems.length === 0 && !loading && (
-            <Box className="text-center p-4">
-              <Typography variant="h6" color="text.secondary">
-                No products found. Create your first product!
-              </Typography>
-            </Box>
-          )}
-        </CardContent>
-      </Card>
-    </>
+        )}
+
+        {productItems.length === 0 && !loading && (
+          <Box
+            sx={{
+              textAlign: "center",
+              py: 8,
+              background: colors.primary[400],
+            }}
+          >
+            <Typography
+              variant="h6"
+              sx={{
+                color: colors.grey[100],
+                mb: 1,
+              }}
+            >
+              No products found
+            </Typography>
+            <Typography
+              variant="body2"
+              sx={{
+                color: colors.grey[300],
+              }}
+            >
+              Create your first product to get started
+            </Typography>
+          </Box>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 

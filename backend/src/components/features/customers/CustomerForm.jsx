@@ -13,9 +13,9 @@ import {
   Select,
   MenuItem,
   Box,
-  Typography,
   InputAdornment,
   IconButton,
+  CircularProgress,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 
@@ -93,6 +93,25 @@ const CustomerForm = ({
   if (isDeleting) {
     return (
       <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+        {/* Loading Overlay for Delete */}
+        {loading && (
+          <Box
+            sx={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: "rgba(255, 255, 255, 0.8)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 1,
+            }}
+          >
+            <CircularProgress />
+          </Box>
+        )}
         <DialogTitle>Confirm Deletion</DialogTitle>
         <DialogContent>
           <DialogContentText>
@@ -111,6 +130,25 @@ const CustomerForm = ({
     return (
       <>
         <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+          {/* Loading Overlay for Form */}
+          {loading && (
+            <Box
+              sx={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: "rgba(255, 255, 255, 0.8)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                zIndex: 1,
+              }}
+            >
+              <CircularProgress />
+            </Box>
+          )}
           <DialogTitle>
             {isEditing ? "Edit Information Customer" : "Add New Customer"}
           </DialogTitle>

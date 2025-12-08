@@ -18,14 +18,14 @@ import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined";
 import CategoryOutlinedIcon from "@mui/icons-material/CategoryOutlined";
 import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
 import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
-import AirportShuttleOutlinedIcon from "@mui/icons-material/AirportShuttleOutlined";
+import LocalShippingOutlinedIcon from "@mui/icons-material/LocalShippingOutlined";
 import Groups2OutlinedIcon from "@mui/icons-material/Groups2Outlined";
 import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
 import InventoryOutlinedIcon from "@mui/icons-material/InventoryOutlined";
-import WidgetsOutlinedIcon from "@mui/icons-material/WidgetsOutlined";
-import ListAltOutlinedIcon from "@mui/icons-material/ListAltOutlined";
-import ReceiptOutlinedIcon from "@mui/icons-material/ReceiptOutlined";
-import CurrencyExchangeOutlinedIcon from "@mui/icons-material/CurrencyExchangeOutlined";
+import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
+import ReceiptLongOutlinedIcon from "@mui/icons-material/ReceiptLongOutlined";
+import AccountBalanceOutlinedIcon from "@mui/icons-material/AccountBalanceOutlined";
+import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
 
 // Hooks
 import { useAuth } from "../../hooks/useAuth";
@@ -78,7 +78,7 @@ const Sidebar = () => {
       backgroundColor: "transparent !important",
     },
     "& .pro-inner-item": {
-      padding: "5px 20px !important",
+      padding: "8px 24px !important",
     },
     "& .pro-inner-item:hover": {
       color: "#00B4DB !important",
@@ -86,7 +86,7 @@ const Sidebar = () => {
     "& .pro-menu-item.active": {
       color: "#00B4DB !important",
     },
-    borderRight: `2px solid ${colors.primary[100]}`,
+    borderRight: `1px solid ${colors.primary[200]}`,
   };
 
   // note: LOGO CONFIG
@@ -94,10 +94,9 @@ const Sidebar = () => {
     src: theme.palette.mode === "dark" ? darkModeLogo : lightModeLogo,
     alt: "Company Logo",
     style: {
-      width: "50px",
-      height: "50px",
+      width: "44px",
+      height: "44px",
       objectFit: "contain",
-      borderRadius: "8px",
     },
   };
 
@@ -109,70 +108,73 @@ const Sidebar = () => {
     );
   };
 
-  //  note: MENU ITEMS DATA WITH PERMISSIONS
+  //  note: MENU ITEMS DATA WITH PERMISSIONS - SHORT TITLES (2-3 words)
   const menuItems = [
     {
-      title: "Dashboard",
+      title: "Dashboard", // 1 word ✓
       to: "/",
       icon: <DashboardOutlinedIcon />,
-      requiredPermission: null, // Everyone can see dashboard
+      requiredPermission: null,
     },
   ];
 
-  const userManagementSubmenu = [
+  const productManagementSubmenu = [
     {
-      title: "Staff Members",
-      to: "/staffs",
-      icon: <AccountCircleOutlinedIcon />,
-      requiredPermission: "view staff",
+      title: "Categories", // 1 word ✓
+      to: "/categories",
+      icon: <CategoryOutlinedIcon />,
+      requiredPermission: "view category",
     },
     {
-      title: "Customers",
+      title: "Products", // 1 word ✓
+      to: "/products",
+      icon: <Inventory2OutlinedIcon />,
+      requiredPermission: "view product",
+    },
+    {
+      title: "Stock", // 1 word ✓
+      to: "/stocks",
+      icon: <InventoryOutlinedIcon />,
+      requiredPermission: "view stock",
+    },
+  ];
+
+  const salesOrdersSubmenu = [
+    {
+      title: "Orders", // 1 word ✓
+      to: "/orders",
+      icon: <ShoppingCartOutlinedIcon />,
+      requiredPermission: "view order",
+    },
+    {
+      title: "Customers", // 1 word ✓
       to: "/customers",
       icon: <GroupOutlinedIcon />,
       requiredPermission: "view customer",
     },
   ];
 
-  const productManagementSubmenu = [
+  const purchaseFinanceSubmenu = [
     {
-      title: "Category",
-      to: "/categories",
-      icon: <CategoryOutlinedIcon />,
-      requiredPermission: "view category",
-    },
-    {
-      title: "Products",
-      to: "/products",
-      icon: <ListAltOutlinedIcon />,
-      requiredPermission: "view product",
-    },
-    {
-      title: "Stock products",
-      to: "/stocks",
-      icon: <InventoryOutlinedIcon />,
-      requiredPermission: "view stock",
-    },
-    {
-      title: "Order",
-      to: "/orders",
-      icon: <InventoryOutlinedIcon />,
-      requiredPermission: "view order",
-    },
-  ];
-
-  const financialRecordsSubmenu = [
-    {
-      title: "Transactions",
+      title: "Transactions", // 1 word ✓
       to: "/transactions",
-      icon: <ReceiptOutlinedIcon />,
+      icon: <ReceiptLongOutlinedIcon />,
       requiredPermission: "view transaction",
     },
     {
-      title: "Suppliers",
+      title: "Suppliers", // 1 word ✓
       to: "/suppliers",
-      icon: <AirportShuttleOutlinedIcon />,
+      icon: <LocalShippingOutlinedIcon />,
       requiredPermission: "view supplier",
+    },
+  ];
+
+  const peopleManagementSubmenu = [
+    {
+      title: "Staff", // 1 word ✓
+      to: "/staffs",
+      icon: <PeopleAltOutlinedIcon />,
+      requiredPermission: "view staff",
     },
   ];
 
@@ -183,7 +185,7 @@ const Sidebar = () => {
           {/* logo section */}
           <MenuItem
             style={{
-              margin: "15px 0 25px 0",
+              margin: "20px 0 30px 0",
               color: colors.grey[100],
             }}
           >
@@ -191,8 +193,8 @@ const Sidebar = () => {
               display="flex"
               alignItems="center"
               justifyContent="start"
-              gap="10px"
-              px="10px"
+              gap="12px"
+              px="16px"
             >
               <img {...logoConfig} />
               <Typography variant="h6" color={colors.grey[100]}>
@@ -216,10 +218,10 @@ const Sidebar = () => {
               />
             ))}
 
-            {/* Product Management Submenu - Only show if user has at least one permission */}
+            {/* Product Management Submenu */}
             {shouldShowSubmenu(productManagementSubmenu) && (
               <SubMenu
-                title="Inventory Management"
+                title="Inveotrys" // 1 word ✓
                 icon={<Inventory2OutlinedIcon />}
                 style={{ color: colors.grey[100] }}
               >
@@ -237,14 +239,14 @@ const Sidebar = () => {
               </SubMenu>
             )}
 
-            {/* Staff Management Submenu - Only show if user has at least one permission */}
-            {shouldShowSubmenu(userManagementSubmenu) && (
+            {/* Sales & Orders Submenu */}
+            {shouldShowSubmenu(salesOrdersSubmenu) && (
               <SubMenu
-                title="User Management"
-                icon={<Groups2OutlinedIcon />}
+                title="Sales" // 1 word ✓
+                icon={<ShoppingCartOutlinedIcon />}
                 style={{ color: colors.grey[100] }}
               >
-                {userManagementSubmenu.map((item) => (
+                {salesOrdersSubmenu.map((item) => (
                   <Item
                     key={item.title}
                     title={item.title}
@@ -258,14 +260,35 @@ const Sidebar = () => {
               </SubMenu>
             )}
 
-            {/* Transition Management Submenu - Only show if user has at least one permission */}
-            {shouldShowSubmenu(financialRecordsSubmenu) && (
+            {/* Purchase & Finance Submenu */}
+            {shouldShowSubmenu(purchaseFinanceSubmenu) && (
               <SubMenu
-                title="Financial Management"
-                icon={<CurrencyExchangeOutlinedIcon />}
+                title="Purchases" // 1 word ✓
+                icon={<AccountBalanceOutlinedIcon />}
                 style={{ color: colors.grey[100] }}
               >
-                {financialRecordsSubmenu.map((item) => (
+                {purchaseFinanceSubmenu.map((item) => (
+                  <Item
+                    key={item.title}
+                    title={item.title}
+                    to={item.to}
+                    icon={item.icon}
+                    selected={selected}
+                    setSelected={setSelected}
+                    requiredPermission={item.requiredPermission}
+                  />
+                ))}
+              </SubMenu>
+            )}
+
+            {/* People Management Submenu */}
+            {shouldShowSubmenu(peopleManagementSubmenu) && (
+              <SubMenu
+                title="People" // 1 word ✓
+                icon={<Groups2OutlinedIcon />}
+                style={{ color: colors.grey[100] }}
+              >
+                {peopleManagementSubmenu.map((item) => (
                   <Item
                     key={item.title}
                     title={item.title}

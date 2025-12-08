@@ -23,6 +23,7 @@ class ProductResource extends JsonResource
             Product::CATEGORY_ID => $this->category_id,
             Product::BRAND => $this->brand,
             Product::PRICE => $this->price,
+            Product::SALE_PRICE => $this->sale_price,
             Product::DESCRIPTION => $this->description,
             Product::STAFF_ID => $this->staff_id,
             // include category

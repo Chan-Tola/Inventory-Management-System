@@ -215,36 +215,6 @@ const StockTable = ({
               ))}
             </Box>
           </Box>
-
-          {/* Loading Indicator */}
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              py: 3,
-              mt: 2,
-              borderTop: 1,
-              borderColor: colors.primary[300] + "50",
-            }}
-          >
-            <CircularProgress
-              size={20}
-              sx={{
-                color: colors.greenAccent[500],
-                mr: 2,
-              }}
-            />
-            <Typography
-              variant="body2"
-              sx={{
-                color: colors.grey[100],
-                fontWeight: 500,
-              }}
-            >
-              Loading stocks...
-            </Typography>
-          </Box>
         </CardContent>
       </Card>
     );

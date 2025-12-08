@@ -44,7 +44,11 @@ const Topbar = () => {
 
   // note: CONSTANTS
   const MENU_ITEMS = [
-    { name: "Profile", path: "setting", icon: <PersonOutlineIcon sx={{ fontSize: 20 }} /> },
+    {
+      name: "Profile",
+      path: "setting",
+      icon: <PersonOutlineIcon sx={{ fontSize: 20 }} />,
+    },
     { name: "Logout", icon: <LogoutIcon sx={{ fontSize: 20 }} /> },
   ];
 
@@ -66,14 +70,14 @@ const Topbar = () => {
   const renderMenuButton = (setting) => {
     const commonStyles = {
       justifyContent: "flex-start",
-      padding: "10px 16px",
-      fontSize: "14px",
+      padding: "12px 20px",
+      fontSize: "15px",
       fontWeight: 500,
       textTransform: "none",
-      minHeight: "44px",
+      minHeight: "46px",
       borderRadius: "8px",
       width: "100%",
-      gap: 2,
+      gap: 3,
     };
 
     if (setting.name === "Logout") {
@@ -122,29 +126,32 @@ const Topbar = () => {
       display="flex"
       justifyContent="space-between"
       alignItems="center"
-      p={2}
-      sx={{ 
+      p={2.5}
+      sx={{
         borderBottom: `1px solid ${theme.palette.divider}`,
         backgroundColor: theme.palette.background.paper,
         boxShadow: theme.shadows[1],
         backdropFilter: "blur(10px)",
+        height: "70px",
       }}
     >
       {/* Date Section */}
       <Box>
-        <Typography 
-          variant="h5" 
-          component="h2" 
+        <Typography
+          variant="h5"
+          component="h2"
           fontWeight="bold"
           color="text.primary"
           sx={{
-            background: theme.palette.mode === 'dark' 
-              ? 'linear-gradient(45deg, #90caf9, #e3f2fd)'
-              : 'linear-gradient(45deg, #1976d2, #42a5f5)',
-            backgroundClip: 'text',
-            WebkitBackgroundClip: 'text',
-            color: 'transparent',
+            background:
+              theme.palette.mode === "dark"
+                ? "linear-gradient(45deg, #90caf9, #e3f2fd)"
+                : "linear-gradient(45deg, #1976d2, #42a5f5)",
+            backgroundClip: "text",
+            WebkitBackgroundClip: "text",
+            color: "transparent",
             fontWeight: 700,
+            fontSize: "1.6rem",
           }}
         >
           Today, {date}
@@ -152,24 +159,30 @@ const Topbar = () => {
       </Box>
 
       {/* note: ACTIONS SECTION */}
-      <Box display="flex" alignItems="center" gap={1.5}>
+      <Box display="flex" alignItems="center" gap={2}>
         {/* note: Theme Toggle Button */}
-        <Tooltip title={`Switch to ${theme.palette.mode === 'dark' ? 'light' : 'dark'} mode`}>
-          <IconButton 
+        <Tooltip
+          title={`Switch to ${
+            theme.palette.mode === "dark" ? "light" : "dark"
+          } mode`}
+        >
+          <IconButton
             onClick={colorMode.toggleColorMode}
             sx={{
               backgroundColor: theme.palette.action.hover,
-              '&:hover': {
+              width: 44,
+              height: 44,
+              "&:hover": {
                 backgroundColor: theme.palette.action.selected,
-                transform: 'scale(1.05)',
+                transform: "scale(1.05)",
               },
-              transition: 'all 0.2s ease-in-out',
+              transition: "all 0.2s ease-in-out",
             }}
           >
             {theme.palette.mode === "dark" ? (
-              <LightModeOutlinedIcon />
+              <LightModeOutlinedIcon fontSize="medium" />
             ) : (
-              <DarkModeOutlinedIcon />
+              <DarkModeOutlinedIcon fontSize="medium" />
             )}
           </IconButton>
         </Tooltip>
@@ -179,6 +192,8 @@ const Topbar = () => {
           <IconButton
             sx={{
               backgroundColor: theme.palette.action.hover,
+              width: 44,
+              height: 44,
               '&:hover': {
                 backgroundColor: theme.palette.action.selected,
                 transform: 'scale(1.05)',
@@ -187,7 +202,7 @@ const Topbar = () => {
             }}
           >
             <Badge badgeContent={0} color="error" variant="dot">
-              <NotificationsOutlinedIcon />
+              <NotificationsOutlinedIcon fontSize="medium" />
             </Badge>
           </IconButton>
         </Tooltip> */}
@@ -195,26 +210,28 @@ const Topbar = () => {
         {/* Profile Section */}
         <Box>
           <Tooltip title="Account settings">
-            <IconButton 
+            <IconButton
               onClick={handleProfileMenuOpen}
               sx={{
                 padding: 0.5,
                 border: `2px solid ${theme.palette.primary.main}30`,
-                '&:hover': {
+                width: 46,
+                height: 46,
+                "&:hover": {
                   border: `2px solid ${theme.palette.primary.main}`,
-                  transform: 'scale(1.05)',
+                  transform: "scale(1.05)",
                 },
-                transition: 'all 0.2s ease-in-out',
+                transition: "all 0.2s ease-in-out",
               }}
             >
-              <Avatar 
-                alt={user.name} 
+              <Avatar
+                alt={user.name}
                 src={user.staff?.profile_url}
                 sx={{
-                  width: 38,
-                  height: 38,
+                  width: 40,
+                  height: 40,
                   backgroundColor: theme.palette.primary.main,
-                  fontSize: '1rem',
+                  fontSize: "1.1rem",
                   fontWeight: 600,
                 }}
               >
@@ -225,14 +242,14 @@ const Topbar = () => {
 
           {/* Profile Dropdown Menu */}
           <Menu
-            sx={{ 
-              mt: '50px',
-              '& .MuiPaper-root': {
+            sx={{
+              mt: "52px",
+              "& .MuiPaper-root": {
                 borderRadius: 2,
-                boxShadow: theme.shadows[8],
-                minWidth: 160,
+                boxShadow: theme.shadows[10],
+                minWidth: 180,
                 border: `1px solid ${theme.palette.divider}`,
-              }
+              },
             }}
             anchorEl={anchorEl}
             open={Boolean(anchorEl)}
@@ -250,13 +267,13 @@ const Topbar = () => {
             {MENU_ITEMS.map((setting) => (
               <MenuItem
                 key={setting.name}
-                sx={{ 
+                sx={{
                   padding: 0.5,
-                  margin: '4px 8px',
-                  borderRadius: '8px',
-                  '&:hover': {
-                    backgroundColor: 'transparent',
-                  }
+                  margin: "5px 10px",
+                  borderRadius: "8px",
+                  "&:hover": {
+                    backgroundColor: "transparent",
+                  },
                 }}
                 onClick={
                   setting.name === "Logout"

@@ -16,6 +16,7 @@ import {
   Typography,
   InputAdornment,
   IconButton,
+  CircularProgress,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 
@@ -145,6 +146,25 @@ const StaffForm = ({
   if (isDeleting) {
     return (
       <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+        {/* Loading Overlay for Delete */}
+        {loading && (
+          <Box
+            sx={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: "rgba(255, 255, 255, 0.8)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 1,
+            }}
+          >
+            <CircularProgress />
+          </Box>
+        )}
         <DialogTitle>Confirm Deletion</DialogTitle>
         <DialogContent>
           <DialogContentText>
@@ -163,6 +183,25 @@ const StaffForm = ({
     return (
       <>
         <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+          {/* Loading Overlay for Delete */}
+          {loading && (
+            <Box
+              sx={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: "rgba(255, 255, 255, 0.8)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                zIndex: 1,
+              }}
+            >
+              <CircularProgress />
+            </Box>
+          )}
           <DialogTitle>
             {isEditing ? "Edit Information" : "Create New Staff"}
           </DialogTitle>

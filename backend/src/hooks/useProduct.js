@@ -21,6 +21,7 @@ export const useProduct = () => {
     name: "",
     sku: "",
     price: "",
+    sale_price: "",
     brand: "",
     category_id: "",
     description: "",
@@ -28,7 +29,7 @@ export const useProduct = () => {
   });
 
   const hasReset = useRef(false);
-  
+
   // Clear success after 3s
   useEffect(() => {
     if (success) {
@@ -56,6 +57,7 @@ export const useProduct = () => {
         name: "",
         sku: "",
         price: "",
+        sale_price: "",
         brand: "",
         category_id: "",
         description: "",
@@ -74,6 +76,7 @@ export const useProduct = () => {
         name: currentProduct.name,
         sku: currentProduct.sku,
         price: currentProduct.price,
+        sale_price: currentProduct.sale_price,
         brand: currentProduct.brand,
         category_id: currentProduct.category_id,
         description: currentProduct.description || "",

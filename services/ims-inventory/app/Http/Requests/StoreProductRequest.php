@@ -25,6 +25,7 @@ class StoreProductRequest extends FormRequest
             Product::CATEGORY_ID => 'required|exists:' . Category::TABLENAME . ',' . Category::ID,
             Product::BRAND => 'required|string|max:255',
             Product::PRICE => 'required|numeric|min:0',
+            Product::SALE_PRICE => 'required|numeric|min:0',
             Product::DESCRIPTION => 'required|string',
             Product::STAFF_ID => 'required|exists:' . 'staffs' . ',' . 'id',
         ];

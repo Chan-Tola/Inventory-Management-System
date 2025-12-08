@@ -13,6 +13,7 @@ import {
   MenuItem,
   Box,
   Typography,
+  CircularProgress,
 } from "@mui/material";
 
 // note: Component props
@@ -38,14 +39,23 @@ const ProductForm = ({
     category_id: "",
     brand: "",
     price: "",
+    sale_price: "",
     description: "",
     images: [],
     ...formData,
   };
-  
+
   //  Then we destructure:
-  const { name, sku, category_id, brand, price, description, images } =
-    safeFormData;
+  const {
+    name,
+    sku,
+    category_id,
+    brand,
+    price,
+    sale_price,
+    description,
+    images,
+  } = safeFormData;
 
   //handle input change
   const handleInputChange = (field) => (e) => {
@@ -54,7 +64,7 @@ const ProductForm = ({
       [field]: e.target.value,
     });
   };
-  
+
   // handle submit
   const handleSubmit = () => {
     console.log("🧾 Product data before submit:", safeFormData);
@@ -102,6 +112,25 @@ const ProductForm = ({
   if (isDeleting) {
     return (
       <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+        {/* Loading Overlay for Delete */}
+        {loading && (
+          <Box
+            sx={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: "rgba(255, 255, 255, 0.8)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 1,
+            }}
+          >
+            <CircularProgress />
+          </Box>
+        )}
         <DialogTitle>Confirm Deletion</DialogTitle>
         <DialogContent>
           <DialogContentText>
@@ -120,6 +149,25 @@ const ProductForm = ({
     return (
       <>
         <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+          {/* Loading Overlay for Form */}
+          {loading && (
+            <Box
+              sx={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: "rgba(255, 255, 255, 0.8)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                zIndex: 1,
+              }}
+            >
+              <CircularProgress />
+            </Box>
+          )}
           <DialogTitle>
             {isEditing ? "Edit Product" : "Add New Product"}
           </DialogTitle>
@@ -173,11 +221,24 @@ const ProductForm = ({
 
               {/* Price */}
               <TextField
-                label="Price"
+                label="Unit Price"
                 type="number"
                 fullWidth
                 value={price}
                 onChange={handleInputChange("price")}
+                required
+                InputProps={{
+                  startAdornment: <Typography sx={{ mr: 1 }}>$</Typography>,
+                }}
+                sx={{ my: 2 }}
+              />
+              {/* Price */}
+              <TextField
+                label="Sale Price"
+                type="number"
+                fullWidth
+                value={sale_price}
+                onChange={handleInputChange("sale_price")}
                 required
                 InputProps={{
                   startAdornment: <Typography sx={{ mr: 1 }}>$</Typography>,

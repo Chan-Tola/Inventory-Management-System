@@ -29,7 +29,7 @@ class GatewayTransactionController extends Controller
             $data = $this->cacheService->remember($cacheKey, 900, function () use ($request) {
                 $response = $this->inventoryService->getTransactions($request->all());
                 return $response->json();
-            },'transactions');
+            }, 'transactions');
 
             return response()->json($data);
         } catch (RequestException $e) {
@@ -56,6 +56,7 @@ class GatewayTransactionController extends Controller
             $response = $this->inventoryService->createTransaction($data);
 
             $this->cacheService->clearByTag('transactions');
+            $this->cacheService->clearByTag('stocks');
 
             return response()->json($response->json(), $response->status());
         } catch (RequestException $e) {
