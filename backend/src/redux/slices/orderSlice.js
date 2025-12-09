@@ -24,7 +24,7 @@ export const fetchOrder = createAsyncThunk(
   }
 );
 
-// Initial Sate
+// Initial State
 const initialState = {
   orderItems: [],
   loading: false,

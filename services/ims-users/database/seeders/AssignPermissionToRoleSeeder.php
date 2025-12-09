@@ -53,6 +53,12 @@ class AssignPermissionToRoleSeeder extends Seeder
         $admin->givePermissionTo(PermissionConstant::VIEW_TRANSACTION);
         $admin->givePermissionTo(PermissionConstant::CREATE_TRANSACTION);
 
+        // sale report
+        $admin->givePermissionTo(PermissionConstant::VIEW_SALE_REPORT);
+
+        // Top Sell 
+        $admin->givePermissionTo(PermissionConstant::VIEW_TOP_SALE);
+
         // ✅ ORDER Permissions - Admin gets ALL
         $admin->givePermissionTo(PermissionConstant::VIEW_ORDER);
         $admin->givePermissionTo(PermissionConstant::CREATE_ORDER);

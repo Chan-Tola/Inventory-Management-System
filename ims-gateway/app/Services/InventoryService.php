@@ -170,4 +170,5 @@ class InventoryService extends BaseService
     {
         return $this->post('/api/inventory/transactions', $data);
     }
+
 }

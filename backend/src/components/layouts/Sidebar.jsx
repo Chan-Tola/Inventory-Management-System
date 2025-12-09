@@ -70,7 +70,7 @@ const Sidebar = () => {
 
   // note: SIDEBAR STYLES
   const sidebarStyle = {
-    height: "100vh",
+    height: "100%",
     "& .pro-sidebar-inner": {
       background: `${colors.primary[400]} !important`,
     },
@@ -152,6 +152,12 @@ const Sidebar = () => {
       icon: <GroupOutlinedIcon />,
       requiredPermission: "view customer",
     },
+    {
+      title: "Sale Report", // 1 word ✓
+      to: "/sale-reports",
+      icon: <GroupOutlinedIcon />,
+      requiredPermission: "view report",
+    },
   ];
 
   const purchaseFinanceSubmenu = [
@@ -221,7 +227,7 @@ const Sidebar = () => {
             {/* Product Management Submenu */}
             {shouldShowSubmenu(productManagementSubmenu) && (
               <SubMenu
-                title="Inveotrys" // 1 word ✓
+                title="Inventory Management"
                 icon={<Inventory2OutlinedIcon />}
                 style={{ color: colors.grey[100] }}
               >

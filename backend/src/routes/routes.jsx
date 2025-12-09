@@ -9,6 +9,7 @@ import {
   CustomerPage,
   TranscationPage,
   OrderPage,
+  SalesReportPage,
 } from "../pages/index";
 export const routes = [
   {
@@ -79,6 +80,15 @@ export const routes = [
     menu: {
       title: "Orders",
       icon: "warehouse",
+      showInMenu: true,
+    },
+  },
+  {
+    path: "/sale-reports",
+    element: <SalesReportPage />,
+    permission: "view report",
+    menu: {
+      title: "Report",
       showInMenu: true,
     },
   },

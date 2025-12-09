@@ -118,13 +118,6 @@ class OrderController extends Controller
             $customerNames = $this->userService->processCustomerResponse($responses['customers'] ?? null);
             $staffNames = $this->userService->processStaffResponse($responses['staff'] ?? null);
 
-            Log::info('📦 Data fetched', [
-                'products' => count($productNames),
-                'customers' => count($customerNames),
-                'staff' => count($staffNames),
-                'customer_2' => $customerNames[2] ?? 'NOT FOUND',
-                'staff_5' => $staffNames[5] ?? 'NOT FOUND'
-            ]);
 
             // --- 5. TRANSFORM ORDERS ---
             $orders->getCollection()->transform(function ($order) use ($productNames, $customerNames, $staffNames) {

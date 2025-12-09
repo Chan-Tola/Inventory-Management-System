@@ -59,6 +59,60 @@ class ProductController extends Controller
         ]);
     }
 
+    public function getProductsBatchForTopSelling(Request $request)
+    {
+        $request->validate([
+            'product_ids' => 'required|array|min:1',
+            'product_ids.*' => 'integer'
+        ]);
+
+        $products = Product::whereIn('id', $request->product_ids)
+            ->select('id', 'name', 'sku', 'price', 'sale_price', 'brand', 'category_id')
+            ->with([
+                'category:id,name',
+                'images' => function ($query) {
+                    // Get primary image or first image
+                    $query->select('id', 'product_id', 'image_url', 'is_primary')
+                        ->orderBy('is_primary', 'desc')
+                        ->orderBy('created_at', 'asc')
+                        ->limit(1);
+                },
+                'stock' => function ($query) {
+                    // UNCOMMENT THIS - Get current stock quantity
+                    $query->select('product_id', DB::raw('SUM(quantity) as total_quantity'))
+                        ->groupBy('product_id');
+                }
+            ])
+            ->get()
+            ->map(function ($product) {
+                // Now $product->stocks will be loaded
+                $stockQuantity = $product->stock ? $product->stock->quantity : 0;
+
+                return [
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'sku' => $product->sku,
+                    'price' => $product->price,
+                    'sale_price' => $product->sale_price,
+                    'brand' => $product->brand,
+                    'category' => $product->category ? [
+                        'id' => $product->category->id,
+                        'name' => $product->category->name
+                    ] : null,
+                    'primary_image' => $product->images->first() ? [
+                        'url' => $product->images->first()->image_url,
+                        'is_primary' => $product->images->first()->is_primary
+                    ] : null,
+                    'current_stock' => $stockQuantity,
+                    'is_in_stock' => $stockQuantity > 0
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'data' => $products
+        ]);
+    }
     /**
      * Store a newly created resource in storage.
      */

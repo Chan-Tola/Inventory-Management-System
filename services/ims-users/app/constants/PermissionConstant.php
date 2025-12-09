@@ -40,9 +40,16 @@ class PermissionConstant
     public const EDIT_SUPPLIER = 'edit supplier';
     public const REMOVE_SUPPLIER = 'remove supplier';
 
-    // // Transition Permissions
+    // Transition Permissions
     public const VIEW_TRANSACTION = 'view transaction';
     public const CREATE_TRANSACTION = 'create transaction';
+
+    // Sale Report Permissions
+    public const VIEW_SALE_REPORT = 'view report';
+
+    // Top Sale  Permissions
+    public const VIEW_TOP_SALE = 'view topsell';
+
 
     // ✅ ORDER Permissions
     public const VIEW_ORDER = 'view order';

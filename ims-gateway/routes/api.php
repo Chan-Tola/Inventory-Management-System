@@ -3,7 +3,6 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\GatewayCategoryController;
-use App\Http\Controllers\GatewayController;
 use App\Http\Controllers\GatewayProductController;
 use App\Http\Controllers\GatewayStockController;
 use App\Http\Controllers\GatewaySupplierController;
@@ -11,6 +10,8 @@ use App\Http\Controllers\GatewayTransactionController;
 use App\Http\Controllers\GatewayStaffController;
 use App\Http\Controllers\GatewayCustomerController;
 use App\Http\Controllers\GatewayOrderController;
+use App\Http\Controllers\GatewayTopSellProductController;
+use App\Http\Controllers\GetwaySaleReportProductController;
 
 // note: publice route no need JWT token
 Route::prefix('auth')->group(function () {
@@ -57,6 +58,10 @@ Route::middleware(['jwt.auth'])->group(function () {
         Route::get('/transactions/{id}', [GatewayTransactionController::class, 'getTransaction'])->middleware('permission:view transaction');
         Route::post('/transactions', [GatewayTransactionController::class, 'createTransaction'])->middleware('permission:create transaction');
     });
+    // note: Sale Report
+    Route::get('/sale-report', [GetwaySaleReportProductController::class, 'getReport'])->middleware('permission:view report');
+    Route::get('/top-selling', [GatewayTopSellProductController::class, 'getTopSellingProducts'])->middleware('permission:view topsell');
+
     //note: /api/users
     Route::prefix('users')->group(function () {
         // note:  Staff  CRUD

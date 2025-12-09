@@ -47,6 +47,13 @@ class PermissionSeeder extends Seeder
         // note: transaction permissions
         Permission::firstOrCreate(['name' => PermissionConstant::VIEW_TRANSACTION, 'guard_name' => 'api']);
         Permission::firstOrCreate(['name' => PermissionConstant::CREATE_TRANSACTION, 'guard_name' => 'api']);
+
+        // note: sale report permissions
+        Permission::firstOrCreate(['name' => PermissionConstant::VIEW_SALE_REPORT, 'guard_name' => 'api']);
+
+        // note: Top Sale  permissions
+        Permission::firstOrCreate(['name' => PermissionConstant::VIEW_TOP_SALE, 'guard_name' => 'api']);
+
         // note: order permissions
         Permission::firstOrCreate(['name' => PermissionConstant::VIEW_ORDER, 'guard_name' => 'api']);
         Permission::firstOrCreate(['name' => PermissionConstant::CREATE_ORDER, 'guard_name' => 'api']);
