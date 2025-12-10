@@ -10,6 +10,7 @@ import {
   TranscationPage,
   OrderPage,
   SalesReportPage,
+  TopSellingProductsPage,
 } from "../pages/index";
 export const routes = [
   {
@@ -83,12 +84,22 @@ export const routes = [
       showInMenu: true,
     },
   },
+  // Sale Report
   {
     path: "/sale-reports",
     element: <SalesReportPage />,
     permission: "view report",
     menu: {
       title: "Report",
+      showInMenu: true,
+    },
+  },
+  {
+    path: "/top-selling",
+    element: <TopSellingProductsPage />,
+    permission: "view topsell",
+    menu: {
+      title: "TopSelling",
       showInMenu: true,
     },
   },

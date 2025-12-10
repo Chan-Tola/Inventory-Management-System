@@ -10,14 +10,12 @@ import "react-pro-sidebar/dist/css/styles.css";
 
 // Assets & Icons
 import { tokens } from "../../theme";
-import darkModeLogo from "../../assets/images/logo-dark-mode.png";
 import lightModeLogo from "../../assets/images/logo-light-mode.png";
 
 // Material-UI Icons
 import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined";
 import CategoryOutlinedIcon from "@mui/icons-material/CategoryOutlined";
 import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
-import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
 import LocalShippingOutlinedIcon from "@mui/icons-material/LocalShippingOutlined";
 import Groups2OutlinedIcon from "@mui/icons-material/Groups2Outlined";
 import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
@@ -25,7 +23,9 @@ import InventoryOutlinedIcon from "@mui/icons-material/InventoryOutlined";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import ReceiptLongOutlinedIcon from "@mui/icons-material/ReceiptLongOutlined";
 import AccountBalanceOutlinedIcon from "@mui/icons-material/AccountBalanceOutlined";
-import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
+import PieChartOutlineIcon from "@mui/icons-material/PieChartOutline";
+import StarBorderIcon from "@mui/icons-material/StarBorder";
+import PersonAddAltIcon from "@mui/icons-material/PersonAddAlt";
 
 // Hooks
 import { useAuth } from "../../hooks/useAuth";
@@ -88,16 +88,13 @@ const Sidebar = () => {
     },
     borderRight: `1px solid ${colors.primary[200]}`,
   };
-
-  // note: LOGO CONFIG
-  const logoConfig = {
-    src: theme.palette.mode === "dark" ? darkModeLogo : lightModeLogo,
-    alt: "Company Logo",
-    style: {
-      width: "44px",
-      height: "44px",
-      objectFit: "contain",
-    },
+  
+  // Get logo filter based on theme
+  const getLogoFilter = () => {
+    if (theme.palette.mode === "dark") {
+      return "brightness(0) invert(1)"; // White logo on dark background
+    }
+    return "none"; // Normal logo on light background
   };
 
   // Helper function to check if submenu should be shown
@@ -147,16 +144,16 @@ const Sidebar = () => {
       requiredPermission: "view order",
     },
     {
-      title: "Customers", // 1 word ✓
-      to: "/customers",
-      icon: <GroupOutlinedIcon />,
-      requiredPermission: "view customer",
-    },
-    {
       title: "Sale Report", // 1 word ✓
       to: "/sale-reports",
-      icon: <GroupOutlinedIcon />,
+      icon: <PieChartOutlineIcon />,
       requiredPermission: "view report",
+    },
+    {
+      title: "Top Selling", // 1 word ✓
+      to: "/top-selling",
+      icon: <StarBorderIcon />,
+      requiredPermission: "view topsell",
     },
   ];
 
@@ -179,8 +176,14 @@ const Sidebar = () => {
     {
       title: "Staff", // 1 word ✓
       to: "/staffs",
-      icon: <PeopleAltOutlinedIcon />,
+      icon: <PersonAddAltIcon />,
       requiredPermission: "view staff",
+    },
+    {
+      title: "Customers", // 1 word ✓
+      to: "/customers",
+      icon: <GroupOutlinedIcon />,
+      requiredPermission: "view customer",
     },
   ];
 
@@ -202,7 +205,16 @@ const Sidebar = () => {
               gap="12px"
               px="16px"
             >
-              <img {...logoConfig} />
+              <img
+                src={lightModeLogo}
+                alt="Company Logo"
+                style={{
+                  width: "44px",
+                  height: "44px",
+                  objectFit: "contain",
+                  filter: getLogoFilter(),
+                }}
+              />
               <Typography variant="h6" color={colors.grey[100]}>
                 Inventoryapp
               </Typography>

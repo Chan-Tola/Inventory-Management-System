@@ -6,7 +6,6 @@ import {
   IconButton,
   Tooltip,
   Chip,
-  Badge,
 } from "@mui/material";
 import { Edit, Delete } from "@mui/icons-material";
 import { useTheme } from "@mui/material";

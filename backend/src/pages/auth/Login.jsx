@@ -1,4 +1,4 @@
-import darkModelogo from "../../assets/images/logo-dark-mode.png";
+import lightModeLogo from "../../assets/images/logo-light-mode.png";
 import { useDispatch, useSelector } from "react-redux";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -13,18 +13,19 @@ import {
   Container,
   Alert,
   CircularProgress,
+  useTheme,
 } from "@mui/material";
 import { loginUser } from "../../redux/slices/authSlice";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-// import { useAlert } from "../../hooks/useAlert";
 
 const Login = () => {
   const [credentials, setCredentials] = useState({
     email: "",
     password: "",
   });
-  // const { showLoginSuccess, showLoginError } = useAlert();
   const [showPassword, setShowPassword] = useState(false);
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
 
   const toggleShowPassword = () => {
     setShowPassword((prev) => !prev);
@@ -39,21 +40,25 @@ const Login = () => {
   // Redirect if already authenticated
   if (isAuthenticated) {
     navigate("/");
-    // showLoginSuccess();
     return null;
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const result = await dispatch(loginUser(credentials)).unwrap();
-      console.log("Login successful:", result);
+      await dispatch(loginUser(credentials)).unwrap();
       navigate("/");
-      // showLoginSuccess();
     } catch (error) {
       console.error("Login failed:", error);
-      // showLoginError(error.message); // Shows error message
     }
+  };
+
+  // Get logo filter based on theme
+  const getLogoFilter = () => {
+    if (isDarkMode) {
+      return "brightness(0) invert(1)"; // White logo on dark background
+    }
+    return "none"; // Normal logo on light background
   };
 
   return (
@@ -65,13 +70,20 @@ const Login = () => {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
+        backgroundColor: theme.palette.background.default, // Adapts to theme
       }}
     >
       <Paper
+        elevation={3}
         sx={{
           p: { xs: 3, sm: 5 },
           width: "100%",
-          background: "#03020A"
+          backgroundColor: theme.palette.background.paper,
+          borderRadius: 3,
+          boxShadow: isDarkMode
+            ? "0 8px 32px rgba(0, 0, 0, 0.3)"
+            : "0 8px 32px rgba(0, 0, 0, 0.1)",
+          border: `1px solid ${theme.palette.divider}`,
         }}
       >
         {/* Logo and Header Section */}
@@ -86,16 +98,21 @@ const Login = () => {
             sx={{
               p: 2,
               borderRadius: 3,
-              boxShadow: "0 4px 12px rgba(13, 71, 161, 0.3)",
+              backgroundColor: isDarkMode
+                ? "rgba(13, 71, 161, 0.2)"
+                : "rgba(13, 71, 161, 0.1)",
+              boxShadow: isDarkMode
+                ? "0 4px 12px rgba(13, 71, 161, 0.3)"
+                : "0 4px 12px rgba(13, 71, 161, 0.2)",
             }}
           >
             <img
-              src={darkModelogo}
+              src={lightModeLogo}
               alt="Company Logo"
               width="70"
               style={{
                 objectFit: "contain",
-                filter: "brightness(0) invert(1)",
+                filter: getLogoFilter(),
               }}
             />
           </Box>
@@ -105,6 +122,7 @@ const Login = () => {
               variant="h4"
               fontWeight="bold"
               gutterBottom
+              color="text.primary"
             >
               Welcome Back
             </Typography>
@@ -210,14 +228,18 @@ const Login = () => {
               fontWeight: "bold",
               textTransform: "none",
               background: "linear-gradient(135deg, #0d47a1 0%, #1976d2 100%)",
-              boxShadow: "0 4px 12px rgba(13, 71, 161, 0.3)",
+              boxShadow: isDarkMode
+                ? "0 4px 12px rgba(13, 71, 161, 0.4)"
+                : "0 4px 12px rgba(13, 71, 161, 0.3)",
               "&:hover": {
                 background: "linear-gradient(135deg, #1976d2 0%, #0d47a1 100%)",
-                boxShadow: "0 6px 16px rgba(13, 71, 161, 0.4)",
+                boxShadow: isDarkMode
+                  ? "0 6px 16px rgba(13, 71, 161, 0.5)"
+                  : "0 6px 16px rgba(13, 71, 161, 0.4)",
                 transform: "translateY(-1px)",
               },
               "&:disabled": {
-                background: "grey.300",
+                background: isDarkMode ? "grey.700" : "grey.300",
               },
               transition: "all 0.2s ease-in-out",
             }}

@@ -9,6 +9,7 @@ import customerReducer from "./slices/customerSlice";
 import transactionReducer from "./slices/transactionSlice";
 import orderReducer from "./slices/orderSlice";
 import saleReportReducer from "./slices/saleReportSlice";
+import topSellProductReducer from "./slices/topSellProductSlice";
 const store = configureStore({
   reducer: {
     // Add other reducers here for microservices
@@ -26,6 +27,8 @@ const store = configureStore({
     orders: orderReducer,
     // note: sale report
     saleReport: saleReportReducer,
+    // note: Top Sale Product
+    topSellProducts: topSellProductReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

@@ -10,11 +10,9 @@ import {
   Paper,
   Box,
   Typography,
-  CircularProgress,
   useTheme,
   TablePagination,
   Skeleton,
-  Chip,
 } from "@mui/material";
 import { tokens } from "../../../theme.js";
 import CategoryTableRow from "./CategoryTableRow";

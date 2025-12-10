@@ -128,7 +128,7 @@ const Topbar = () => {
       alignItems="center"
       p={2.5}
       sx={{
-        borderBottom: `1px solid ${theme.palette.divider}`,
+        borderBottom: `1px solid ${colors.primary[200]}`,
         backgroundColor: theme.palette.background.paper,
         boxShadow: theme.shadows[1],
         backdropFilter: "blur(10px)",

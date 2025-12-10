@@ -12,14 +12,12 @@ import {
   Typography,
   Paper,
   useTheme,
-  CircularProgress,
   Skeleton,
 } from "@mui/material";
 // Hooks
 import { useAuth } from "../../hooks/useAuth";
 import { useMonthlyStats } from "../../hooks/useMonthlyStats";
 import { useFinancialStats } from "../../hooks/useFinancialStats";
-import { useTransaction } from "../../hooks/useTransaction";
 import { useCallback, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux"; // ✅ Add useSelector
 import { fetchTransactions } from "../../redux/slices/transactionSlice"; // Note: check if this is fetchTransaction or fetchTransactions
@@ -97,23 +95,6 @@ const Dashboard = () => {
     },
   ];
 
-  // // ✅ Show loading state
-  // if (loading && transactionItems.length === 0) {
-  //   return (
-  //     <Box
-  //       sx={{
-  //         p: 4,
-  //         display: "flex",
-  //         justifyContent: "center",
-  //         alignItems: "center",
-  //         height: "50vh",
-  //       }}
-  //     >
-  //       <CircularProgress size={40} sx={{ mr: 2 }} />
-  //       <Typography variant="h6">Loading dashboard data...</Typography>
-  //     </Box>
-  //   );
-  // }
   if (loading && transactionItems.length === 0) {
     return (
       <Box sx={{ p: 3 }}>
