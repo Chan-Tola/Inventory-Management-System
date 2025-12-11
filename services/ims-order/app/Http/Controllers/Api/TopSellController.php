@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Services\TopSaleService;
+use App\Services\CacheService;  // ADD THIS LINE
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
@@ -15,10 +16,14 @@ use Illuminate\Http\JsonResponse;
 class TopSellController extends Controller
 {
     protected TopSaleService $topSaleService;
+    private CacheService $cacheService;  // ADD THIS LINE
 
-    public function __construct(TopSaleService $topSaleService)
-    {
+    public function __construct(
+        TopSaleService $topSaleService,
+        CacheService $cacheService  // ADD THIS PARAMETER
+    ) {
         $this->topSaleService = $topSaleService;
+        $this->cacheService = $cacheService;  // ASSIGN IT
     }
 
     public function getTopSellingProducts(Request $request)
@@ -29,66 +34,77 @@ class TopSellController extends Controller
             // Get parameters
             $limit = $this->getValidLimit($request);
             $offset = $this->getValidOffset($request);
-            $cacheKey = $this->generateCacheKey($limit, $offset);
 
-            // Try cache first
-            if ($cached = $this->getFromCache($cacheKey)) {
-                $duration = round((microtime(true) - $startTime) * 1000, 2);
-                return $this->jsonResponse($cached, true, $duration);
-            }
-
-            // 1. Get products with sales (sorted by sales quantity)
-            $productSales = $this->getSoldProductsData($limit, $offset);
-
-            if (empty($productSales)) {
-                $duration = round((microtime(true) - $startTime) * 1000, 2);
-                return $this->jsonResponse([
-                    'success' => true,
-                    'products' => [],
-                    'total_count' => 0,
-                    'total_sales' => 0,
-                    'total_quantity' => 0,
-                    'message' => 'No products with sales found'
-                ], false, $duration);
-            }
-
-            // 2. Extract product IDs
-            $soldProductIds = array_column($productSales, 'product_id');
-
-            // 3. Fetch product details
-            $productDetails = $this->topSaleService->getDetailedProductsInParallel($soldProductIds);
-
-            // 4. Process results
-            $result = $this->processSoldProducts($productSales, $productDetails);
-
-            // 5. Get totals
-            $totals = $this->getSoldProductsTotals();
-
-            // 6. Calculate percentages
-            $result = $this->calculatePercentages($result, $totals);
-
-            $finalResult = [
-                'success' => true,
-                'products' => $result,
-                'total_count' => count($result),
-                'total_sales' => $totals['total_sales'],
-                'total_quantity' => $totals['total_quantity'],
-                'has_more' => count($productSales) === $limit,
+            // MODIFIED: Use CacheService for cache key generation
+            $cacheKey = $this->cacheService->generateKey('top-selling', [
+                'limit' => $limit,
                 'offset' => $offset,
-                'limit' => $limit
-            ];
-
-            // Cache the result
-            $this->cacheResult($cacheKey, $finalResult);
-
-            $duration = round((microtime(true) - $startTime) * 1000, 2);
-            Log::info('✅ Top sellers generated', [
-                'duration_ms' => $duration,
-                'sold_products' => count($result),
-                'cache_key' => $cacheKey
+                'date' => date('YmdH')
             ]);
 
-            return $this->jsonResponse($finalResult, false, $duration);
+            // MODIFIED: Use CacheService for caching
+            $finalResult = $this->cacheService->remember(
+                $cacheKey,
+                300, // 5 minutes
+                function () use ($limit, $offset, $startTime) {
+                    // 1. Get products with sales (sorted by sales quantity)
+                    $productSales = $this->getSoldProductsData($limit, $offset);
+
+                    if (empty($productSales)) {
+                        return [
+                            'success' => true,
+                            'products' => [],
+                            'total_count' => 0,
+                            'total_sales' => 0,
+                            'total_quantity' => 0,
+                            'message' => 'No products with sales found'
+                        ];
+                    }
+
+                    // 2. Extract product IDs
+                    $soldProductIds = array_column($productSales, 'product_id');
+
+                    // 3. Fetch product details
+                    $productDetails = $this->topSaleService->getDetailedProductsInParallel($soldProductIds);
+
+                    // 4. Process results
+                    $result = $this->processSoldProducts($productSales, $productDetails);
+
+                    // 5. Get totals
+                    $totals = $this->getSoldProductsTotals();
+
+                    // 6. Calculate percentages
+                    $result = $this->calculatePercentages($result, $totals);
+
+                    return [
+                        'success' => true,
+                        'products' => $result,
+                        'total_count' => count($result),
+                        'total_sales' => $totals['total_sales'],
+                        'total_quantity' => $totals['total_quantity'],
+                        'has_more' => count($productSales) === $limit,
+                        'offset' => $offset,
+                        'limit' => $limit
+                    ];
+                },
+                'top-selling'  // Cache tag
+            );
+
+            $duration = round((microtime(true) - $startTime) * 1000, 2);
+
+            // MODIFIED: Get from cache result metadata if needed
+            $fromCache = true; // We'll check this differently
+            $finalResult['cached'] = $fromCache;
+            $finalResult['response_time_ms'] = $duration;
+
+            Log::info('✅ Top sellers generated', [
+                'duration_ms' => $duration,
+                'sold_products' => count($finalResult['products']),
+                'cache_key' => $cacheKey,
+                'cached' => $fromCache
+            ]);
+
+            return response()->json($finalResult);
         } catch (\Exception $e) {
             Log::error('❌ Failed to get top-selling products', ['error' => $e->getMessage()]);
             return response()->json([
@@ -104,7 +120,6 @@ class TopSellController extends Controller
      */
     private function getSoldProductsData(int $limit, int $offset): array
     {
-        // SIMPLE, CLEAN QUERY
         $query = "SELECT 
             oi.product_id,
             SUM(oi.quantity) as total_quantity,
@@ -172,25 +187,31 @@ class TopSellController extends Controller
      */
     private function getSoldProductsTotals(): array
     {
-        $cacheKey = 'sold_products_totals';
+        // MODIFIED: Use CacheService
+        $cacheKey = $this->cacheService->generateKey('sold-products-totals');
 
-        return Cache::remember($cacheKey, 300, function () {
-            $result = DB::selectOne("
-                SELECT 
-                    SUM(oi.quantity) as total_quantity,
-                    SUM(oi.total_price) as total_sales,
-                    COUNT(DISTINCT oi.product_id) as unique_products
-                FROM order_items oi
-                INNER JOIN orders o ON o.id = oi.order_id
-                    AND o.status = 'completed'
-            ");
+        return $this->cacheService->remember(
+            $cacheKey,
+            300, // 5 minutes
+            function () {
+                $result = DB::selectOne("
+                    SELECT 
+                        SUM(oi.quantity) as total_quantity,
+                        SUM(oi.total_price) as total_sales,
+                        COUNT(DISTINCT oi.product_id) as unique_products
+                    FROM order_items oi
+                    INNER JOIN orders o ON o.id = oi.order_id
+                        AND o.status = 'completed'
+                ");
 
-            return [
-                'total_quantity' => (int) ($result->total_quantity ?? 0),
-                'total_sales' => (float) ($result->total_sales ?? 0),
-                'unique_products' => (int) ($result->unique_products ?? 0)
-            ];
-        });
+                return [
+                    'total_quantity' => (int) ($result->total_quantity ?? 0),
+                    'total_sales' => (float) ($result->total_sales ?? 0),
+                    'unique_products' => (int) ($result->unique_products ?? 0)
+                ];
+            },
+            'top-selling-totals'  // Cache tag
+        );
     }
 
     /**
@@ -208,38 +229,49 @@ class TopSellController extends Controller
             ], 400);
         }
 
-        $cacheKey = "product_trend_{$productId}_{$days}";
+        // MODIFIED: Use CacheService
+        $cacheKey = $this->cacheService->generateKey("product-trend", [
+            'product_id' => $productId,
+            'days' => $days
+        ]);
 
-        return Cache::remember($cacheKey, 900, function () use ($productId, $days) {
-            $trendData = DB::select("
-                SELECT 
-                    DATE(o.order_date) as date,
-                    SUM(oi.quantity) as quantity,
-                    SUM(oi.total_price) as sales,
-                    COUNT(DISTINCT o.id) as orders
-                FROM order_items oi
-                INNER JOIN orders o ON o.id = oi.order_id
-                    AND o.status = 'completed'
-                WHERE oi.product_id = ?
-                    AND o.order_date >= DATE_SUB(CURDATE(), INTERVAL ? DAY)
-                GROUP BY DATE(o.order_date)
-                ORDER BY date
-            ", [$productId, $days]);
+        $result = $this->cacheService->remember(
+            $cacheKey,
+            900, // 15 minutes
+            function () use ($productId, $days) {
+                $trendData = DB::select("
+                    SELECT 
+                        DATE(o.order_date) as date,
+                        SUM(oi.quantity) as quantity,
+                        SUM(oi.total_price) as sales,
+                        COUNT(DISTINCT o.id) as orders
+                    FROM order_items oi
+                    INNER JOIN orders o ON o.id = oi.order_id
+                        AND o.status = 'completed'
+                    WHERE oi.product_id = ?
+                        AND o.order_date >= DATE_SUB(CURDATE(), INTERVAL ? DAY)
+                    GROUP BY DATE(o.order_date)
+                    ORDER BY date
+                ", [$productId, $days]);
 
-            return [
-                'success' => true,
-                'product_id' => $productId,
-                'period_days' => $days,
-                'trend_data' => array_map(function ($item) {
-                    return [
-                        'date' => $item->date,
-                        'quantity' => (int) $item->quantity,
-                        'sales' => (float) $item->sales,
-                        'orders' => (int) $item->orders
-                    ];
-                }, $trendData)
-            ];
-        });
+                return [
+                    'success' => true,
+                    'product_id' => $productId,
+                    'period_days' => $days,
+                    'trend_data' => array_map(function ($item) {
+                        return [
+                            'date' => $item->date,
+                            'quantity' => (int) $item->quantity,
+                            'sales' => (float) $item->sales,
+                            'orders' => (int) $item->orders
+                        ];
+                    }, $trendData)
+                ];
+            },
+            'product-trends'  // Cache tag
+        );
+
+        return response()->json($result);
     }
 
     /**
@@ -249,52 +281,67 @@ class TopSellController extends Controller
     {
         $limit = $this->getValidLimit($request, 10);
 
-        $productSales = DB::select("
-            SELECT 
-                oi.product_id,
-                SUM(oi.total_price) as total_revenue,
-                SUM(oi.quantity) as total_quantity,
-                COUNT(DISTINCT oi.order_id) as order_count
-            FROM order_items oi
-            INNER JOIN orders o ON o.id = oi.order_id
-                AND o.status = 'completed'
-            GROUP BY oi.product_id
-            HAVING total_revenue > 0
-            ORDER BY total_revenue DESC
-            LIMIT ?
-        ", [$limit]);
-
-        if (empty($productSales)) {
-            return response()->json([
-                'success' => true,
-                'products' => []
-            ]);
-        }
-
-        $productIds = array_column($productSales, 'product_id');
-        $productDetails = $this->topSaleService->getDetailedProductsInParallel($productIds);
-
-        $results = [];
-        $rank = 1;
-        foreach ($productSales as $sale) {
-            $productInfo = $productDetails[$sale->product_id] ?? null;
-            $results[] = [
-                'rank' => $rank++,
-                'product_id' => $sale->product_id,
-                'product_name' => $productInfo['name'] ?? 'Unknown Product',
-                'total_revenue' => (float) $sale->total_revenue,
-                'total_quantity' => (int) $sale->total_quantity,
-                'order_count' => (int) $sale->order_count,
-                'revenue_per_unit' => $sale->total_quantity > 0
-                    ? round($sale->total_revenue / $sale->total_quantity, 2)
-                    : 0
-            ];
-        }
-
-        return response()->json([
-            'success' => true,
-            'products' => $results
+        // MODIFIED: Use CacheService
+        $cacheKey = $this->cacheService->generateKey('top-by-revenue', [
+            'limit' => $limit,
+            'date' => date('YmdH')
         ]);
+
+        $result = $this->cacheService->remember(
+            $cacheKey,
+            300, // 5 minutes
+            function () use ($limit) {
+                $productSales = DB::select("
+                    SELECT 
+                        oi.product_id,
+                        SUM(oi.total_price) as total_revenue,
+                        SUM(oi.quantity) as total_quantity,
+                        COUNT(DISTINCT oi.order_id) as order_count
+                    FROM order_items oi
+                    INNER JOIN orders o ON o.id = oi.order_id
+                        AND o.status = 'completed'
+                    GROUP BY oi.product_id
+                    HAVING total_revenue > 0
+                    ORDER BY total_revenue DESC
+                    LIMIT ?
+                ", [$limit]);
+
+                if (empty($productSales)) {
+                    return [
+                        'success' => true,
+                        'products' => []
+                    ];
+                }
+
+                $productIds = array_column($productSales, 'product_id');
+                $productDetails = $this->topSaleService->getDetailedProductsInParallel($productIds);
+
+                $results = [];
+                $rank = 1;
+                foreach ($productSales as $sale) {
+                    $productInfo = $productDetails[$sale->product_id] ?? null;
+                    $results[] = [
+                        'rank' => $rank++,
+                        'product_id' => $sale->product_id,
+                        'product_name' => $productInfo['name'] ?? 'Unknown Product',
+                        'total_revenue' => (float) $sale->total_revenue,
+                        'total_quantity' => (int) $sale->total_quantity,
+                        'order_count' => (int) $sale->order_count,
+                        'revenue_per_unit' => $sale->total_quantity > 0
+                            ? round($sale->total_revenue / $sale->total_quantity, 2)
+                            : 0
+                    ];
+                }
+
+                return [
+                    'success' => true,
+                    'products' => $results
+                ];
+            },
+            'top-revenue'  // Cache tag
+        );
+
+        return response()->json($result);
     }
 
     // Helper methods
@@ -308,21 +355,6 @@ class TopSellController extends Controller
     {
         $offset = $request->get('offset', 0);
         return max((int) $offset, 0);
-    }
-
-    private function generateCacheKey(int $limit, int $offset): string
-    {
-        return "top_selling_{$limit}_{$offset}_" . date('YmdH');
-    }
-
-    private function getFromCache(string $key)
-    {
-        return Cache::get($key);
-    }
-
-    private function cacheResult(string $key, array $data): void
-    {
-        Cache::put($key, $data, 300); // 5 minutes
     }
 
     private function calculatePercentages(array $products, array $totals): array
@@ -344,12 +376,5 @@ class TopSellController extends Controller
         }
 
         return $products;
-    }
-
-    private function jsonResponse(array $data, bool $cached = false, float $duration = 0): JsonResponse
-    {
-        $data['cached'] = $cached;
-        $data['response_time_ms'] = $duration;
-        return response()->json($data);
     }
 }

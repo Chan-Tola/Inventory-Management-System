@@ -7,24 +7,23 @@ use Illuminate\Http\Request;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Services\InventoryService;
+use App\Services\CacheService;  // ADD THIS LINE
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
 class ReportController extends Controller
 {
-    /**
-     * Handle sale report requests
-     * This is the MAIN function that does everything
-     */
     protected InventoryService $inventoryService;
+    private CacheService $cacheService;  // ADD THIS LINE
 
     public function __construct(
-        InventoryService $inventoryService
+        InventoryService $inventoryService,
+        CacheService $cacheService  // ADD THIS PARAMETER
     ) {
         $this->inventoryService = $inventoryService;
+        $this->cacheService = $cacheService;  // ASSIGN IT
     }
-
 
     public function getReport(Request $request)
     {
@@ -32,28 +31,48 @@ class ReportController extends Controller
             // 1. Determine date range
             $dateRange = $this->getDateRange($request);
 
-            // 2. Get summary data
-            $summary = $this->getSummary($dateRange['start_date'], $dateRange['end_date']);
+            // ADD CACHING: Generate unique cache key based on report parameters
+            $cacheKey = $this->cacheService->generateKey('report', [
+                'type' => $dateRange['type'],
+                'start' => $dateRange['start_date'],
+                'end' => $dateRange['end_date'],
+                'days' => $dateRange['days']
+            ]);
 
-            // 3. Get product sales
-            $productSales = $this->getProductSales($dateRange['start_date'], $dateRange['end_date']);
+            // Use cache with 10 minutes TTL (reports don't need real-time)
+            $reportData = $this->cacheService->remember(
+                $cacheKey,
+                600, // 10 minutes
+                function () use ($dateRange) {
+                    // 2. Get summary data
+                    $summary = $this->getSummary($dateRange['start_date'], $dateRange['end_date']);
 
-            // 4. Get daily breakdown
-            $dailyBreakdown = $this->getDailyBreakdown($dateRange['start_date'], $dateRange['end_date']);
+                    // 3. Get product sales
+                    $productSales = $this->getProductSales($dateRange['start_date'], $dateRange['end_date']);
 
-            // 5. Return the report
+                    // 4. Get daily breakdown
+                    $dailyBreakdown = $this->getDailyBreakdown($dateRange['start_date'], $dateRange['end_date']);
+
+                    return [
+                        'report_type' => $dateRange['type'],
+                        'period' => [
+                            'start_date' => $dateRange['start_date'],
+                            'end_date' => $dateRange['end_date'],
+                            'days' => $dateRange['days']
+                        ],
+                        'summary' => $summary,
+                        'product_sales' => $productSales,
+                        'daily_breakdown' => $dailyBreakdown,
+                        'generated_at' => now()->toDateTimeString()
+                    ];
+                },
+                'reports'  // Cache tag
+            );
+
             return response()->json([
                 'success' => true,
-                'report_type' => $dateRange['type'],
-                'period' => [
-                    'start_date' => $dateRange['start_date'],
-                    'end_date' => $dateRange['end_date'],
-                    'days' => $dateRange['days']
-                ],
-                'summary' => $summary,
-                'product_sales' => $productSales,
-                'daily_breakdown' => $dailyBreakdown,
-                'generated_at' => now()->toDateTimeString()
+                'cached' => true,  // Optional: indicate if from cache
+                ...$reportData  // Spread the cached data
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -66,9 +85,6 @@ class ReportController extends Controller
 
     /**
      * Determine date range based on request
-     * This handles YOUR EXACT requirements:
-     * - date=2025-12-08 → 1 day
-     * - start_date=2025-12-01 → 7 days
      */
     private function getDateRange(Request $request): array
     {
@@ -246,7 +262,7 @@ class ReportController extends Controller
 
             $dailyData[] = [
                 'date' => $dateStr,
-                'day_name' => $currentDate->format('l'), // Monday, Tuesday, etc.
+                'day_name' => $currentDate->format('l'),
                 'sales' => (float) $daySales,
                 'orders' => $dayOrdersCount,
                 'items_sold' => $dayItems,
