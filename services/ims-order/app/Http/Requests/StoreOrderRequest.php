@@ -18,12 +18,15 @@ class StoreOrderRequest extends FormRequest
     {
         return [
             'customer_id' => 'required|exists:customers,id',
+            // 🔥 Allow single object OR array of objects
+            'items'       => ['required'],
+            
             'staff_id' => 'required|exists:' . 'staffs' . ',' . 'id',
             'items' => 'required|array|min:1',
             'items.*.product_id' => 'required|exists:products,id',
             'items.*.quantity' => 'required|integer|min:1',
             'items.*.unit_price' => 'required|numeric|min:0',
-            
+
             'user' => 'sometimes|array',
             'user_id' => 'sometimes|integer',
             'user_permission' => 'sometimes|array',

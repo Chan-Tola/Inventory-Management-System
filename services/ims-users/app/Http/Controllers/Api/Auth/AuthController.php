@@ -3,13 +3,16 @@
 namespace App\Http\Controllers\Api\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\LoginRequest;
+// use App\Http\Requests\LoginRequest;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Http\JsonResponse;
 use App\Http\Resources\UserResource;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
+use Tymon\JWTAuth\Exceptions\JWTException;
 
 class AuthController extends Controller
 {
@@ -57,8 +60,74 @@ class AuthController extends Controller
         }
     }
 
-    public function register() {}
+    /**
+     * Test endpoint to decode token
+     */
+    public function decodeToken(Request $request): JsonResponse
+    {
+        try {
+            $token = $request->bearerToken();
 
+            if (!$token) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No token provided'
+                ], 401);
+            }
+
+            // Decode using middleware method
+            $tokenParts = explode('.', $token);
+
+            if (count($tokenParts) !== 3) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid token format'
+                ], 400);
+            }
+
+            $payload = json_decode(
+                base64_decode(
+                    strtr($tokenParts[1], '-_', '+/')
+                ),
+                true
+            );
+
+            // Also try JWTAuth decode
+            $jwtDecoded = null;
+            try {
+                $jwtDecoded = JWTAuth::setToken($token)->getPayload()->toArray();
+            } catch (\Exception $e) {
+                // Ignore
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'manual_decode' => [
+                        'payload_keys' => array_keys($payload),
+                        'has_permissions' => isset($payload['permissions']),
+                        'permissions' => $payload['permissions'] ?? 'NOT FOUND',
+                        'roles' => $payload['roles'] ?? 'NOT FOUND',
+                        'sub' => $payload['sub'] ?? 'NOT FOUND',
+                    ],
+                    'jwt_decode' => $jwtDecoded,
+                    'has_view_category' => isset($payload['permissions']) ?
+                        in_array('view category', $payload['permissions']) : false
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Decode failed',
+                'error' => $e->getMessage()
+            ], 400);
+        }
+    }
+
+
+    /**
+     * Handle user logout
+     */
     public function logout(Request $request)
     {
         try {
@@ -79,41 +148,27 @@ class AuthController extends Controller
             ], 500);
         }
     }
-
-    public function validateToken(Request $request): JsonResponse // ✅ Now using correct Request
+    /**
+     * Clear cache for testing purposes (optional)
+     */
+    public function clearCache(Request $request): JsonResponse
     {
-        try {
-            Log::info('=== VALIDATE TOKEN START ===');
+        $request->validate([
+            'user_id' => 'required|integer|exists:users,id'
+        ]);
 
-            // Check if user is authenticated using the JWT token
-            if (!auth('api')->check()) {
-                Log::warning('Token validation failed - user not authenticated');
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Invalid token'
-                ], 401);
-            }
+        $userId = $request->user_id;
 
-            $user = auth('api')->user();
-            Log::info('Token validation successful', ['user_id' => $user->id]);
+        Cache::forget("user:{$userId}:permissions");
+        Cache::forget("user:{$userId}:roles");
 
-            // Now UserResource should work!
-            return response()->json([
-                'success' => true,
-                'data' => new UserResource($user)
-            ], 200);
-        } catch (\Exception $e) {
-            Log::error('Token validation exception', [
-                'message' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString() // Add trace to see detailed error
-            ]);
+        Log::info('User cache cleared manually', ['user_id' => $userId]);
 
-            return response()->json([
-                'success' => false,
-                'message' => 'Token validation failed: ' . $e->getMessage()
-            ], 500);
-        }
+        return response()->json([
+            'success' => true,
+            'message' => 'Cache cleared successfully'
+        ]);
     }
+
+    public function register() {}
 }

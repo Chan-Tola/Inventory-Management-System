@@ -228,7 +228,7 @@ const TranscationForm = ({
 
               {/* Amount */}
               <TextField
-                label="Amount"
+                label="Unit Price"
                 type="number"
                 fullWidth
                 value={amount}

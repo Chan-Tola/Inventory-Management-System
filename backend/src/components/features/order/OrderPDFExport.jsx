@@ -39,8 +39,20 @@ const OrderPDFExport = () => {
 
   useEffect(() => {
     if (location.state?.order) {
-      setOrder(location.state.order);
-      console.log("Order data received:", location.state.order);
+      // Normalize product_name to always be a string
+      const normalizedOrder = {
+        ...location.state.order,
+        items:
+          location.state.order.items?.map((item) => ({
+            ...item,
+            product_name:
+              typeof item.product_name === "object"
+                ? item.product_name.name || "Product"
+                : item.product_name || "Product",
+          })) || [],
+      };
+      setOrder(normalizedOrder);
+      console.log("Order data received and normalized:", normalizedOrder);
       setLoading(false);
     }
   }, [orderId, location.state]);
@@ -53,7 +65,12 @@ const OrderPDFExport = () => {
   }, [order, loading, pdfGenerated]);
 
   const generatePDF = () => {
-    if (!order) return;
+    console.log("Generating PDF with order:", order);
+
+    if (!order) {
+      console.error("No order data available");
+      return;
+    }
 
     const doc = new jsPDF("p", "mm", "a4");
     const pageWidth = doc.internal.pageSize.getWidth();
@@ -140,10 +157,16 @@ const OrderPDFExport = () => {
         const unitPrice = parseFloat(item.unit_price) || 0;
         const subtotal = parseFloat(item.subtotal) || 0;
 
+        // FIX: Handle product_name (already normalized, but keep for safety)
+        const productName =
+          typeof item.product_name === "object"
+            ? item.product_name.name || "Product"
+            : item.product_name || "Product";
+
         doc.text(itemQuantity.toString(), 20 + 7.5, yPos + 5, {
           align: "center",
         });
-        doc.text(item.product_name || "Product", 35 + 5, yPos + 5);
+        doc.text(productName, 35 + 5, yPos + 5);
         doc.text(`$${unitPrice.toFixed(2)}`, 115 + 20, yPos + 5, {
           align: "right",
         });
@@ -166,10 +189,7 @@ const OrderPDFExport = () => {
     const emptyRowsNeeded = 7 - totalRowsSoFar;
 
     for (let i = 0; i < emptyRowsNeeded; i++) {
-      doc.text("", 20, yPos + 5);
-      doc.text("", 35, yPos + 5);
-      doc.text("", 115, yPos + 5);
-      doc.text("", 155, yPos + 5);
+      // Just increase yPos without drawing anything
       yPos += 7;
     }
 
@@ -233,7 +253,9 @@ const OrderPDFExport = () => {
     doc.text("Web: company.com", pageWidth - 20, footerY, { align: "right" });
 
     // Save PDF
-    doc.save(`receipt-${order.order_code || order.id}.pdf`);
+    const fileName = `receipt-${order.order_code || order.id}.pdf`;
+    doc.save(fileName);
+    console.log(`PDF generated: ${fileName}`);
   };
 
   const handleBack = () => {
@@ -376,49 +398,14 @@ const OrderPDFExport = () => {
           borderColor: "divider",
         }}
       >
-        {/* Header - From and To sections */}
-        <Grid container spacing={4} sx={{ mb: 4 }}>
-          {/* FROM section */}
-          <Grid item xs={6}>
-            <Box>
-              <Typography variant="caption" fontWeight="bold" gutterBottom>
-                FROM
-              </Typography>
-              <Typography variant="body1" fontWeight="bold">
-                YOUR COMPANY
-              </Typography>
-              <Typography variant="body2">Your Address 1234</Typography>
-              <Typography variant="body2">CA 12345</Typography>
-            </Box>
-          </Grid>
-
-          {/* RECEIPT header right side */}
-          <Grid item xs={6}>
-            <Box sx={{ textAlign: "right" }}>
-              <Typography variant="h4" fontWeight="bold" gutterBottom>
-                RECEIPT
-              </Typography>
-              <Typography variant="body2">
-                <strong>Receipt #:</strong> {order.order_code || order.id}
-              </Typography>
-              <Typography variant="body2">
-                <strong>Receipt Date:</strong>{" "}
-                {new Date(order.order_date).toLocaleDateString("en-US")}
-              </Typography>
-            </Box>
-          </Grid>
-        </Grid>
-
         {/* TO section */}
         <Box sx={{ mb: 4 }}>
           <Typography variant="caption" fontWeight="bold" gutterBottom>
-            TO
+            FROM
           </Typography>
           <Typography variant="body1" fontWeight="medium">
-            {order.customer_name || "Customer Name"}
+            {"Customer Name : " + order.customer_name || "Customer Name"}
           </Typography>
-          <Typography variant="body2">Customer Address 1234</Typography>
-          <Typography variant="body2">CA 12345</Typography>
         </Box>
 
         <Divider sx={{ my: 3 }} />
@@ -454,7 +441,7 @@ const OrderPDFExport = () => {
                     py: 1,
                   }}
                 >
-                  Description
+                  Product Name
                 </TableCell>
                 <TableCell
                   sx={{
@@ -464,7 +451,7 @@ const OrderPDFExport = () => {
                     textAlign: "right",
                   }}
                 >
-                  Unit Price
+                  Sale Price
                 </TableCell>
                 <TableCell
                   sx={{
@@ -481,12 +468,18 @@ const OrderPDFExport = () => {
             <TableBody>
               {/* Order Items */}
               {order.items && order.items.length > 0 ? (
-                order.items.map((item, index) => {
+                order.items.map((item) => {
                   const unitPrice = parseFloat(item.unit_price) || 0;
                   const subtotal = parseFloat(item.subtotal) || 0;
 
+                  // Get product name (already normalized, but keep for safety)
+                  const productName =
+                    typeof item.product_name === "object"
+                      ? item.product_name.name || "Product"
+                      : item.product_name || "Product";
+
                   return (
-                    <TableRow key={item.id || index}>
+                    <TableRow key={item.id}>
                       <TableCell
                         sx={{
                           py: 2,
@@ -495,9 +488,7 @@ const OrderPDFExport = () => {
                       >
                         {item.quantity || 0}
                       </TableCell>
-                      <TableCell sx={{ py: 2 }}>
-                        {item.product_name || "Product"}
-                      </TableCell>
+                      <TableCell sx={{ py: 2 }}>{productName}</TableCell>
                       <TableCell sx={{ py: 2 }} align="right">
                         ${unitPrice.toFixed(2)}
                       </TableCell>
@@ -585,24 +576,13 @@ const OrderPDFExport = () => {
           }}
         >
           <Typography variant="caption" color="text.secondary">
-            Tel: +1 234 56 789
+            Tel: +855 16 354 159
           </Typography>
           <Typography variant="caption" color="text.secondary">
-            Email: company@email.com
+            Email: chantola.ren@gmail.com
           </Typography>
           <Typography variant="caption" color="text.secondary">
-            Web: company.com
-          </Typography>
-        </Box>
-
-        {/* Print notice */}
-        <Box sx={{ mt: 3, textAlign: "center" }}>
-          <Typography
-            variant="caption"
-            color="text.secondary"
-            fontStyle="italic"
-          >
-            This is a computer-generated receipt. No signature is required.
+            Web: IMS.com
           </Typography>
         </Box>
       </Paper>

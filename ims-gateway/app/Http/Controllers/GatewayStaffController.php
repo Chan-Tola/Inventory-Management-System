@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\CacheService;
 use App\Services\UserService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Client\RequestException;
@@ -10,16 +11,26 @@ use Illuminate\Http\JsonResponse;
 class GatewayStaffController extends Controller
 {
     protected UserService $userService;
+    protected CacheService $cacheService;
     public function __construct(
         UserService $userService,
+        CacheService $cacheService,
     ) {
         $this->userService = $userService;
+        $this->cacheService = $cacheService;
     }
     public function getStaffUsers(Request $request): JsonResponse
     {
         try {
-            $response = $this->userService->getStaffUsers($request->query());
-            $data = $response->json();
+            $queryParams = $request->query();
+            $cacheKey = $this->cacheService->generateKey('staffs', $queryParams);
+            $data = $this->cacheService->remember($cacheKey, 1800, function () use ($request) {
+                $response = $this->userService->getStaffUsers($request->query());
+                return $response->json();
+            }, 'staffs');
+
+            // $response = $this->userService->getStaffUsers($request->query());
+            // $data = $response->json();
 
             return response()->json($data);
         } catch (RequestException $e) {
@@ -53,6 +64,8 @@ class GatewayStaffController extends Controller
                 $response = $this->userService->createStaffUser($data);
             }
 
+            $this->cacheService->clearByTag('staffs');
+
             return response()->json($response->json(), $response->status());
         } catch (RequestException $e) {
             return $this->handleServiceError($e);
@@ -75,6 +88,7 @@ class GatewayStaffController extends Controller
                 $response = $this->userService->updateStaffUser($id, $data);
             }
 
+            $this->cacheService->clearByTag('staffs');
 
             return response()->json($response->json(), $response->status());
         } catch (RequestException $e) {
@@ -86,6 +100,9 @@ class GatewayStaffController extends Controller
     {
         try {
             $response = $this->userService->deleteStaffUser($id);
+
+            $this->cacheService->clearByTag('staffs');
+            
             return response()->json($response->json(), $response->status());
         } catch (RequestException $e) {
             return $this->handleServiceError($e);

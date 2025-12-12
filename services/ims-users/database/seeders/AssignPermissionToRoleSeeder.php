@@ -72,10 +72,15 @@ class AssignPermissionToRoleSeeder extends Seeder
         $admin->givePermissionTo(PermissionConstant::REMOVE_ORDER_ITEM);
 
         // note:: assign limited permissions to staff
+        $staff->givePermissionTo(PermissionConstant::VIEW_CATEGORY);
         $staff->givePermissionTo(PermissionConstant::VIEW_PRODUCT);
-        $staff->givePermissionTo(PermissionConstant::VIEW_SUPPLIER);
         $staff->givePermissionTo(PermissionConstant::VIEW_STOCK);
         $staff->givePermissionTo(PermissionConstant::CREATE_STOCK);
+        $staff->givePermissionTo(PermissionConstant::VIEW_CUSTOMER);
+        $staff->givePermissionTo(PermissionConstant::VIEW_SUPPLIER);
+        $staff->givePermissionTo(PermissionConstant::VIEW_TRANSACTION);
+        $staff->givePermissionTo(PermissionConstant::VIEW_SALE_REPORT);
+        $staff->givePermissionTo(PermissionConstant::VIEW_STAFF);
 
         // ✅ ORDER Permissions - Staff can view and create orders
         $staff->givePermissionTo(PermissionConstant::VIEW_ORDER);

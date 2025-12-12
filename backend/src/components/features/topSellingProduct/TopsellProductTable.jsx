@@ -148,7 +148,7 @@ const TopsellProductTable = ({ topSellProducts, loading }) => {
                     Revenue
                   </Typography>
                 </TableCell>
-                <TableCell sx={{ py: 2 }}>
+                {/* <TableCell sx={{ py: 2 }}>
                   <Typography
                     variant="subtitle2"
                     color={colors.grey[100]}
@@ -165,7 +165,7 @@ const TopsellProductTable = ({ topSellProducts, loading }) => {
                   >
                     % of Total
                   </Typography>
-                </TableCell>
+                </TableCell> */}
               </TableRow>
             </TableHead>
             <TableBody>

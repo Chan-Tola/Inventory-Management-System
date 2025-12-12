@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreTransactionRequest;
 use App\Http\Resources\TransactionResource;
 use App\Models\Transaction;
-use App\Services\CacheService;  // ADD THIS LINE
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
@@ -14,68 +13,52 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 
 class TransactionController extends Controller
 {
-    private $cacheService;
-
-    // ADD CONSTRUCTOR
-    public function __construct(CacheService $cacheService)
-    {
-        $this->cacheService = $cacheService;
-    }
-
     public function index(Request $request): JsonResponse
     {
         try {
-            // ADD CACHING
-            $cacheKey = $this->cacheService->generateKey('transactions', $request->all());
+            $query = Transaction::select([
+                'id',
+                'transaction_type',
+                'quantity',
+                'transaction_date',
+                'notes',
+                'amount',
+                'money_type',
+                'product_id',
+                'supplier_id',
+                'staff_id',
+            ])->with([
+                'product:id,name',
+                'supplier:id,name',
+            ])->latest();
+            // $query = Transaction::with(['product', 'supplier']);
 
-            $data = $this->cacheService->remember(
-                $cacheKey,
-                600, // 10 minutes (transactions change frequently)
-                function () use ($request) {
-                    $query = Transaction::select([
-                        'id',
-                        'transaction_type',
-                        'quantity',
-                        'transaction_date',
-                        'notes',
-                        'amount',
-                        'money_type',
-                        'product_id',
-                        'supplier_id',
-                        'staff_id',
-                    ])->with([
-                        'product:id,name',
-                        'supplier:id,name',
-                    ])->latest();
+            // Filter by product_id
+            if ($request->has('product_id')) {
+                $query->where('product_id', $request->product_id);
+            }
 
-                    // Filter by product_id
-                    if ($request->has('product_id')) {
-                        $query->where('product_id', $request->product_id);
-                    }
+            // Filter by transaction_type
+            if ($request->has('transaction_type')) {
+                $query->where('transaction_type', $request->transaction_type);
+            }
 
-                    // Filter by transaction_type
-                    if ($request->has('transaction_type')) {
-                        $query->where('transaction_type', $request->transaction_type);
-                    }
+            // Filter by date range
+            if ($request->has('start_date') && $request->has('end_date')) {
+                $query->whereBetween('transaction_date', [
+                    $request->start_date,
+                    $request->end_date
+                ]);
+            }
 
-                    // Filter by date range
-                    if ($request->has('start_date') && $request->has('end_date')) {
-                        $query->whereBetween('transaction_date', [
-                            $request->start_date,
-                            $request->end_date
-                        ]);
-                    }
-
-                    return $query->paginate(20);
-                },
-                'transactions'
-            );
+            $transactions = $query->paginate(20);
 
             return response()->json([
                 'message' => 'Transactions retrieved successfully',
-                'data' => TransactionResource::collection($data)
+                'data' => TransactionResource::collection($transactions)
             ], 200);
         } catch (\Exception $e) {
+            // Log::error('Failed to retrieve transactions: ' . $e->getMessage());
             return response()->json([
                 'message' => 'Failed to retrieve transactions',
                 'error' => $e->getMessage()
@@ -91,15 +74,12 @@ class TransactionController extends Controller
 
             DB::commit();
 
-            // ADD CACHE CLEARING
-            $this->cacheService->clearByTag('transactions');
-            $this->cacheService->clearByTag("transaction:{$transaction->id}");
-            $this->cacheService->clearByTag("product:{$transaction->product_id}:transactions");
-
-            // Also clear product-related caches since transaction affects product stock
-            $this->cacheService->clearByTag('products');
-            $this->cacheService->clearByTag("product:{$transaction->product_id}");
-            $this->cacheService->clearByTag('stocks');
+            // Log::info('Transaction created successfully', [
+            //     'transaction_id' => $transaction->id,
+            //     'product_id' => $transaction->product_id,
+            //     'type' => $transaction->transaction_type,
+            //     'quantity' => $transaction->quantity
+            // ]);
 
             return response()->json([
                 'message' => 'Transaction created successfully.',
@@ -107,6 +87,7 @@ class TransactionController extends Controller
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
+            // Log::error('Transaction creation failed: ' . $e->getMessage());
             return response()->json([
                 'message' => 'Failed to create transaction',
                 'error' => $e->getMessage()
@@ -117,17 +98,7 @@ class TransactionController extends Controller
     public function show($id): JsonResponse
     {
         try {
-            // ADD CACHING
-            $cacheKey = $this->cacheService->generateKey("transaction:{$id}");
-
-            $transaction = $this->cacheService->remember(
-                $cacheKey,
-                600, // 10 minutes
-                function () use ($id) {
-                    return Transaction::with(['product', 'supplier'])->find($id);
-                },
-                "transaction:{$id}"
-            );
+            $transaction = Transaction::with(['product', 'supplier'])->find($id);
 
             if (!$transaction) {
                 return response()->json([
@@ -150,24 +121,22 @@ class TransactionController extends Controller
 
     public function storeInternal(StoreTransactionRequest $request)
     {
-        $validated = $request->validated();
+        // Log::info('📥 INTERNAL: Transaction creation request received', $request->all());
+
+        $validated = $request->validated(); // clean
 
         DB::beginTransaction();
 
         try {
             $transaction = Transaction::create($validated);
 
+            // Log::info('✅ INTERNAL: Transaction created', [
+            //     'transaction_id' => $transaction->id,
+            //     'product_id' => $transaction->product_id,
+            //     'quantity' => $transaction->quantity
+            // ]);
+
             DB::commit();
-
-            // ADD CACHE CLEARING FOR INTERNAL TOO
-            $this->cacheService->clearByTag('transactions');
-            $this->cacheService->clearByTag("transaction:{$transaction->id}");
-            $this->cacheService->clearByTag("product:{$transaction->product_id}:transactions");
-
-            // Also clear product-related caches
-            $this->cacheService->clearByTag('products');
-            $this->cacheService->clearByTag("product:{$transaction->product_id}");
-            $this->cacheService->clearByTag('stocks');
 
             return response()->json([
                 'success' => true,
@@ -183,6 +152,11 @@ class TransactionController extends Controller
             ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
+
+            // Log::error('💥 INTERNAL: Transaction creation failed', [
+            //     'error' => $e->getMessage(),
+            //     'data' => $request->all()
+            // ]);
 
             return response()->json([
                 'success' => false,

@@ -6,10 +6,17 @@ export const useFinancialStats = (transactionItems) => {
     let totalExpenses = 0;
 
     transactionItems.forEach((transaction) => {
-      if (transaction.money_type === "income" && transaction.amount) {
-        totalIncome += parseFloat(transaction.amount) || 0;
-      } else if (transaction.money_type === "expense" && transaction.amount) {
-        totalExpenses += parseFloat(transaction.amount) || 0;
+      const amount = parseFloat(transaction.amount) || 0;
+      const quantity = parseFloat(transaction.quantity) || 1; // default 1
+
+      const total = amount * quantity;
+
+      if (transaction.money_type === "income") {
+        totalIncome += total;
+      }
+
+      if (transaction.money_type === "expense") {
+        totalExpenses += total;
       }
     });
 

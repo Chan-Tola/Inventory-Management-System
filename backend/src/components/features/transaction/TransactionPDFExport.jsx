@@ -350,51 +350,17 @@ const TransactionPDFExport = () => {
           borderColor: "divider",
         }}
       >
-        {/* Header - From and To sections */}
-        <Grid container spacing={4} sx={{ mb: 4 }}>
-          {/* FROM section */}
-          <Grid item xs={6}>
-            <Box>
-              <Typography variant="caption" fontWeight="bold" gutterBottom>
-                FROM
-              </Typography>
-              <Typography variant="body1" fontWeight="bold">
-                YOUR COMPANY
-              </Typography>
-              <Typography variant="body2">Your Address 1234</Typography>
-              <Typography variant="body2">CA 12345</Typography>
-            </Box>
-          </Grid>
-
-          {/* RECEIPT header right side */}
-          <Grid item xs={6}>
-            <Box sx={{ textAlign: "right" }}>
-              <Typography variant="h4" fontWeight="bold" gutterBottom>
-                RECEIPT
-              </Typography>
-              <Typography variant="body2">
-                <strong>Receipt #:</strong> {transaction.id}
-              </Typography>
-              <Typography variant="body2">
-                <strong>Receipt Date:</strong>{" "}
-                {new Date().toLocaleDateString("en-US")}
-              </Typography>
-            </Box>
-          </Grid>
-        </Grid>
-
         {/* TO section */}
         <Box sx={{ mb: 4 }}>
           <Typography variant="caption" fontWeight="bold" gutterBottom>
-            TO
+            FROM
           </Typography>
           <Typography variant="body1" fontWeight="medium">
-            {transaction.supplier?.name || "Customer Name"}
+            {transaction.supplier?.name || "STAF ID: " + transaction.staff_id}
           </Typography>
           <Typography variant="body2">
-            {transaction.supplier?.address || "Customer Address 1234"}
+            {transaction.supplier?.address || ""}
           </Typography>
-          <Typography variant="body2">CA 12345</Typography>
         </Box>
 
         <Divider sx={{ my: 3 }} />
@@ -430,7 +396,7 @@ const TransactionPDFExport = () => {
                     py: 1,
                   }}
                 >
-                  Description
+                  Product Name
                 </TableCell>
                 <TableCell
                   sx={{
@@ -469,10 +435,10 @@ const TransactionPDFExport = () => {
                   {transaction.product?.name || "Product"}
                 </TableCell>
                 <TableCell sx={{ py: 2 }} align="right">
-                  ${(amount / quantity || 0).toFixed(2)}
+                  ${amount.toFixed(2)}
                 </TableCell>
                 <TableCell sx={{ py: 2 }} align="right">
-                  ${amount.toFixed(2)}
+                  ${(amount * quantity || 0).toFixed(2)}
                 </TableCell>
               </TableRow>
 
@@ -532,24 +498,13 @@ const TransactionPDFExport = () => {
           }}
         >
           <Typography variant="caption" color="text.secondary">
-            Tel: +1 234 56 789
+            Tel: +855 16 354 159
           </Typography>
           <Typography variant="caption" color="text.secondary">
-            Email: company@email.com
+            Email: chantola.ren@email.com
           </Typography>
           <Typography variant="caption" color="text.secondary">
-            Web: company.com
-          </Typography>
-        </Box>
-
-        {/* Print notice */}
-        <Box sx={{ mt: 3, textAlign: "center" }}>
-          <Typography
-            variant="caption"
-            color="text.secondary"
-            fontStyle="italic"
-          >
-            This is a computer-generated receipt. No signature is required.
+            Web: IMS.com
           </Typography>
         </Box>
       </Paper>

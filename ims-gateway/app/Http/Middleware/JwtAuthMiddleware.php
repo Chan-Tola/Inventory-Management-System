@@ -89,7 +89,7 @@ class JwtAuthMiddleware
             return response()->json(['message' => 'Invalid token'], 401);
         }
     }
-    
+
     private function extractToken(Request $request): ?string
     {
         // Method 1: Try bearerToken() first (works for POST, GET, etc.)

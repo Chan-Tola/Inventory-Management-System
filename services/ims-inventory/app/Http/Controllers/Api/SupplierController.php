@@ -7,47 +7,27 @@ use App\Http\Requests\StoreSupplierRequest;
 use App\Http\Requests\UpdateSupplierRequest;
 use App\Http\Resources\SupplierResource;
 use App\Models\Supplier;
-use App\Services\CacheService;  // ADD THIS LINE
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;    // ADD THIS LINE
 use Illuminate\Support\Facades\DB;
 
 class SupplierController extends Controller
 {
-    private $cacheService;
-
-    // ADD CONSTRUCTOR
-    public function __construct(CacheService $cacheService)
-    {
-        $this->cacheService = $cacheService;
-    }
-
-    public function index(Request $request): JsonResponse  // ADD Request parameter
+    public function index(): JsonResponse
     {
         try {
-            // ADD CACHING
-            $cacheKey = $this->cacheService->generateKey('suppliers', $request->query());
-
-            $suppliers = $this->cacheService->remember(
-                $cacheKey,
-                3600, // 1 hour (suppliers don't change often)
-                function () {
-                    return Supplier::all();
-                },
-                'suppliers'
-            );
-
+            $suppliers = Supplier::all();
             return response()->json([
-                'message' => 'Suppliers retrieved successfully',
+                'message' => 'suppliers retrieved successfully',
                 'data' => SupplierResource::collection($suppliers)
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => 'Failed to retrieve suppliers',
+                'message' => 'Failed to retrieved supsuppliers',
                 'error' => $e->getMessage()
             ], 500);
         }
     }
+
 
     public function store(StoreSupplierRequest $request): JsonResponse
     {
@@ -55,51 +35,34 @@ class SupplierController extends Controller
         try {
             $supplier = Supplier::create($request->validated());
 
-            // ADD CACHE CLEARING
-            $this->cacheService->clearByTag('suppliers');
-            $this->cacheService->clearByTag("supplier:{$supplier->id}");
-
             DB::commit();
             return response()->json([
-                'message' => 'Supplier created successfully.',
+                'message' => 'supsuppliers created successfully.',
                 'data' => new SupplierResource($supplier)
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
-                'message' => 'Failed to create supplier',
+                'message' => 'Failed to create supsuppliers',
                 'error' => $e->getMessage()
             ], 500);
         }
     }
-
     public function show($id): JsonResponse
     {
         try {
-            // ADD CACHING
-            $cacheKey = $this->cacheService->generateKey("supplier:{$id}");
-
-            $supplier = $this->cacheService->remember(
-                $cacheKey,
-                3600, // 1 hour
-                function () use ($id) {
-                    return Supplier::find($id);
-                },
-                "supplier:{$id}"
-            );
-
+            $supplier = Supplier::find($id);
             if (!$supplier) {
-                return response()->json(['message' => 'Supplier not found'], 404);
+                return response()->json(['message' => 'supplier not found'], 404);
             }
-
             return response()->json([
-                'message' => 'Supplier retrieved successfully',
-                'data' => new SupplierResource($supplier)  // Use Resource
+                'message' => 'supsupplier retrieved successfully',
+                'data' => $supplier
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => 'Failed to retrieve supplier.',
-                'error' => $e->getMessage()
+                'message' => 'Failed to retrieved supsupplier.',
+                'error' =>  $e->getMessage()
             ], 500);
         }
     }
@@ -110,25 +73,23 @@ class SupplierController extends Controller
             DB::beginTransaction();
 
             $supplier = Supplier::find($id);
+
             if (!$supplier) {
-                return response()->json(['message' => 'Supplier not found'], 404);
+                return response()->json(['message' => 'supplier not found'], 404);
             }
 
+            //  the request is already validated at this point from (UpdatesupplierRequest method)
             $supplier->update($request->validated());
-
-            // ADD CACHE CLEARING
-            $this->cacheService->clearByTag('suppliers');
-            $this->cacheService->clearByTag("supplier:{$id}");
 
             DB::commit();
             return response()->json([
-                'message' => 'Supplier updated successfully',
+                'message' => 'supplier update successfully',
                 'data' => new SupplierResource($supplier)
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
-                'message' => 'Failed to update supplier.',
+                'message' => 'Failed to updated supplier.',
                 'error' => $e->getMessage()
             ], 500);
         }
@@ -141,23 +102,17 @@ class SupplierController extends Controller
 
             $supplier = Supplier::find($id);
             if (!$supplier) {
-                return response()->json(['message' => 'Supplier not found'], 404);
+                return response()->json(['message' => 'supplier not found'], 404);
             }
-
             $supplier->delete();
-
-            // ADD CACHE CLEARING
-            $this->cacheService->clearByTag('suppliers');
-            $this->cacheService->clearByTag("supplier:{$id}");
-
             DB::commit();
             return response()->json([
-                'message' => 'Supplier deleted successfully'
+                'message' => 'supplier deleted successfully'
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
-                'message' => 'Failed to delete supplier.',
+                'message' => 'Failed to deleted supplier.',
                 'error' => $e->getMessage()
             ], 500);
         }

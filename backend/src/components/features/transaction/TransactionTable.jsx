@@ -92,7 +92,7 @@ const TransactionTable = ({
                     "Type",
                     "Product",
                     "Quantity",
-                    "Amount",
+                    "Price",
                     "Date",
                     "Actions",
                   ].map((header) => (
@@ -315,7 +315,7 @@ const TransactionTable = ({
                       letterSpacing: "0.5px",
                     }}
                   >
-                    Amount
+                    Price
                   </Typography>
                 </TableCell>
                 <TableCell sx={{ py: 2, borderBottom: "none" }}>

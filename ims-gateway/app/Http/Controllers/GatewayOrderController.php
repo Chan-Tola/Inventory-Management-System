@@ -30,7 +30,7 @@ class GatewayOrderController extends Controller
             $data = $this->cacheService->remember($cacheKey, 900, function () use ($request) {
                 $response = $this->orderService->getOrders($request->all());
                 return $response->json();
-            },'orders');
+            }, 'orders');
 
             return response()->json($data);
         } catch (\Exception $e) {
@@ -72,6 +72,8 @@ class GatewayOrderController extends Controller
             $response = $this->orderService->createOrder($orderData);
 
             $this->cacheService->clearByTag('orders');
+            $this->cacheService->clearByTag('transactions');
+            $this->cacheService->clearByTag('stocks');
 
             return response()->json(
                 $response->json(),

@@ -83,12 +83,12 @@ const TopsellProductTableRow = ({ topSellProduct }) => {
           {formatPrice(topSellProduct.total_sales_amount)}
         </Typography>
         <Typography variant="caption" color={colors.grey[400]}>
-          {formatPrice(topSellProduct.price)} each
+          {formatPrice(topSellProduct.sale_price)} each
         </Typography>
       </TableCell>
 
       {/* Stock Status Column: Color-coded stock indicator with quantity */}
-      <TableCell sx={{ py: 2 }}>
+      {/* <TableCell sx={{ py: 2 }}>
         <Chip
           label={topSellProduct.is_in_stock ? "In Stock" : "Out of Stock"}
           size="small"
@@ -109,10 +109,10 @@ const TopsellProductTableRow = ({ topSellProduct }) => {
         >
           Stock: {topSellProduct.current_stock}
         </Typography>
-      </TableCell>
+      </TableCell> */}
 
       {/* Sales Percentage Column: Visual progress bar with percentage value */}
-      <TableCell sx={{ py: 2 }}>
+      {/* <TableCell sx={{ py: 2 }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <Box
             sx={{
@@ -135,7 +135,7 @@ const TopsellProductTableRow = ({ topSellProduct }) => {
             {topSellProduct.sales_percentage.toFixed(1)}%
           </Typography>
         </Box>
-      </TableCell>
+      </TableCell> */}
     </TableRow>
   );
 };
