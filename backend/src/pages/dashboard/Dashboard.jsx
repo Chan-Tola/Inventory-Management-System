@@ -7,13 +7,7 @@ import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import TrendingDownIcon from "@mui/icons-material/TrendingDown";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
-import {
-  Box,
-  Typography,
-  Paper,
-  useTheme,
-  Skeleton,
-} from "@mui/material";
+import { Box, Typography, Paper, useTheme, Skeleton } from "@mui/material";
 // Hooks
 import { useAuth } from "../../hooks/useAuth";
 import { useMonthlyStats } from "../../hooks/useMonthlyStats";
@@ -21,6 +15,7 @@ import { useFinancialStats } from "../../hooks/useFinancialStats";
 import { useCallback, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux"; // ✅ Add useSelector
 import { fetchTransactions } from "../../redux/slices/transactionSlice"; // Note: check if this is fetchTransaction or fetchTransactions
+import { fetchProducts } from "../../redux/slices/productSlice"; // Note: check if this is fetchTransaction or fetchTransactions
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -31,6 +26,8 @@ const Dashboard = () => {
   const { transactionItems, loading, error } = useSelector(
     (state) => state.transactions
   );
+  const { productItems } = useSelector((state) => state.products);
+  const totalProducts = productItems?.length ?? 0;
 
   const hasFetched = useRef(false);
 
@@ -38,6 +35,7 @@ const Dashboard = () => {
   const handleRefresh = useCallback(() => {
     // Check which function name is correct in your slice
     dispatch(fetchTransactions()); // or fetchTransaction() depending on your slice
+    dispatch(fetchProducts()); // or fetchTransaction() depending on your slice
   }, [dispatch]);
 
   useEffect(() => {
@@ -63,8 +61,8 @@ const Dashboard = () => {
   // Enhanced stats with better visual indicators
   const stats = [
     {
-      title: "Orders",
-      value: transactionItems.length,
+      title: "Products",
+      value: totalProducts,
       icon: <ShoppingCartOutlinedIcon />,
       bgColor: "linear-gradient(135deg, #ff9800 0%, #f57c00 100%)",
       trend: null,

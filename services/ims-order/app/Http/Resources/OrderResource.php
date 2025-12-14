@@ -14,7 +14,8 @@ class OrderResource extends JsonResource
         return [
             'id' => $this->id,
             'customer_id' => $this->customer_id,
-            'customer_name' => $this->customer_name ?? 'Unknown Customer', // ✅ Added
+            'customer_name' => $this->customer_name ?? 'Unknown Customer',
+            'customer_address' => $this->customer_address ?? 'No Address Provided',
             'order_code' => $this->order_code,
             'staff_id' => $this->staff_id,
             'staff_name' => $this->staff_name ?? 'Unknown Staff', // ✅ Added

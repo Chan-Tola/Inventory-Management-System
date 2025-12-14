@@ -65,6 +65,18 @@ class UserService
     /**
      * Process customer response (simple version)
      */
+    // public function processCustomerResponse($response): array
+    // {
+    //     if (!$response || !$response->successful()) {
+    //         return [];
+    //     }
+
+    //     $data = $response->json();
+    //     return collect($data['data'] ?? [])
+    //         ->pluck('name', 'id')
+    //         ->toArray();
+    // }
+    // Option A: Return associative array with customer_id as key
     public function processCustomerResponse($response): array
     {
         if (!$response || !$response->successful()) {
@@ -72,8 +84,15 @@ class UserService
         }
 
         $data = $response->json();
+
         return collect($data['data'] ?? [])
-            ->pluck('name', 'id')
+            ->keyBy('id') // Key the collection by customer id
+            ->map(function ($customer) {
+                return [
+                    'name' => $customer['name'] ?? 'Unknown Customer',
+                    'address' => $customer['address'] ?? 'No Address'
+                ];
+            })
             ->toArray();
     }
 

@@ -13,7 +13,6 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Grid,
   Stack,
   CircularProgress,
   Alert,
@@ -81,26 +80,43 @@ const OrderPDFExport = () => {
     const totalQuantity =
       order.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
 
-    // Company Info (From)
+    // === FROM SECTION (STAFF INFO) ===
     doc.setFontSize(10);
     doc.setFont("helvetica", "bold");
     doc.text("FROM", 20, yPos);
     doc.setFont("helvetica", "normal");
-    doc.text("YOUR COMPANY", 20, yPos + 6);
-    doc.text("Your Address 1234", 20, yPos + 12);
-    doc.text("CA 12345", 20, yPos + 18);
+    doc.text(`Staff Name: ${order.staff_name || "Unknown"}`, 20, yPos + 6);
 
-    // Receipt Header (Right side)
+    yPos += 15;
+
+    // === TO SECTION (CUSTOMER INFO) ===
+    doc.setFont("helvetica", "bold");
+    doc.text("TO", 20, yPos);
+    doc.setFont("helvetica", "normal");
+    doc.text(
+      `Customer Name: ${order.customer_name || "Unknown"}`,
+      20,
+      yPos + 6
+    );
+    doc.text(
+      `Address: ${order.customer_address || "Customer Address"}`,
+      20,
+      yPos + 12
+    );
+
+    yPos += 25;
+
+    // === RECEIPT HEADER (Right side) ===
     doc.setFontSize(18);
     doc.setFont("helvetica", "bold");
-    doc.text("RECEIPT", pageWidth - 20, yPos + 5, { align: "right" });
+    doc.text("RECEIPT", pageWidth - 20, yPos - 20, { align: "right" });
 
     doc.setFontSize(10);
     doc.setFont("helvetica", "normal");
     doc.text(
       `Receipt #: ${order.order_code || order.id}`,
       pageWidth - 20,
-      yPos + 15,
+      yPos - 14,
       {
         align: "right",
       }
@@ -108,21 +124,11 @@ const OrderPDFExport = () => {
     doc.text(
       `Receipt Date: ${new Date(order.order_date).toLocaleDateString("en-US")}`,
       pageWidth - 20,
-      yPos + 21,
+      yPos - 8,
       { align: "right" }
     );
 
-    yPos += 40;
-
-    // Customer Info (To)
-    doc.setFont("helvetica", "bold");
-    doc.text("TO", 20, yPos);
-    doc.setFont("helvetica", "normal");
-    doc.text(order.customer_name || "Customer Name", 20, yPos + 6);
-    doc.text("Customer Address 1234", 20, yPos + 12);
-    doc.text("CA 12345", 20, yPos + 18);
-
-    yPos += 40;
+    yPos += 10;
 
     // Items Table - MANUAL IMPLEMENTATION
     // Draw table header
@@ -131,17 +137,18 @@ const OrderPDFExport = () => {
     doc.setTextColor(255, 255, 255); // White text
     doc.setFillColor(0, 0, 0); // Black background
 
-    // Header cells
-    doc.rect(20, yPos, 15, 8, "F");
-    doc.rect(35, yPos, 80, 8, "F");
-    doc.rect(115, yPos, 40, 8, "F");
-    doc.rect(155, yPos, 40, 8, "F");
+    // Header cells - CORRECTED COLUMN ORDER: Product Name first, then Quantity
+    // Column positions: [20, 110, 140, 170]
+    doc.rect(20, yPos, 90, 8, "F"); // Product Name (width: 90)
+    doc.rect(110, yPos, 30, 8, "F"); // Quantity (width: 30)
+    doc.rect(140, yPos, 30, 8, "F"); // Unit Price (width: 30)
+    doc.rect(170, yPos, 25, 8, "F"); // Amount (width: 25)
 
-    // Header text
-    doc.text("QTY", 20 + 7.5, yPos + 5, { align: "center" });
-    doc.text("Description", 35 + 40, yPos + 5, { align: "center" });
-    doc.text("Unit Price", 115 + 20, yPos + 5, { align: "center" });
-    doc.text("Amount", 155 + 20, yPos + 5, { align: "center" });
+    // Header text - CORRECTED COLUMN ORDER
+    doc.text("Product Name", 20 + 45, yPos + 5, { align: "center" }); // Center of Product Name column
+    doc.text("Quantity", 110 + 15, yPos + 5, { align: "center" }); // Center of Quantity column
+    doc.text("Unit Price", 140 + 15, yPos + 5, { align: "center" }); // Center of Unit Price column
+    doc.text("Amount", 170 + 12.5, yPos + 5, { align: "center" }); // Center of Amount column
 
     yPos += 8;
 
@@ -157,29 +164,36 @@ const OrderPDFExport = () => {
         const unitPrice = parseFloat(item.unit_price) || 0;
         const subtotal = parseFloat(item.subtotal) || 0;
 
-        // FIX: Handle product_name (already normalized, but keep for safety)
+        // Handle product_name
         const productName =
           typeof item.product_name === "object"
             ? item.product_name.name || "Product"
             : item.product_name || "Product";
 
-        doc.text(itemQuantity.toString(), 20 + 7.5, yPos + 5, {
+        // Product Name (FIRST COLUMN)
+        doc.text(productName, 20 + 5, yPos + 5, { maxWidth: 80 });
+
+        // Quantity (SECOND COLUMN)
+        doc.text(itemQuantity.toString(), 110 + 15, yPos + 5, {
           align: "center",
         });
-        doc.text(productName, 35 + 5, yPos + 5);
-        doc.text(`$${unitPrice.toFixed(2)}`, 115 + 20, yPos + 5, {
+
+        // Unit Price (THIRD COLUMN)
+        doc.text(`$${unitPrice.toFixed(2)}`, 140 + 15, yPos + 5, {
           align: "right",
         });
-        doc.text(`$${subtotal.toFixed(2)}`, 155 + 20, yPos + 5, {
+
+        // Amount (FOURTH COLUMN)
+        doc.text(`$${subtotal.toFixed(2)}`, 170 + 20, yPos + 5, {
           align: "right",
         });
       });
     } else {
       // If no items, show one row
-      doc.text("1", 20 + 7.5, yPos + 5, { align: "center" });
-      doc.text("Product", 35 + 5, yPos + 5);
-      doc.text(`$0.00`, 115 + 20, yPos + 5, { align: "right" });
-      doc.text(`$0.00`, 155 + 20, yPos + 5, { align: "right" });
+      doc.text("Product", 20 + 5, yPos + 5);
+      doc.text("1", 110 + 15, yPos + 5, { align: "center" });
+      doc.text(`$0.00`, 140 + 15, yPos + 5, { align: "right" });
+      doc.text(`$0.00`, 170 + 20, yPos + 5, { align: "right" });
     }
 
     yPos += 7;
@@ -200,12 +214,12 @@ const OrderPDFExport = () => {
     // Calculate table height
     const tableHeight = 8 + 7 * 7; // Header + 7 rows * 7mm each
 
-    // Vertical lines
-    doc.line(20, yPos - tableHeight + 8, 20, yPos + 7);
-    doc.line(35, yPos - tableHeight + 8, 35, yPos + 7);
-    doc.line(115, yPos - tableHeight + 8, 115, yPos + 7);
-    doc.line(155, yPos - tableHeight + 8, 155, yPos + 7);
-    doc.line(195, yPos - tableHeight + 8, 195, yPos + 7);
+    // Vertical lines - CORRECTED POSITIONS
+    doc.line(20, yPos - tableHeight + 8, 20, yPos + 7); // Left border
+    doc.line(110, yPos - tableHeight + 8, 110, yPos + 7); // Between Product Name and Quantity
+    doc.line(140, yPos - tableHeight + 8, 140, yPos + 7); // Between Quantity and Unit Price
+    doc.line(170, yPos - tableHeight + 8, 170, yPos + 7); // Between Unit Price and Amount
+    doc.line(195, yPos - tableHeight + 8, 195, yPos + 7); // Right border
 
     // Horizontal lines
     const tableTopY = yPos - tableHeight + 8;
@@ -217,27 +231,20 @@ const OrderPDFExport = () => {
     // Totals Section
     yPos += 15;
 
-    // Subtotal
-    doc.setFontSize(10);
-    doc.text("Subtotal", pageWidth - 100, yPos);
-    doc.text(`$${amount.toFixed(2)}`, pageWidth - 20, yPos, { align: "right" });
-
-    // Tax (assuming 5% tax included in total)
-    const taxRate = 0.05;
-    const taxAmount = amount * taxRate;
-    doc.text(
-      `Sales Tax (${(taxRate * 100).toFixed(0)}%)`,
-      pageWidth - 100,
-      yPos + 8
-    );
-    doc.text(`$${taxAmount.toFixed(2)}`, pageWidth - 20, yPos + 8, {
+    // Total Quantity
+    doc.setFont("helvetica", "bold");
+    doc.text("Total Quantity", pageWidth - 100, yPos);
+    doc.setFont("helvetica", "normal");
+    doc.text(totalQuantity.toString(), pageWidth - 20, yPos, {
       align: "right",
     });
 
-    // Total
+    yPos += 8;
+
+    // Total Amount
     doc.setFont("helvetica", "bold");
-    doc.text("Total", pageWidth - 100, yPos + 16);
-    doc.text(`$${(amount + taxAmount).toFixed(2)}`, pageWidth - 20, yPos + 16, {
+    doc.text("Total Amount", pageWidth - 100, yPos);
+    doc.text(`$${amount.toFixed(2)}`, pageWidth - 20, yPos, {
       align: "right",
     });
 
@@ -246,11 +253,11 @@ const OrderPDFExport = () => {
     doc.setFontSize(9);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(100, 100, 100);
-    doc.text("Tel: +1 234 56 789", 20, footerY);
-    doc.text("Email: company@email.com", pageWidth / 2, footerY, {
+    doc.text("Tel: +855 16 354 159", 20, footerY);
+    doc.text("Email: chantola.ren@gmail.com", pageWidth / 2, footerY, {
       align: "center",
     });
-    doc.text("Web: company.com", pageWidth - 20, footerY, { align: "right" });
+    doc.text("Web: IMS.com", pageWidth - 20, footerY, { align: "right" });
 
     // Save PDF
     const fileName = `receipt-${order.order_code || order.id}.pdf`;
@@ -311,9 +318,8 @@ const OrderPDFExport = () => {
 
   // Parse values to numbers
   const amount = parseFloat(order.total_amount) || 0;
-  const taxRate = 0.05;
-  const taxAmount = amount * taxRate;
-  const totalAmount = amount + taxAmount;
+  const totalQuantity =
+    order.items?.reduce((sum, item) => sum + (item.quantity || 0), 0) || 0;
 
   return (
     <Container
@@ -398,13 +404,25 @@ const OrderPDFExport = () => {
           borderColor: "divider",
         }}
       >
-        {/* TO section */}
+        {/* From section */}
         <Box sx={{ mb: 4 }}>
           <Typography variant="caption" fontWeight="bold" gutterBottom>
             FROM
           </Typography>
           <Typography variant="body1" fontWeight="medium">
-            {"Customer Name : " + order.customer_name || "Customer Name"}
+            {"Staff Name : " + order.staff_name || "UnKnow"}
+          </Typography>
+        </Box>
+        {/* TO section */}
+        <Box sx={{ mb: 4 }}>
+          <Typography variant="caption" fontWeight="bold" gutterBottom>
+            TO
+          </Typography>
+          <Typography variant="body1" fontWeight="medium">
+            {"Customer Name : " + order.customer_name || "UnKnow"}
+          </Typography>
+          <Typography variant="body1" fontWeight="medium">
+            {"Address : " + order.customer_address || "Customer Address"}
           </Typography>
         </Box>
 
@@ -428,17 +446,6 @@ const OrderPDFExport = () => {
                     color: "white",
                     fontWeight: "bold",
                     py: 1,
-                    width: "60px",
-                    textAlign: "center",
-                  }}
-                >
-                  QTY
-                </TableCell>
-                <TableCell
-                  sx={{
-                    color: "white",
-                    fontWeight: "bold",
-                    py: 1,
                   }}
                 >
                   Product Name
@@ -448,10 +455,21 @@ const OrderPDFExport = () => {
                     color: "white",
                     fontWeight: "bold",
                     py: 1,
+                    width: "60px",
+                    textAlign: "center",
+                  }}
+                >
+                  Quantity
+                </TableCell>
+                <TableCell
+                  sx={{
+                    color: "white",
+                    fontWeight: "bold",
+                    py: 1,
                     textAlign: "right",
                   }}
                 >
-                  Sale Price
+                  Unit Price
                 </TableCell>
                 <TableCell
                   sx={{
@@ -480,6 +498,7 @@ const OrderPDFExport = () => {
 
                   return (
                     <TableRow key={item.id}>
+                      <TableCell sx={{ py: 2 }}>{productName}</TableCell>
                       <TableCell
                         sx={{
                           py: 2,
@@ -488,7 +507,6 @@ const OrderPDFExport = () => {
                       >
                         {item.quantity || 0}
                       </TableCell>
-                      <TableCell sx={{ py: 2 }}>{productName}</TableCell>
                       <TableCell sx={{ py: 2 }} align="right">
                         ${unitPrice.toFixed(2)}
                       </TableCell>
@@ -500,6 +518,7 @@ const OrderPDFExport = () => {
                 })
               ) : (
                 <TableRow>
+                  <TableCell sx={{ py: 2 }}>No items</TableCell>
                   <TableCell
                     sx={{
                       py: 2,
@@ -508,7 +527,6 @@ const OrderPDFExport = () => {
                   >
                     0
                   </TableCell>
-                  <TableCell sx={{ py: 2 }}>No items</TableCell>
                   <TableCell sx={{ py: 2 }} align="right">
                     $0.00
                   </TableCell>
@@ -523,13 +541,13 @@ const OrderPDFExport = () => {
                 length: Math.max(0, 7 - (order.items?.length || 1)),
               }).map((_, index) => (
                 <TableRow key={`empty-${index}`}>
+                  <TableCell sx={{ py: 1.5 }}></TableCell>
                   <TableCell
                     sx={{
                       py: 1.5,
                       textAlign: "center",
                     }}
                   ></TableCell>
-                  <TableCell sx={{ py: 1.5 }}></TableCell>
                   <TableCell sx={{ py: 1.5 }} align="right"></TableCell>
                   <TableCell sx={{ py: 1.5 }} align="right"></TableCell>
                 </TableRow>
@@ -542,21 +560,23 @@ const OrderPDFExport = () => {
         <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
           <Box sx={{ width: 300 }}>
             <Stack spacing={1}>
+              {/* Total Quantity Row */}
               <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                <Typography variant="body2">Subtotal</Typography>
-                <Typography variant="body2">${amount.toFixed(2)}</Typography>
+                <Typography variant="body1" fontWeight="bold">
+                  Total Quantity
+                </Typography>
+                <Typography variant="body1" fontWeight="bold">
+                  {totalQuantity}
+                </Typography>
               </Box>
-              <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                <Typography variant="body2">Sales Tax (5%)</Typography>
-                <Typography variant="body2">${taxAmount.toFixed(2)}</Typography>
-              </Box>
+
               <Divider sx={{ my: 1 }} />
               <Box sx={{ display: "flex", justifyContent: "space-between" }}>
                 <Typography variant="body1" fontWeight="bold">
-                  Total
+                  Total Amount
                 </Typography>
                 <Typography variant="body1" fontWeight="bold">
-                  ${totalAmount.toFixed(2)}
+                  ${amount.toFixed(2)}
                 </Typography>
               </Box>
             </Stack>

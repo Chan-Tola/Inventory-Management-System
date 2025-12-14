@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Transaction extends Model
 {
     use HasFactory;
+
     const TABLENAME = 'transactions';
     const ID = 'id';
     const TRANSACTION_TYPE = 'transaction_type';
@@ -24,6 +25,10 @@ class Transaction extends Model
     // ✅ ADD: Money types
     const MONEY_INCOME = 'income';
     const MONEY_EXPENSE = 'expense';
+
+    // Transaction types
+    const TYPE_IN = 'in';
+    const TYPE_OUT = 'out';
 
     protected $table = self::TABLENAME;
 
@@ -43,34 +48,6 @@ class Transaction extends Model
         self::TRANSACTION_DATE => null,
     ];
 
-
-
-    // protected static function booted()
-    // {
-    //     static::creating(function ($transaction) {
-    //         // Auto-set transaction date if not provided
-    //         if (!$transaction->{self::TRANSACTION_DATE}) {
-    //             $transaction->{self::TRANSACTION_DATE} = now();
-    //         }
-    //     });
-
-    //     static::created(function ($transaction) {
-    //         // Auto-update stock when transaction is created
-    //         $transaction->updateStock();
-    //     });
-    // }
-
-    // public function updateStock()
-    // {
-    //     $currentStock = $this->calculateCurrentStock();
-
-    //     // Update or create stock record
-    //     Stock::updateOrCreate(
-    //         ['product_id' => $this->{self::PRODUCT_ID}], // ✅ Use string or constant
-    //         ['quantity' => $currentStock] // ✅ Match your column name
-    //     );
-    // }
-    
     protected static function booted()
     {
         static::creating(function ($transaction) {
@@ -82,65 +59,158 @@ class Transaction extends Model
 
         static::created(function ($transaction) {
             // Auto-update stock when transaction is created
-            $transaction->updateStock();
+            $transaction->updateStockOnCreate();
         });
 
-        // ✅ ADD: Update stock when transaction is updated
         static::updated(function ($transaction) {
-            $transaction->updateStock();
+            // Only update stock if quantity or type changed
+            if ($transaction->isDirty([self::QUANTITY, self::TRANSACTION_TYPE])) {
+                $transaction->updateStockOnUpdate();
+            }
         });
 
-        // ✅ ADD: Update stock when transaction is deleted
-        static::deleted(function ($transaction) {
-            $transaction->updateStock();
+        static::deleting(function ($transaction) {
+            // Update stock BEFORE deleting (reverse the transaction)
+            $transaction->updateStockOnDelete();
         });
     }
 
     /**
-     * Update or create stock record based on all transactions
+     * Update stock when creating NEW transaction
      */
-    public function updateStock()
+    public function updateStockOnCreate()
     {
         $productId = $this->{self::PRODUCT_ID};
-        $currentStock = $this->calculateCurrentStock($productId);
+        $stock = Stock::where('product_id', $productId)->first();
 
-        // Get product details to check if product exists
-        $product = Product::find($productId);
+        // Calculate change based on transaction type
+        $change = $this->getQuantityChange();
 
-        if (!$product) {
-            // Product doesn't exist (shouldn't happen if foreign key constraint works)
-            return;
-        }
+        $currentQuantity = $stock ? $stock->quantity : 0;
+        $newQuantity = max(0, $currentQuantity + $change);
 
-        // Get existing stock record
+        $this->updateOrCreateStock($productId, $newQuantity);
+    }
+
+    /**
+     * Update stock when UPDATING existing transaction
+     */
+    public function updateStockOnUpdate()
+    {
+        $productId = $this->{self::PRODUCT_ID};
+
+        // ១. លុបឥទ្ធិពលចាស់ (Reverse old impact)
+        $oldChange = $this->getOldQuantityChange();
+
+        // ២. បន្ថែមឥទ្ធិពលថ្មី (Add new impact)
+        $newChange = $this->getQuantityChange();
+
+        // ៣. គណនាការផ្លាស់ប្តូរសរុប
+        $totalChange = $newChange - $oldChange;
+
+        $stock = Stock::where('product_id', $productId)->first();
+        $currentQuantity = $stock ? $stock->quantity : 0;
+        $newQuantity = max(0, $currentQuantity + $totalChange);
+
+        $this->updateOrCreateStock($productId, $newQuantity);
+    }
+
+    /**
+     * Update stock when DELETING transaction
+     */
+    public function updateStockOnDelete()
+    {
+        $productId = $this->{self::PRODUCT_ID};
+
+        // Reverse the transaction (លុបឥទ្ធិពលចាស់)
+        $oldChange = $this->getQuantityChange();
+        $reverseChange = -$oldChange; // ត្រឡប់ការផ្លាស់ប្តូរ
+
         $stock = Stock::where('product_id', $productId)->first();
 
         if ($stock) {
-            // Update existing stock record
-            $stock->update([
-                'quantity' => $currentStock
-            ]);
+            $newQuantity = max(0, $stock->quantity + $reverseChange);
+            $stock->update(['quantity' => $newQuantity]);
+        }
+    }
+
+    /**
+     * Get quantity change for CURRENT transaction values
+     */
+    private function getQuantityChange(): int
+    {
+        if ($this->{self::TRANSACTION_TYPE} === self::TYPE_IN) {
+            return $this->{self::QUANTITY};
+        } elseif ($this->{self::TRANSACTION_TYPE} === self::TYPE_OUT) {
+            return -$this->{self::QUANTITY};
+        }
+
+        return 0;
+    }
+
+    /**
+     * Get OLD quantity change (before update)
+     */
+    private function getOldQuantityChange(): int
+    {
+        $oldType = $this->getOriginal(self::TRANSACTION_TYPE);
+        $oldQuantity = $this->getOriginal(self::QUANTITY);
+
+        if ($oldType === self::TYPE_IN) {
+            return $oldQuantity;
+        } elseif ($oldType === self::TYPE_OUT) {
+            return -$oldQuantity;
+        }
+
+        return 0;
+    }
+
+    /**
+     * Update or create stock record
+     */
+    private function updateOrCreateStock($productId, $quantity)
+    {
+        $stock = Stock::where('product_id', $productId)->first();
+
+        if ($stock) {
+            $stock->update(['quantity' => $quantity]);
         } else {
-            // Create new stock record for the first time
+            $product = Product::find($productId);
             Stock::create([
                 'product_id' => $productId,
-                'quantity' => max(0, $currentStock), // Ensure non-negative
-                'unit' => $product->unit ?? 'pcs', // Use product's unit if available
-                'min_quantity' => 10 // Default safety stock
+                'quantity' => $quantity,
+                'unit' => $product->unit ?? 'pcs',
+                'min_quantity' => 10
             ]);
         }
     }
+
     /**
-     * Calculate current stock from all transactions
+     * Reconcile stock - for fixing data issues
      */
-    private function calculateCurrentStock()
+    public static function reconcileStock($productId)
     {
-        return Transaction::where(self::PRODUCT_ID, $this->{self::PRODUCT_ID})
+        $calculatedStock = Transaction::where(self::PRODUCT_ID, $productId)
             ->selectRaw("SUM(CASE WHEN transaction_type = 'in' THEN quantity ELSE -quantity END) as total")
             ->value('total') ?? 0;
+
+        $stock = Stock::where('product_id', $productId)->first();
+        $newQuantity = max(0, $calculatedStock);
+
+        if ($stock) {
+            $stock->update(['quantity' => $newQuantity]);
+        } else {
+            $product = Product::find($productId);
+            Stock::create([
+                'product_id' => $productId,
+                'quantity' => $newQuantity,
+                'unit' => $product->unit ?? 'pcs',
+                'min_quantity' => 10
+            ]);
+        }
+
+        return $newQuantity;
     }
-
-
 
     // ✅ ADD: Check if it's a money transaction
     public function isMoneyTransaction(): bool
@@ -158,7 +228,6 @@ class Transaction extends Model
             : -$this->{self::AMOUNT};
     }
 
-
     public function supplier()
     {
         return $this->belongsTo(Supplier::class, self::SUPPLIER_ID);
@@ -167,5 +236,10 @@ class Transaction extends Model
     public function product()
     {
         return $this->belongsTo(Product::class, self::PRODUCT_ID);
+    }
+
+    public function staff()
+    {
+        return $this->belongsTo(Staff::class, self::STAFF_ID);
     }
 }

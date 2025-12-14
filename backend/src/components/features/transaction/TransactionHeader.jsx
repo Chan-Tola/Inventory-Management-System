@@ -87,7 +87,7 @@ const TransactionHeader = ({
             onClick={onAddTransaction}
             disabled={loading}
           >
-            Add Transaction
+            add stock
           </Button>
         </Box>
       </Box>

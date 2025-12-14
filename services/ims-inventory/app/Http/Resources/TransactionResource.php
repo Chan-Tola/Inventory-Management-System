@@ -17,6 +17,7 @@ class TransactionResource extends JsonResource
             'transaction_type' => $this->transaction_type,
             'transaction_type_display' => $this->getTransactionTypeDisplay(),
             'quantity' => $this->quantity,
+            'address' => $this->address,
             'transaction_date' => $this->transaction_date,
             'notes' => $this->notes,
 
@@ -41,6 +42,7 @@ class TransactionResource extends JsonResource
                 return $this->supplier ? [
                     'id' => $this->supplier->id,
                     'name' => $this->supplier->name,
+                    'address' => $this->supplier->address,
                 ] : null;
             }),
 
