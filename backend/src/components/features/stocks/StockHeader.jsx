@@ -23,7 +23,7 @@ const StockHeader = ({ searchText, setSearchText, itemsCount, onAddStock }) => {
       >
         <Box display="flex" alignItems="center" gap={2}>
           <Typography variant="h4" component="h1" fontWeight="bold">
-            Stock Management
+            Stock Moment
           </Typography>
           <Chip
             sx={{
@@ -47,7 +47,6 @@ const StockHeader = ({ searchText, setSearchText, itemsCount, onAddStock }) => {
         <Box display="flex" gap={2}>
           {/* note: SEARCH SECTION  */}
           <Box
-            
             display="flex"
             backgroundColor={colors.primary[400]}
             borderRadius="3px"

@@ -12,6 +12,8 @@ class CacheService
      */
     public function remember(string $key, int $ttl, callable $callback, string $tag = null)
     {
+        Log::info('Using cache with driver: ' . config('cache.default'));
+        Log::info('Cache key: ' . $key);
         try {
             if ($tag) {
                 return Cache::tags([$tag])->remember($key, $ttl, $callback);
@@ -88,26 +90,72 @@ class CacheService
     /**
      * Clear all cache with a specific prefix
      */
+    // public function clearByPrefix(string $prefix): void
+    // {
+    //     try {
+    //         // If using Redis, we can clear by pattern
+    //         if (config('cache.default') === 'redis') {
+    //             $redis = Cache::getRedis();
+
+    //             // Clear all keys starting with the prefix
+    //             $pattern = "*{$prefix}*";
+    //             $keys = $redis->keys($pattern);
+
+    //             foreach ($keys as $key) {
+    //                 // Remove the Laravel database prefix if present
+    //                 $cleanKey = str_replace('laravel_database_', '', $key);
+    //                 Cache::forget($cleanKey);
+    //             }
+
+    //             Log::info("Cleared cache pattern: {$pattern}", ['keys_count' => count($keys)]);
+    //         } else {
+    //             // Fallback for file/database cache
+    //             Cache::forget($prefix);
+    //         }
+    //     } catch (\Exception $e) {
+    //         Log::warning('Failed to clear cache by prefix', [
+    //             'error' => $e->getMessage(),
+    //             'prefix' => $prefix
+    //         ]);
+    //     }
+    // }
     public function clearByPrefix(string $prefix): void
     {
         try {
-            // If using Redis, we can clear by pattern
             if (config('cache.default') === 'redis') {
-                $redis = Cache::getRedis();
+                $redis = Cache::connection('cache')->getRedis();
 
-                // Clear all keys starting with the prefix
-                $pattern = "*{$prefix}*";
-                $keys = $redis->keys($pattern);
+                // Get the full prefix with Laravel's cache prefix
+                $fullPrefix = config('cache.prefix') . $prefix;
 
-                foreach ($keys as $key) {
-                    // Remove the Laravel database prefix if present
-                    $cleanKey = str_replace('laravel_database_', '', $key);
-                    Cache::forget($cleanKey);
-                }
+                // Use SCAN instead of KEYS for better performance
+                $cursor = 0;
+                $deletedCount = 0;
 
-                Log::info("Cleared cache pattern: {$pattern}", ['keys_count' => count($keys)]);
+                do {
+                    // SCAN returns [cursor, keys]
+                    $result = $redis->scan($cursor, [
+                        'MATCH' => $fullPrefix . '*',
+                        'COUNT' => 100
+                    ]);
+
+                    $cursor = $result[0];
+                    $keys = $result[1] ?? [];
+
+                    foreach ($keys as $key) {
+                        // Remove the full prefix to get the cache key
+                        $cacheKey = str_replace(config('cache.prefix'), '', $key);
+                        Cache::forget($cacheKey);
+                        $deletedCount++;
+                    }
+                } while ($cursor !== 0);
+
+                Log::info("Cleared cache by prefix", [
+                    'prefix' => $prefix,
+                    'keys_deleted' => $deletedCount
+                ]);
             } else {
-                // Fallback for file/database cache
+                // Fallback for non-Redis cache
                 Cache::forget($prefix);
             }
         } catch (\Exception $e) {

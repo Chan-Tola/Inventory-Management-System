@@ -9,7 +9,9 @@ use App\Http\Resources\CategoryResource;
 use App\Models\Category;
 use App\Services\CacheService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class CategoryController extends Controller
 {
@@ -20,50 +22,37 @@ class CategoryController extends Controller
     {
         $this->cacheService = $cacheService;
     }
-    
-    public function index(): JsonResponse
+
+    /**
+     * Get all categories with cache
+     */
+    public function index(Request $request): JsonResponse
     {
         try {
-            $categories = Category::select('id', 'name', 'description', 'staff_id')->get();
+            // Generate cache key
+            $cacheKey = $this->cacheService->generateKey('categories', $request->query());
+
+            // Use cache with 30 minutes TTL
+            $categories = $this->cacheService->remember(
+                $cacheKey,
+                1800, // 30 minutes
+                function () {
+                    return Category::select('id', 'name', 'description', 'staff_id')->get();
+                },
+                'categories' // Tag for easy clearing
+            );
+
             return response()->json([
                 'message' => 'Categories retrieved successfully',
                 'data' => CategoryResource::collection($categories)
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => 'Failed to retrieved categories',
+                'message' => 'Failed to retrieve categories',
                 'error' => $e->getMessage()
             ], 500);
         }
     }
-    // public function index(): JsonResponse
-    // {
-    //     try {
-    //         // 1. Generate cache key
-    //         $cacheKey = $this->cacheService->generateKey('categories');
-
-    //         // 2. Use cache - this is how you call it!
-    //         $categories = $this->cacheService->remember(
-    //             $cacheKey,           // Cache key
-    //             1800,                // TTL in seconds (30 minutes)
-    //             function () {        // Callback function that runs if cache misses
-    //                 return Category::select('id', 'name', 'description', 'staff_id')->get();
-    //             },
-    //             'categories'         // Tag for easy invalidation
-    //         );
-
-    //         return response()->json([
-    //             'message' => 'Categories retrieved successfully',
-    //             'data' => $categories
-    //         ], 200);
-    //     } catch (\Exception $e) {
-    //         return response()->json([
-    //             'message' => 'Failed to retrieved categories',
-    //             'error' => $e->getMessage()
-    //         ], 500);
-    //     }
-    // }
-
 
     public function store(StoreCategoryRequest $request): JsonResponse
     {
@@ -71,7 +60,11 @@ class CategoryController extends Controller
         try {
             $category = Category::create($request->validated());
 
+            // 🔥 Clear cache after creating
+            $this->clearCategoryCache();
+
             DB::commit();
+
             return response()->json([
                 'message' => 'Category created successfully.',
                 'data' => new CategoryResource($category)
@@ -84,21 +77,34 @@ class CategoryController extends Controller
             ], 500);
         }
     }
+
     public function show($id): JsonResponse
     {
         try {
-            $category = Category::find($id);
+            // Generate cache key for specific category
+            $cacheKey = $this->cacheService->generateKey("category:{$id}");
+
+            $category = $this->cacheService->remember(
+                $cacheKey,
+                1800,
+                function () use ($id) {
+                    return Category::find($id);
+                },
+                'categories'
+            );
+
             if (!$category) {
                 return response()->json(['message' => 'Category not found'], 404);
             }
+
             return response()->json([
                 'message' => 'Category retrieved successfully',
-                'data' => $category
+                'data' => new CategoryResource($category)
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => 'Failed to retrieved category.',
-                'error' =>  $e->getMessage()
+                'message' => 'Failed to retrieve category.',
+                'error' => $e->getMessage()
             ], 500);
         }
     }
@@ -114,18 +120,21 @@ class CategoryController extends Controller
                 return response()->json(['message' => 'Category not found'], 404);
             }
 
-            //  the request is already validated at this point from (UpdateCategoryRequest method)
             $category->update($request->validated());
 
+            // 🔥 Clear cache after updating
+            $this->clearCategoryCache($id);
+
             DB::commit();
+
             return response()->json([
-                'message' => 'Category update successfully',
+                'message' => 'Category updated successfully',
                 'data' => new CategoryResource($category)
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
-                'message' => 'Failed to updated category.',
+                'message' => 'Failed to update category.',
                 'error' => $e->getMessage()
             ], 500);
         }
@@ -137,20 +146,49 @@ class CategoryController extends Controller
             DB::beginTransaction();
 
             $category = Category::find($id);
+
             if (!$category) {
                 return response()->json(['message' => 'Category not found'], 404);
             }
+
             $category->delete();
+
+            // 🔥 Clear cache after deleting
+            $this->clearCategoryCache($id);
+
             DB::commit();
+
             return response()->json([
                 'message' => 'Category deleted successfully'
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
-                'message' => 'Failed to deleted category.',
+                'message' => 'Failed to delete category.',
                 'error' => $e->getMessage()
             ], 500);
+        }
+    }
+
+    private function clearCategoryCache(?int $categoryId = null): void
+    {
+        try {
+            // Clear specific category if ID provided
+            if ($categoryId) {
+                $this->cacheService->forget("category:{$categoryId}");
+            }
+
+            // Clear all category list caches
+            $this->cacheService->clearByPrefix('categories:');
+
+            // Clear by tag
+            $this->cacheService->clearByTag('categories');
+        } catch (\Exception $e) {
+            // Don't fail the operation if cache clearing fails
+            Log::warning('Failed to clear category cache', [
+                'category_id' => $categoryId,
+                'error' => $e->getMessage()
+            ]);
         }
     }
 }

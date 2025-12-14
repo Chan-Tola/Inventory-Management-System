@@ -8,6 +8,7 @@ export const useSimpleTransaction = () => {
   const { transactionItems, loading } = useSelector(
     (state) => state.transactions
   );
+  const { categoryItems } = useSelector((state) => state.categories);
   useEffect(() => {
     // Only fetch if we don't have categories yet
     if (transactionItems.length === 0) {
@@ -15,5 +16,5 @@ export const useSimpleTransaction = () => {
     }
   }, [dispatch, transactionItems.length]);
 
-  return { transactionItems, loading };
+  return { transactionItems, loading, categoryItems };
 };
