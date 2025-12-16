@@ -1,3 +1,4 @@
+// SalesReportPage.jsx (updated)
 import React, { useState, useEffect } from "react";
 import {
   Container,
@@ -96,10 +97,22 @@ const SalesReportPage = () => {
   return (
     <Box p={3}>
       {/* Page Header */}
-      <Box sx={{ mb: 3 }}>
+      <Box
+        sx={{
+          mb: 3,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
         <Typography variant="h4" component="h1" fontWeight="bold">
           Sales Report
         </Typography>
+
+        {/* Export Button - Top right corner */}
+        {hasData && reportData && !isLoading && (
+          <ExportButtons reportData={reportData} />
+        )}
       </Box>
 
       {/* Report Controls */}
@@ -137,12 +150,7 @@ const SalesReportPage = () => {
       {/* Report Content */}
       {hasData && reportData && !isLoading ? (
         <Box>
-          {/* Top Row: Export on the right */}
-          {/* <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 3 }}>
-            <Box sx={{ width: 200 }}>
-              <ExportButtons reportData={reportData} />
-            </Box>
-          </Box> */}
+          {/* Export button is now in the header - removed from here */}
 
           {/* Daily Breakdown - Full width at the top */}
           {reportData.report_type === "weekly" && (
@@ -225,6 +233,9 @@ const SalesReportPage = () => {
           >
             <Typography variant="h6" gutterBottom color="text.secondary">
               No Report Generated
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Use the controls above to generate a sales report
             </Typography>
           </Paper>
         )

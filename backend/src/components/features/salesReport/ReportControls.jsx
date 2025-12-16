@@ -72,7 +72,7 @@ const ReportControls = ({
             onClick={onGenerate}
             disabled={isLoading}
           >
-            {isLoading ? "..." : "Go"}
+            {isLoading ? "..." : "Search"}
           </Button>
         </Grid>
 

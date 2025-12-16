@@ -33,7 +33,6 @@ const ProductSalesTable = ({ reportData }) => {
             <TableCell align="right">Quantity</TableCell>
             <TableCell align="right">Sales</TableCell>
             <TableCell align="right">Orders</TableCell>
-            <TableCell align="center">Avg/Order</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -64,11 +63,6 @@ const ProductSalesTable = ({ reportData }) => {
                 <TableCell align="right">
                   <Typography variant="body2" color="text.secondary">
                     {formatNumber(product.order_count)}
-                  </Typography>
-                </TableCell>
-                <TableCell align="center">
-                  <Typography variant="body2" color="text.secondary">
-                    {formatCurrency(product.average_quantity_per_order || 0)}
                   </Typography>
                 </TableCell>
               </TableRow>

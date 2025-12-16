@@ -152,7 +152,7 @@ class ReportController extends Controller
             'total_items_sold' => $totalItems,
             'unique_customers' => $uniqueCustomers,
             'average_order_value' => $totalOrders > 0 ? round($totalSales / $totalOrders, 2) : 0,
-            'average_items_per_order' => $totalOrders > 0 ? round($totalItems / $totalOrders, 2) : 0
+            // 'average_items_per_order' => $totalOrders > 0 ? round($totalItems / $totalOrders, 2) : 0
         ];
     }
 
@@ -200,9 +200,6 @@ class ReportController extends Controller
                     'total_quantity' => (int) $item->total_quantity,
                     'total_sales' => (float) $item->total_sales,
                     'order_count' => (int) $item->order_count,
-                    'average_quantity_per_order' => $item->order_count > 0
-                        ? round($item->total_quantity / $item->order_count, 2)
-                        : 0
                 ];
             })->toArray();
         } else {
@@ -250,9 +247,6 @@ class ReportController extends Controller
                 'sales' => (float) $daySales,
                 'orders' => $dayOrdersCount,
                 'items_sold' => $dayItems,
-                'average_order_value' => $dayOrdersCount > 0
-                    ? round($daySales / $dayOrdersCount, 2)
-                    : 0
             ];
 
             $currentDate->addDay();
