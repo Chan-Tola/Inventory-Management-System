@@ -3,19 +3,18 @@
 namespace App\Http\Controllers\Api\Auth;
 
 use App\Http\Controllers\Controller;
-// use App\Http\Requests\LoginRequest;
-use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Http\JsonResponse;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
-use Tymon\JWTAuth\Exceptions\JWTException;
+use Illuminate\Support\Facades\Log;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
+
     public function login(Request $request): JsonResponse
     {
         try {
@@ -25,24 +24,37 @@ class AuthController extends Controller
             ]);
 
             if (!Auth::attempt($credentials)) {
-                return response()->json(['success' => false, 'message' => 'Invalid credentials'], 401);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid credentials'
+                ], 401);
             }
 
-            $user = Auth::user();
-            // ✅ FRESH QUERY: Get user with Spatie relationships
-            $userWithPermissions = \App\Models\User::with(['roles.permissions'])
-                ->where('id', $user->id)
-                ->first();
-            // ✅ Get permissions and roles from Spatie
-            $permissions = $userWithPermissions->getAllPermissions()->pluck('name')->toArray();
-            $roles = $userWithPermissions->getRoleNames()->toArray();
+            $userId = Auth::id();
+
+            // ✅ Cache permissions/roles only (most stable approach)
+            $cacheKey = "user:{$userId}:auth_data";
+            $authData = Cache::remember($cacheKey, 3600, function () use ($userId) {
+                $user = User::with(['roles.permissions', 'staff'])
+                    ->findOrFail($userId);
+
+                return [
+                    'permissions' => $user->getAllPermissions()->pluck('name')->toArray(),
+                    'roles' => $user->getRoleNames()->toArray(),
+                    'staff_id' => $user->staff?->id,
+                ];
+            });
+
+            // ✅ Always fetch fresh user for response
+            $user = User::with(['staff', 'customer'])->findOrFail($userId);
 
             $token = JWTAuth::claims([
+                'sub' => $userId,
                 'email' => $user->email,
                 'name' => $user->name,
-                'permissions' => $permissions,  // ✅ Now has actual permissions
-                'roles' => $roles,              // ✅ Now has actual roles
-                'staff_id' => $user->staff?->id,
+                'permissions' => $authData['permissions'],
+                'roles' => $authData['roles'],
+                'staff_id' => $authData['staff_id'],
             ])->attempt($credentials);
 
             return response()->json([
@@ -56,13 +68,19 @@ class AuthController extends Controller
                 ]
             ]);
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Authentication failed'], 500);
+            Log::error('Login failed', [
+                'error' => $e->getMessage(),
+                'email' => $request->email ?? 'unknown',
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Authentication failed'
+            ], 500);
         }
     }
 
-    /**
-     * Test endpoint to decode token
-     */
     public function decodeToken(Request $request): JsonResponse
     {
         try {
@@ -75,9 +93,7 @@ class AuthController extends Controller
                 ], 401);
             }
 
-            // Decode using middleware method
             $tokenParts = explode('.', $token);
-
             if (count($tokenParts) !== 3) {
                 return response()->json([
                     'success' => false,
@@ -86,31 +102,18 @@ class AuthController extends Controller
             }
 
             $payload = json_decode(
-                base64_decode(
-                    strtr($tokenParts[1], '-_', '+/')
-                ),
+                base64_decode(strtr($tokenParts[1], '-_', '+/')),
                 true
             );
-
-            // Also try JWTAuth decode
-            $jwtDecoded = null;
-            try {
-                $jwtDecoded = JWTAuth::setToken($token)->getPayload()->toArray();
-            } catch (\Exception $e) {
-                // Ignore
-            }
 
             return response()->json([
                 'success' => true,
                 'data' => [
-                    'manual_decode' => [
-                        'payload_keys' => array_keys($payload),
-                        'has_permissions' => isset($payload['permissions']),
-                        'permissions' => $payload['permissions'] ?? 'NOT FOUND',
-                        'roles' => $payload['roles'] ?? 'NOT FOUND',
-                        'sub' => $payload['sub'] ?? 'NOT FOUND',
-                    ],
-                    'jwt_decode' => $jwtDecoded,
+                    'payload_keys' => array_keys($payload),
+                    'has_permissions' => isset($payload['permissions']),
+                    'permissions' => $payload['permissions'] ?? 'NOT FOUND',
+                    'roles' => $payload['roles'] ?? 'NOT FOUND',
+                    'sub' => $payload['sub'] ?? 'NOT FOUND',
                     'has_view_category' => isset($payload['permissions']) ?
                         in_array('view category', $payload['permissions']) : false
                 ]
@@ -125,32 +128,34 @@ class AuthController extends Controller
     }
 
 
-    /**
-     * Handle user logout
-     */
-    public function logout(Request $request)
+    public function logout(Request $request): JsonResponse
     {
         try {
-            $token = $request->bearerToken();
-            Log::info('Logout request', ['token_prefix' => $token ? substr($token, 0, 20) . '...' : 'NULL']);
-            // Invalidate the token
+            $userId = Auth::id();
+
+            // ✅ Clear user cache on logout
+            if ($userId) {
+                Cache::forget("user:{$userId}:auth_data");
+            }
+
             auth('api')->logout();
+
             return response()->json([
                 'success' => true,
                 'message' => 'Logout successful',
                 'data' => null
             ], 200);
         } catch (\Exception $e) {
+            Log::error('Logout failed', ['error' => $e->getMessage()]);
+
             return response()->json([
                 'success' => false,
-                'message' => 'Logout failed: ' . $e->getMessage(),
+                'message' => 'Logout failed',
                 'data' => null
             ], 500);
         }
     }
-    /**
-     * Clear cache for testing purposes (optional)
-     */
+    
     public function clearCache(Request $request): JsonResponse
     {
         $request->validate([
@@ -159,8 +164,8 @@ class AuthController extends Controller
 
         $userId = $request->user_id;
 
-        Cache::forget("user:{$userId}:permissions");
-        Cache::forget("user:{$userId}:roles");
+        // ✅ Clear the correct cache key
+        Cache::forget("user:{$userId}:auth_data");
 
         Log::info('User cache cleared manually', ['user_id' => $userId]);
 

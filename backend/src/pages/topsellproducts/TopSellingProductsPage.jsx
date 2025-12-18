@@ -21,11 +21,9 @@ const TopSellingProductsPage = () => {
     topSellProducts,
     loading,
     error,
-    success,
     totalCount,
     totalSales,
     totalQuantity,
-    handleCloseSnackbar,
   } = useTopSellingProducts();
 
   const hasFetched = useRef(false);
@@ -57,7 +55,7 @@ const TopSellingProductsPage = () => {
     },
     {
       title: "Avg Revenue per Product",
-      value: `$${(totalCount > 0 ? totalSales / totalCount : 0).toFixed(2)}`,
+      value: `$${(totalSales / totalCount).toFixed(2)}`,
       icon: <AccountBalanceIcon />,
       bgColor: "linear-gradient(135deg, #9c27b0 0%, #7b1fa2 100%)",
     },

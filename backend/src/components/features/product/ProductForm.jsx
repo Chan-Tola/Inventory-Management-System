@@ -204,7 +204,7 @@ const ProductForm = ({
                   </MenuItem>
                   {categories.map((category) => (
                     <MenuItem key={category.id} value={category.id}>
-                      {category.id} {category.name}
+                      {category.name}
                     </MenuItem>
                   ))}
                 </Select>
